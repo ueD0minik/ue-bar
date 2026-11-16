@@ -1,0 +1,541 @@
+﻿// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Dominik Poschinger
+
+using System.IO;
+using System.Windows;
+using UeBar.App.Bar;
+using UeBar.App.Localization;
+using UeBar.App.Bar.Edit;
+using UeBar.App.Bar.ViewModels;
+using UeBar.App.Infrastructure;
+using UeBar.App.Settings;
+using UeBar.App.Tiles;
+using UeBar.App.Tray;
+using UeBar.Bar;
+using UeBar.Core;
+using UeBar.Core.Bus;
+using UeBar.Core.Layout;
+using UeBar.Core.Logging;
+using UeBar.Core.Modules;
+using UeBar.Core.Abstractions;
+using UeBar.Core.Settings;
+
+namespace UeBar.App;
+
+/// <summary>
+/// Entry point: no visible main window, only a tray icon (M1). Builds the core (guard, bus, registry),
+/// registers the modules in one place (<see cref="ModuleCatalog"/>) and starts them.
+/// </summary>
+public partial class App : Application
+{
+    private SingleInstance? _singleInstance;
+    private FileLogger? _log;
+    private ModuleRegistry? _registry;
+    private TileHost? _tiles;
+    private TrayIcon? _tray;
+    private BarController? _bar;
+    private LocalFileLayoutStore? _layoutCache;
+    private SyncedLayoutStore? _layoutStore;
+    private ModuleLayoutStoreSource? _remoteLayout;
+    private LayoutCoordinator? _layout;
+    private Heartbeat? _heartbeat;
+    private UiWatchdog? _watchdog;
+    private ExtrasController? _extras;
+    private bool _exiting;
+    private string? _lastUiErrorKey;
+    private DateTime _lastUiErrorWindow;
+    private int _lastUiErrorCount;
+    private DateTime _uiErrorMutedUntil;
+    private EventWaitHandle? _exitSignal;
+    private RegisteredWaitHandle? _exitWait;
+
+    /// <summary>Signal with which the installer/uninstaller ends the running ue Bar (per session).</summary>
+    public const string ExitSignalName = @"Local\ueBar-Exit";
+
+#if DEBUG
+    private const string BuildVariant = "Debug";
+#else
+    private const string BuildVariant = "Release";
+#endif
+
+    protected override async void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        var paths = AppPaths.Default;
+
+        // More details in the log: environment variable UEBAR_LOG_LEVEL=Debug
+        var level = Enum.TryParse<LogLevel>(Environment.GetEnvironmentVariable("UEBAR_LOG_LEVEL"), true, out var l) ? l : LogLevel.Info;
+        _log = new FileLogger(paths.Logs, level);
+        HookGlobalExceptionHandlers(_log);
+
+        // Very first line – even before the single-instance check.
+        _log.Info(null, $"Process starting: PID {Environment.ProcessId}, {BuildVariant}, {Environment.ProcessPath}, contract v{CoreApiVersion.Current}, {Environment.OSVersion}{(AppPaths.IsCustom ? $", data folder {paths.Root}" : "")}");
+
+        _singleInstance = SingleInstance.TryAcquire();
+        if (_singleInstance is null && !await HandleOtherInstanceAsync())
+        {
+            Shutdown(0);
+            return;
+        }
+
+        _singleInstance!.StartServer(Dispatcher, BuildVariant, _log);
+        _singleInstance.SecondInstanceStarted += request =>
+            _tray?.ShowInfo(Loc.Get("App_AlreadyRunning"), Loc.Get("App_SecondStartIgnored"));
+
+        // Installer/uninstaller (M7): named signal "please exit" → shut down cleanly.
+        _exitSignal = new EventWaitHandle(false, EventResetMode.AutoReset, ExitSignalName);
+        _exitWait = ThreadPool.RegisterWaitForSingleObject(_exitSignal, (_, _) => Dispatcher.BeginInvoke(async () =>
+        {
+            _log?.Info(null, "Exit requested (installer)");
+            await ExitAsync();
+        }), null, Timeout.Infinite, executeOnlyOnce: true);
+
+        _watchdog = new UiWatchdog(Dispatcher, _log, paths.Logs);
+        _watchdog.Start();
+
+        try
+        {
+            System.Windows.Forms.Application.EnableVisualStyles();
+
+            var settings = new SettingsService(paths.SettingsFile, new DpapiSecretProtector(), _log);
+            settings.Load();
+            var general = new GeneralSettingsStore(settings);
+
+            // Language (R1) before the first window: setting, otherwise the Windows display language.
+            Loc.Apply(general.Current.Language);
+            _log.Info(null, $"UI language: {Loc.Culture.Name} (setting: {UeBar.Core.Localization.UiLanguages.Normalize(general.Current.Language)})");
+
+            // Background cleanup (M7): hang dumps – only the last 3 (logs: 7 days, FileLogger).
+            if (FileRetention.KeepNewest(paths.Logs, "*.dmp", 3) is > 0 and var removed)
+            {
+                _log.Info(null, $"{removed} old hang dumps deleted");
+            }
+
+            // Software rendering saves ~35–50 MB (no Direct3D device/driver buffers in the process);
+            // the bar is small and mostly hidden. Must be set before the first window.
+            if (settings.GetSection<BarSettings>(BarController.SettingsSection).SoftwareRendering)
+            {
+                System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
+            }
+
+            // Appearance (M7) before the first window: accent color, columns.
+            Appearance.ApplyAccent(general.Current.AccentColor);
+            GridMetrics.Columns = general.Current.EffectiveColumns;
+
+            var guard = new ModuleGuard(_log);
+            var bus = new ModuleBus(guard, settings.BusPolicy, _log);
+            _registry = new ModuleRegistry(guard, bus, _log, settings, paths.Root)
+            {
+                // Test module: off in release without a saved setting (M7, distribution).
+                DeveloperModulesEnabledByDefault = AppInfo.BuildVariant == "Debug",
+                DeviceName = () => general.Current.DeviceName,
+            };
+            ModuleCatalog.RegisterAll(_registry);
+
+            _tiles = new TileHost(_registry, _log);
+            await _registry.StartAllAsync();
+
+            // Layout levels (SPEC 9): base in a module's store (e.g. Home Assistant, per user)
+            // with layout.json as a local copy – without such a module local only. Device always in device.json.
+            _layoutCache = new LocalFileLayoutStore(paths.LayoutFile, paths.Backups, _log);
+            _remoteLayout = new ModuleLayoutStoreSource(_registry, _log) { Preference = general.Current.LayoutStore };
+            _layoutStore = new SyncedLayoutStore(_layoutCache, _remoteLayout, paths.LayoutSyncFile, paths.Backups, _log);
+            var manager = new LayoutManager(_layoutStore, new DeviceLayoutStore(paths.DeviceFile, _log), _log, general.Current.EffectiveDeviceName(Environment.MachineName));
+            _layout = new LayoutCoordinator(manager, _layoutStore, _registry, _tiles, _log, Dispatcher);
+            await _layout.ReloadAsync();
+
+            var location = new LocationService(_registry, _log);
+            UeBar.App.Bar.Media.ModuleImageLoader.Current = new UeBar.App.Bar.Media.ModuleImageLoader(_registry, _log);
+            var viewModel = new BarViewModel(_registry, _tiles, Dispatcher, _log, location);
+            viewModel.Attach();
+            var window = new BarWindow();
+            _bar = new BarController(window, viewModel, settings, _log, Dispatcher);
+            _bar.Start();
+
+            // Extras (M6): notifications, Now Playing, Assist, quick search – through core services.
+            var quickCommands = new QuickCommandService(_registry, _log);
+            var settingsForExtras = settings;
+            _extras = new ExtrasController(
+                viewModel,
+                _bar,
+                _registry,
+                new NotificationHub(_registry, _log),
+                new NowPlayingService(_registry, _log),
+                new AssistService(_registry, quickCommands, _log),
+                quickCommands,
+                () => settingsForExtras,
+                _log,
+                Dispatcher);
+            var extras = _extras;
+            window.EscapePressed += (_, _) => extras.OnEscape();
+            window.Panel.AssistInputRequested += (_, _) => extras.BeginInput();
+            extras.QuickSearchOpened += (_, _) => window.Panel.FocusQuickSearch();
+            _layout.ViewModel = viewModel;
+            _layout.Bar = _bar;
+            viewModel.EditRequested += (_, _) => _layout.StartEdit();
+
+            var registry = _registry;
+            var log = _log;
+            var bar = _bar;
+            var layout = _layout;
+            _tray = new TrayIcon(_registry, _bar, Dispatcher);
+            var tray = _tray;
+            _tray.ExitRequested += async (_, _) => await ExitAsync();
+            _tray.ExportLayout = _layout.Export;
+            _tray.ImportLayout = _layout.Import;
+            var layoutStore = _layoutStore;
+            _tray.LayoutStatus = () => layoutStore.Status;
+            _tray.OpenQuickSearch = extras.OpenQuickSearch;
+            _tray.ResetBar = async () =>
+            {
+                // Emergency exit (M6-Fix 1) – without an app restart. Editing is finished with saving first.
+                try
+                {
+                    if (layout.IsEditing)
+                    {
+                        await layout.FinishEditAsync();
+                    }
+
+                    extras.Reset();
+                    bar.Reset();
+                    if (bar.HotkeyStatus.Result != UeBar.Bar.HotkeyRegistration.Registered)
+                    {
+                        tray.ShowInfo(Loc.Get("Tray_QuickSearch"), bar.HotkeyStatus.Message);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Error(null, "Reset bar failed", ex);
+                }
+            };
+
+            // Keep the panel open while a setup is running (welcome, first start again).
+            void HoldPanelWhile(Func<bool> active)
+            {
+                if (!bar.OpenQuickSearch())
+                {
+                    return;
+                }
+
+                System.ComponentModel.PropertyChangedEventHandler? handler = null;
+                handler = (_, e) =>
+                {
+                    if (e.PropertyName is nameof(BarViewModel.IsSetup) or nameof(BarViewModel.IsWelcome) && !active())
+                    {
+                        viewModel.PropertyChanged -= handler;
+                        bar.CloseQuickSearch();
+                    }
+                };
+                viewModel.PropertyChanged += handler;
+            }
+
+            // Settings window (M7)
+            var settingsHost = new SettingsHost
+            {
+                Settings = settings,
+                General = general,
+                Bar = bar,
+                Registry = registry,
+                LayoutSource = _remoteLayout,
+                LayoutStore = layoutStore,
+                Layout = layout,
+                Paths = paths,
+                Log = log,
+                ResetBar = () => tray.ResetBar?.Invoke() ?? Task.CompletedTask,
+                ClearNotificationHistory = extras.ClearHistory,
+                NotificationHistoryCount = () => extras.HistoryCount,
+                GeneralChanged = (before, after) => _ = ApplyGeneralAsync(before, after, viewModel, bar, registry, log),
+                ShowSetupAgain = () =>
+                {
+                    if (layout.ShowSetupAgain())
+                    {
+                        HoldPanelWhile(() => viewModel.IsSetup);
+                    }
+                },
+            };
+            _tray.OpenSettings = () => SettingsWindow.Show(settingsHost);
+            viewModel.SettingsRequested += (_, _) =>
+            {
+                extras.CloseQuickSearch("settings opened"); // do not leave the pinned panel above the window
+                SettingsWindow.Show(settingsHost);
+            };
+
+            // Welcome assistant (M7): first start without settings.
+            await StartWelcomeIfNeededAsync(settings, general, registry, viewModel, log, HoldPanelWhile, tray);
+
+            _layout.SetupShown += (_, _) => _tray?.ShowInfo(Loc.Get("App_SetupTitle"), Loc.Get("App_SetupText"));
+            _layout.UpdateSetup();
+            if (_bar.HotkeyStatus.Result != UeBar.Bar.HotkeyRegistration.Registered)
+            {
+                _tray.ShowInfo(Loc.Get("Tray_QuickSearch"), _bar.HotkeyStatus.Message);
+            }
+
+            _heartbeat = new Heartbeat(_registry, _log, location);
+            _heartbeat.Start();
+            _log.Info(null, $"Start finished (ue Bar {AppInfo.Version}{(AppInfo.IsPortable ? ", portable" : "")})");
+
+#if DEBUG
+            // Debug only: deliberately trigger a hang to check the UI watchdog.
+            if (int.TryParse(Environment.GetEnvironmentVariable("UEBAR_TEST_HANG"), out var hangSeconds) && hangSeconds > 0)
+            {
+                _ = Dispatcher.BeginInvoke(() =>
+                {
+                    _log.Warn(null, $"TEST: blocking UI thread {hangSeconds} s");
+                    Thread.Sleep(TimeSpan.FromSeconds(hangSeconds));
+                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            }
+
+            // Debug only: "Reset bar" like from the tray, every N seconds (test without mouse).
+            if (int.TryParse(Environment.GetEnvironmentVariable("UEBAR_TEST_RESET"), out var resetSeconds) && resetSeconds > 0)
+            {
+                var resetTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(resetSeconds) };
+                resetTimer.Tick += (_, _) => _ = _tray.ResetBar?.Invoke();
+                resetTimer.Start();
+            }
+#endif
+        }
+        catch (Exception ex)
+        {
+            _log.Error(null, "Start failed", ex);
+            MessageBox.Show(Loc.F("App_StartFailed", ex.Message, paths.Logs), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
+            await ExitAsync();
+        }
+    }
+
+    /// <summary>
+    /// Welcome assistant (M7): first start without settings.json (or never finished and a
+    /// module is not set up yet). Generic: the first module with "Essential" fields.
+    /// </summary>
+    private async Task StartWelcomeIfNeededAsync(
+        SettingsService settings,
+        GeneralSettingsStore general,
+        ModuleRegistry registry,
+        BarViewModel viewModel,
+        IUeLogger log,
+        Action<Func<bool>> holdPanelWhile,
+        TrayIcon tray)
+    {
+        var needsSetup = registry.Modules.Any(m => m.IsEnabled && m.Module is IModuleSettings && m.Status.State == UeBar.Core.Abstractions.ModuleState.NotConfigured);
+        if (!WelcomeRules.ShouldShow(settings.FileExisted, general.Current.WelcomeDone, needsSetup))
+        {
+            return;
+        }
+
+        foreach (var module in registry.Modules.Where(m => m.IsEnabled && m.Module is IModuleSettings))
+        {
+            var fields = await registry.InvokeAsync(module.Id, "Read setting fields", (m, _) =>
+                Task.FromResult(m is IModuleSettings s ? s.SettingFields : (IReadOnlyList<SettingField>)[]));
+            if (fields is not { Succeeded: true, Value: { } list } || !list.Any(f => f.Essential))
+            {
+                continue;
+            }
+
+            log.Info(null, $"Welcome assistant for {module.Id}");
+            var welcome = new WelcomeViewModel(registry, settings, log, module, list);
+            welcome.Finished += (_, skipped) =>
+            {
+                general.Update(g => g.WelcomeDone = true);
+                viewModel.HideWelcome();
+                if (skipped)
+                {
+                    tray.ShowInfo("ue Bar", Loc.Get("App_SetupLater"));
+                }
+            };
+            viewModel.ShowWelcome(welcome);
+            holdPanelWhile(() => viewModel.IsWelcome || viewModel.IsSetup);
+            return;
+        }
+
+        // No module needs input: only the first-start layout is left (if needed).
+        general.Update(g => g.WelcomeDone = true);
+    }
+
+    /// <summary>General settings changed (M7/R1): apply accent color, columns, device name and language right away.</summary>
+    private static async Task ApplyGeneralAsync(GeneralSettings before, GeneralSettings after, BarViewModel viewModel, BarController bar, ModuleRegistry registry, IUeLogger log)
+    {
+        if (UeBar.Core.Localization.UiLanguages.Normalize(before.Language) != UeBar.Core.Localization.UiLanguages.Normalize(after.Language))
+        {
+            // Modules, tiles, view models and open windows follow through UiCultureSource.Changed.
+            Loc.Apply(after.Language);
+            log.Info(null, $"UI language: {Loc.Culture.Name} (setting: {UeBar.Core.Localization.UiLanguages.Normalize(after.Language)})");
+        }
+
+        if (!string.Equals(before.AccentColor, after.AccentColor, StringComparison.OrdinalIgnoreCase))
+        {
+            Appearance.ApplyAccent(after.AccentColor);
+            viewModel.RefreshLayout();
+            log.Info(null, $"Accent color: {AccentColors.Normalize(after.AccentColor) ?? AccentColors.Default}");
+        }
+
+        if (before.EffectiveColumns != after.EffectiveColumns)
+        {
+            GridMetrics.Columns = after.EffectiveColumns;
+            bar.ApplyColumns();
+            log.Info(null, $"Tile grid: {after.EffectiveColumns} columns");
+        }
+
+        if (before.EffectiveDeviceName(Environment.MachineName) != after.EffectiveDeviceName(Environment.MachineName))
+        {
+            log.Info(null, $"Device name: {after.EffectiveDeviceName(Environment.MachineName)} – running modules reconnect");
+            foreach (var module in registry.Modules.Where(m => m.IsEnabled && m.IsRunning))
+            {
+                await registry.RestartModuleAsync(module.Id);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Another instance holds the lock. Ask briefly (max. 2 s) whether it responds. If it does,
+    /// this start ends. If it hangs, the user is asked whether it should be ended.
+    /// Returns true if this start may continue.
+    /// </summary>
+    private async Task<bool> HandleOtherInstanceAsync()
+    {
+        var log = _log!;
+        var (state, reply) = await SingleInstance.PingOtherAsync(BuildVariant);
+        if (state == OtherInstanceState.Responsive)
+        {
+            log.Info(null, $"ue Bar is already running ({reply}) – this start ends.");
+            return false;
+        }
+
+        var others = SingleInstance.OtherProcesses();
+        var info = others.Count == 0
+            ? "no process found"
+            : string.Join(", ", others.Select(p => $"PID {p.Id}, started {SafeStart(p)}"));
+        log.Warn(null, $"ue Bar is already running but does not respond within {SingleInstance.HandshakeTimeout.TotalSeconds:0} s ({info}).");
+
+        var answer = MessageBox.Show(
+            Loc.Get("App_HangingQuestion"),
+            "ue Bar",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+        if (answer != MessageBoxResult.Yes)
+        {
+            log.Info(null, "User declined ending the hanging instance.");
+            return false;
+        }
+
+        foreach (var process in others)
+        {
+            try
+            {
+                log.Warn(null, $"Ending hanging instance PID {process.Id}");
+                process.Kill();
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                await process.WaitForExitAsync(cts.Token);
+            }
+            catch (Exception ex)
+            {
+                log.Error(null, $"Instance PID {process.Id} could not be ended: {ex.Message}");
+            }
+        }
+
+        _singleInstance = SingleInstance.TryAcquire();
+        if (_singleInstance is null)
+        {
+            log.Error(null, "Lock is still held after ending – start aborted.");
+            MessageBox.Show(Loc.Get("App_CannotEndOld"), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
+        return true;
+
+        static string SafeStart(System.Diagnostics.Process p)
+        {
+            try
+            {
+                return p.StartTime.ToString("HH:mm:ss");
+            }
+            catch (InvalidOperationException)
+            {
+                return "?";
+            }
+        }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _watchdog?.Dispose();
+        _heartbeat?.Dispose();
+        _tray?.Dispose();
+        _layoutStore?.Dispose();
+        _remoteLayout?.Dispose();
+        _layoutCache?.Dispose();
+        _singleInstance?.Dispose();
+        _exitWait?.Unregister(null);
+        _exitSignal?.Dispose();
+        _log?.Info(null, $"Process ended: PID {Environment.ProcessId}");
+        base.OnExit(e);
+    }
+
+    private async Task ExitAsync()
+    {
+        if (_exiting)
+        {
+            return;
+        }
+
+        _exiting = true;
+        _tray?.Dispose();
+        _tray = null;
+        _bar?.Dispose();
+        _bar = null;
+        if (_registry is not null)
+        {
+            // Modules get at most a few seconds to clean up.
+            await Task.WhenAny(_registry.DisposeAsync().AsTask(), Task.Delay(TimeSpan.FromSeconds(5)));
+        }
+
+        Shutdown(0);
+    }
+
+    private void HookGlobalExceptionHandlers(IUeLogger log)
+    {
+        // Last line of defense: nothing may end the app silently.
+        DispatcherUnhandledException += (_, args) =>
+        {
+            args.Handled = true;
+
+            // M7: the same exception in a loop (e.g. a broken template in the layout) must not flood the log
+            // – after 5 identical ones in 30 s only one hint, then 60 s of quiet for exactly this one.
+            var key = $"{args.Exception.GetType().FullName}: {args.Exception.Message}";
+            var now = DateTime.UtcNow;
+            if (key == _lastUiErrorKey && now - _lastUiErrorWindow < TimeSpan.FromSeconds(30))
+            {
+                _lastUiErrorCount++;
+            }
+            else if (key != _lastUiErrorKey || now >= _uiErrorMutedUntil)
+            {
+                _lastUiErrorKey = key;
+                _lastUiErrorWindow = now;
+                _lastUiErrorCount = 1;
+                _uiErrorMutedUntil = DateTime.MinValue;
+            }
+
+            if (now < _uiErrorMutedUntil)
+            {
+                return;
+            }
+
+            if (_lastUiErrorCount > 5)
+            {
+                _uiErrorMutedUntil = now.AddSeconds(60);
+                log.Error(null, $"The same exception repeats on the UI thread – further identical messages suppressed for 60 s: {key}");
+                return;
+            }
+
+            log.Error(null, "Unhandled exception on the UI thread", args.Exception);
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            log.Error(null, "Unobserved task exception", args.Exception);
+            args.SetObserved();
+        };
+
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+            log.Error(null, $"Unhandled exception (terminating: {args.IsTerminating})", args.ExceptionObject as Exception);
+    }
+}

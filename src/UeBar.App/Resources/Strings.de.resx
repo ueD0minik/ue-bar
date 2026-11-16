@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Tray_ModuleError" xml:space="preserve">
+    <value>Modul-Fehler: {0}</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Einstellungen …</value>
+  </data>
+  <data name="Tray_Pause" xml:space="preserve">
+    <value>Bar pausieren</value>
+  </data>
+  <data name="Tray_Reset" xml:space="preserve">
+    <value>Bar zurücksetzen</value>
+  </data>
+  <data name="Tray_Reset_Tip" xml:space="preserve">
+    <value>Hängt die Bar? Versteckt sie, setzt Fokus und Tastenkürzel zurück – ohne Neustart.</value>
+  </data>
+  <data name="Tray_QuickSearch" xml:space="preserve">
+    <value>Schnellsuche</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Beenden</value>
+  </data>
+  <data name="Layout_Pending" xml:space="preserve">
+    <value>Änderungen ausstehend</value>
+  </data>
+  <data name="Layout_Synced" xml:space="preserve">
+    <value>abgeglichen {0}</value>
+  </data>
+  <data name="Tray_Export" xml:space="preserve">
+    <value>Exportieren …</value>
+  </data>
+  <data name="Tray_Import" xml:space="preserve">
+    <value>Importieren …</value>
+  </data>
+  <data name="App_AlreadyRunning" xml:space="preserve">
+    <value>ue Bar läuft bereits</value>
+  </data>
+  <data name="App_SecondStartIgnored" xml:space="preserve">
+    <value>Ein zweiter Start wurde ignoriert.</value>
+  </data>
+  <data name="App_SetupTitle" xml:space="preserve">
+    <value>ue Bar einrichten</value>
+  </data>
+  <data name="App_SetupText" xml:space="preserve">
+    <value>Fahre mit der Maus an den oberen Bildschirmrand und wähle, was in die Bar soll.</value>
+  </data>
+  <data name="App_StartFailed" xml:space="preserve">
+    <value>ue Bar konnte nicht starten:
+{0}
+
+Details im Log: {1}</value>
+  </data>
+  <data name="App_SetupLater" xml:space="preserve">
+    <value>Einrichten geht jederzeit über Einstellungen → Module.</value>
+  </data>
+  <data name="App_HangingQuestion" xml:space="preserve">
+    <value>ue Bar läuft bereits, reagiert aber nicht.
+
+Soll die hängende ue Bar jetzt beendet und neu gestartet werden?
+
+(„Nein“: Du kannst sie auch im Task-Manager unter „ueBar“ beenden.)</value>
+  </data>
+  <data name="App_CannotEndOld" xml:space="preserve">
+    <value>ue Bar konnte die alte Instanz nicht beenden. Bitte im Task-Manager „ueBar“ beenden.</value>
+  </data>
+  <data name="Hotkey_WindowNotReady" xml:space="preserve">
+    <value>Fenster noch nicht bereit</value>
+  </data>
+  <data name="Pill_Done" xml:space="preserve">
+    <value>Erledigt</value>
+  </data>
+  <data name="Pill_Failed" xml:space="preserve">
+    <value>Nicht geklappt</value>
+  </data>
+  <data name="Tab_HomeOnlyBadge" xml:space="preserve">
+    <value>daheim</value>
+  </data>
+  <data name="Tab_AwayOnlyBadge" xml:space="preserve">
+    <value>unterwegs</value>
+  </data>
+  <data name="Assist_History" xml:space="preserve">
+    <value>Verlauf ({0})</value>
+  </data>
+  <data name="Assist_Placeholder" xml:space="preserve">
+    <value>Frag {0} …</value>
+  </data>
+  <data name="Search_Hint" xml:space="preserve">
+    <value>Name, ID oder Bereich – oder „+ Text“ für die Einkaufsliste</value>
+  </data>
+  <data name="Search_NothingFound" xml:space="preserve">
+    <value>Nichts gefunden</value>
+  </data>
+  <data name="Welcome_Step1" xml:space="preserve">
+    <value>Schritt 1 von 3 · Adresse</value>
+  </data>
+  <data name="Welcome_Step2" xml:space="preserve">
+    <value>Schritt 2 von 3 · Zugang</value>
+  </data>
+  <data name="Welcome_Step3" xml:space="preserve">
+    <value>Schritt 3 von 3 · Verbindung testen</value>
+  </data>
+  <data name="Welcome_AddressIntro" xml:space="preserve">
+    <value>Verbinde ue Bar mit {0}. Wo ist er erreichbar? Eine Adresse genügt.</value>
+  </data>
+  <data name="Welcome_TokenIntro" xml:space="preserve">
+    <value>Damit ue Bar Geräte steuern darf, braucht es einen Zugangsschlüssel.</value>
+  </data>
+  <data name="Welcome_TestIntro" xml:space="preserve">
+    <value>Kurzer Test, ob alles passt.</value>
+  </data>
+  <data name="Welcome_SaveAndNext" xml:space="preserve">
+    <value>Speichern und weiter</value>
+  </data>
+  <data name="Common_Next" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="Welcome_Testing" xml:space="preserve">
+    <value>Teste …</value>
+  </data>
+  <data name="Welcome_TestFailed" xml:space="preserve">
+    <value>Test fehlgeschlagen ({0})</value>
+  </data>
+  <data name="Edit_ScopeAll" xml:space="preserve">
+    <value>Auf allen meinen Geräten</value>
+  </data>
+  <data name="Edit_ScopeDevice" xml:space="preserve">
+    <value>Nur auf diesem Gerät ({0})</value>
+  </data>
+  <data name="Edit_VisibleAlways" xml:space="preserve">
+    <value>Immer</value>
+  </data>
+  <data name="Edit_VisibleHome" xml:space="preserve">
+    <value>Nur daheim</value>
+  </data>
+  <data name="Edit_VisibleAway" xml:space="preserve">
+    <value>Nur unterwegs</value>
+  </data>
+  <data name="Edit_IconDefault" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="Edit_AddStatus" xml:space="preserve">
+    <value>Statuswert hinzufügen</value>
+  </data>
+  <data name="Edit_AddTile" xml:space="preserve">
+    <value>Kachel hinzufügen</value>
+  </data>
+  <data name="Edit_StatusMax" xml:space="preserve">
+    <value>Höchstens {0} Werte</value>
+  </data>
+  <data name="Edit_StatusNone" xml:space="preserve">
+    <value>Noch keine Werte</value>
+  </data>
+  <data name="Edit_SearchHint" xml:space="preserve">
+    <value>Name, ID oder Bereich eingeben</value>
+  </data>
+  <data name="Edit_DeleteTab" xml:space="preserve">
+    <value>Tab löschen?</value>
+  </data>
+  <data name="Edit_DeleteTabOne" xml:space="preserve">
+    <value>Tab mit 1 Kachel löschen?</value>
+  </data>
+  <data name="Edit_DeleteTabMany" xml:space="preserve">
+    <value>Tab mit {0} Kacheln löschen?</value>
+  </data>
+  <data name="Edit_NothingToAdd" xml:space="preserve">
+    <value>Kein Modul bietet etwas zum Hinzufügen an</value>
+  </data>
+  <data name="Layout_SaveFailed" xml:space="preserve">
+    <value>Das Layout konnte nicht gespeichert werden:
+{0}</value>
+  </data>
+  <data name="Layout_ExportTitle" xml:space="preserve">
+    <value>Layout exportieren</value>
+  </data>
+  <data name="Layout_FileFilter" xml:space="preserve">
+    <value>Layout (*.json)|*.json</value>
+  </data>
+  <data name="Layout_ExportFailed" xml:space="preserve">
+    <value>Export fehlgeschlagen:
+{0}</value>
+  </data>
+  <data name="Layout_FinishEditFirst" xml:space="preserve">
+    <value>Bitte zuerst den Bearbeiten-Modus beenden.</value>
+  </data>
+  <data name="Layout_ImportTitle" xml:space="preserve">
+    <value>Layout importieren</value>
+  </data>
+  <data name="Layout_FileFilterAll" xml:space="preserve">
+    <value>Layout (*.json)|*.json|Alle Dateien (*.*)|*.*</value>
+  </data>
+  <data name="Layout_ImportInvalid" xml:space="preserve">
+    <value>Die Datei kann nicht importiert werden:
+{0}</value>
+  </data>
+  <data name="Layout_ImportSummary" xml:space="preserve">
+    <value>„{0}“ enthält {1} Tabs mit {2} Kacheln.
+
+Das Basis-Layout wird dadurch ersetzt (das bisherige wird vorher gesichert). Geräte-Tabs bleiben.</value>
+  </data>
+  <data name="Layout_ImportUnknown" xml:space="preserve">
+    <value>Unbekannte Module/Kacheltypen ({0}) bleiben erhalten und zeigen einen Platzhalter.</value>
+  </data>
+  <data name="Layout_ImportNow" xml:space="preserve">
+    <value>Jetzt importieren?</value>
+  </data>
+  <data name="Layout_ImportFailed" xml:space="preserve">
+    <value>Import fehlgeschlagen:
+{0}</value>
+  </data>
+  <data name="Panel_DragToMove" xml:space="preserve">
+    <value>Ziehen zum Verschieben</value>
+  </data>
+  <data name="Panel_Notifications" xml:space="preserve">
+    <value>Benachrichtigungen</value>
+  </data>
+  <data name="Panel_Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
+  <data name="Panel_Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Panel_Pin" xml:space="preserve">
+    <value>Fixieren</value>
+  </data>
+  <data name="Panel_Unpin" xml:space="preserve">
+    <value>Lösen</value>
+  </data>
+  <data name="Panel_Undo" xml:space="preserve">
+    <value>Rückgängig (Strg+Z)</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Panel_CancelEdit_Tip" xml:space="preserve">
+    <value>Alle Änderungen seit Beginn verwerfen</value>
+  </data>
+  <data name="Common_Done" xml:space="preserve">
+    <value>Fertig</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Search_Keys" xml:space="preserve">
+    <value>↑↓ auswählen · Enter ausführen · Esc schließen</value>
+  </data>
+  <data name="Media_Previous" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="Media_PlayPause" xml:space="preserve">
+    <value>Wiedergabe/Pause</value>
+  </data>
+  <data name="Media_Next" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="History_ClearAll" xml:space="preserve">
+    <value>Alle löschen</value>
+  </data>
+  <data name="History_Empty" xml:space="preserve">
+    <value>Keine Benachrichtigungen</value>
+  </data>
+  <data name="Welcome_Title" xml:space="preserve">
+    <value>Willkommen bei ue Bar</value>
+  </data>
+  <data name="Welcome_TestAgain" xml:space="preserve">
+    <value>Nochmal testen</value>
+  </data>
+  <data name="Welcome_ContinueAnyway" xml:space="preserve">
+    <value>Trotzdem weiter</value>
+  </data>
+  <data name="Welcome_Skip" xml:space="preserve">
+    <value>Überspringen</value>
+  </data>
+  <data name="Welcome_Skip_Tip" xml:space="preserve">
+    <value>Später in den Einstellungen einrichten</value>
+  </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="Setup_Intro" xml:space="preserve">
+    <value>Es gibt noch kein Layout. Wähle, was in die Bar soll – alles lässt sich später mit dem Stift ändern.</value>
+  </data>
+  <data name="Setup_AgainTitle" xml:space="preserve">
+    <value>Layout neu vorschlagen</value>
+  </data>
+  <data name="Setup_AgainIntro" xml:space="preserve">
+    <value>„Übernehmen“ ersetzt das bisherige Layout (es wird vorher gesichert). Geräte-Tabs bleiben.</value>
+  </data>
+  <data name="Setup_StartEmpty" xml:space="preserve">
+    <value>Leer starten</value>
+  </data>
+  <data name="Setup_StartEmpty_Tip" xml:space="preserve">
+    <value>Ohne Tabs beginnen und selbst einrichten</value>
+  </data>
+  <data name="Common_Apply" xml:space="preserve">
+    <value>Übernehmen</value>
+  </data>
+  <data name="Tab_HiddenHere" xml:space="preserve">
+    <value>Auf diesem Gerät ausgeblendet</value>
+  </data>
+  <data name="Tab_DeviceOnly" xml:space="preserve">
+    <value>Nur auf diesem Gerät</value>
+  </data>
+  <data name="Edit_NewTab" xml:space="preserve">
+    <value>Neuer Tab</value>
+  </data>
+  <data name="Edit_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="Common_MoveLeft" xml:space="preserve">
+    <value>Nach links</value>
+  </data>
+  <data name="Common_MoveRight" xml:space="preserve">
+    <value>Nach rechts</value>
+  </data>
+  <data name="Edit_Icon" xml:space="preserve">
+    <value>Symbol</value>
+  </data>
+  <data name="Edit_AppliesTo" xml:space="preserve">
+    <value>Gilt für</value>
+  </data>
+  <data name="Edit_Visible" xml:space="preserve">
+    <value>Sichtbar</value>
+  </data>
+  <data name="Edit_HideHere" xml:space="preserve">
+    <value>Auf diesem Gerät ausblenden</value>
+  </data>
+  <data name="Edit_DeleteTabButton" xml:space="preserve">
+    <value>Tab löschen</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+  <data name="Edit_StatusLine" xml:space="preserve">
+    <value>Statuszeile (oben, höchstens 5)</value>
+  </data>
+  <data name="Common_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Edit_AddValue" xml:space="preserve">
+    <value>Wert hinzufügen</value>
+  </data>
+  <data name="Assist_Send" xml:space="preserve">
+    <value>Senden</value>
+  </data>
+  <data name="Assist_New_Tip" xml:space="preserve">
+    <value>Neues Gespräch – der Assistent vergisst den bisherigen Zusammenhang</value>
+  </data>
+  <data name="Assist_New" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+  <data name="Assist_Thinking" xml:space="preserve">
+    <value>Denke nach …</value>
+  </data>
+  <data name="Assist_NewConversation" xml:space="preserve">
+    <value>Neues Gespräch</value>
+  </data>
+  <data name="Assist_More" xml:space="preserve">
+    <value>mehr</value>
+  </data>
+  <data name="Assist_Less" xml:space="preserve">
+    <value>weniger</value>
+  </data>
+  <data name="Edit_Help" xml:space="preserve">
+    <value>Kachel antippen = Eigenschaften · ziehen = verschieben (auch auf einen anderen Tab) · Strg+Z = rückgängig</value>
+  </data>
+  <data name="Edit_TileLabel" xml:space="preserve">
+    <value>Kachel</value>
+  </data>
+  <data name="Edit_Size" xml:space="preserve">
+    <value>Größe</value>
+  </data>
+  <data name="Edit_MoveToTab" xml:space="preserve">
+    <value>In Tab verschieben</value>
+  </data>
+  <data name="Edit_ChooseTab" xml:space="preserve">
+    <value>Tab wählen …</value>
+  </data>
+  <data name="Edit_DeleteTile" xml:space="preserve">
+    <value>Kachel löschen</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Edit_TileType" xml:space="preserve">
+    <value>Kacheltyp</value>
+  </data>
+  <data name="Common_Add" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="Element_Less" xml:space="preserve">
+    <value>Weniger</value>
+  </data>
+  <data name="Element_More" xml:space="preserve">
+    <value>Mehr</value>
+  </data>
+  <data name="Settings_WindowTitle" xml:space="preserve">
+    <value>ue Bar – Einstellungen</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Settings_General" xml:space="preserve">
+    <value>Allgemein</value>
+  </data>
+  <data name="Settings_Bar" xml:space="preserve">
+    <value>Bar</value>
+  </data>
+  <data name="Settings_Oled" xml:space="preserve">
+    <value>OLED-Schutz</value>
+  </data>
+  <data name="Settings_Notifications" xml:space="preserve">
+    <value>Benachrichtigungen</value>
+  </data>
+  <data name="Settings_Layout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="Settings_Modules" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="Settings_Info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="Settings_PageFailed" xml:space="preserve">
+    <value>Seite konnte nicht angezeigt werden: {0}</value>
+  </data>
+  <data name="General_Autostart" xml:space="preserve">
+    <value>Mit Windows starten</value>
+  </data>
+  <data name="General_Autostart_Portable" xml:space="preserve">
+    <value>Portable Version: der Autostart zeigt auf diese .exe – nach dem Verschieben neu einschalten.</value>
+  </data>
+  <data name="General_Autostart_Hint" xml:space="preserve">
+    <value>ue Bar startet nach der Anmeldung automatisch.</value>
+  </data>
+  <data name="General_NotAColor" xml:space="preserve">
+    <value>„{0}“ ist keine Farbe. Beispiel: #3E91FF</value>
+  </data>
+  <data name="General_OwnColor" xml:space="preserve">
+    <value>Eigener Wert als #RRGGBB</value>
+  </data>
+  <data name="Language_System" xml:space="preserve">
+    <value>Systemsprache</value>
+  </data>
+  <data name="Language_SystemWith" xml:space="preserve">
+    <value>Systemsprache ({0})</value>
+  </data>
+  <data name="General_Language" xml:space="preserve">
+    <value>Sprache</value>
+  </data>
+  <data name="General_Language_Hint" xml:space="preserve">
+    <value>Systemsprache: Deutsch, wenn Windows auf Deutsch steht, sonst Englisch. Wirkt sofort.</value>
+  </data>
+  <data name="General_DeviceName" xml:space="preserve">
+    <value>Gerätename</value>
+  </data>
+  <data name="General_DeviceName_Hint" xml:space="preserve">
+    <value>Für Benachrichtigungen und das Geräte-Layout. Leer = Computername ({0}). Module übernehmen ihn beim nächsten Verbinden.</value>
+  </data>
+  <data name="General_Accent" xml:space="preserve">
+    <value>Akzentfarbe</value>
+  </data>
+  <data name="General_Columns" xml:space="preserve">
+    <value>Spalten im Kachelraster</value>
+  </data>
+  <data name="General_Columns_Hint" xml:space="preserve">
+    <value>Breite des Panels: 3 bis 6 Kacheln nebeneinander.</value>
+  </data>
+  <data name="General_ColumnsN" xml:space="preserve">
+    <value>{0} Spalten</value>
+  </data>
+  <data name="General_ReduceAnimations" xml:space="preserve">
+    <value>Animationen reduzieren</value>
+  </data>
+  <data name="General_ReduceAnimations_Hint" xml:space="preserve">
+    <value>Kurzes Ein-/Ausblenden statt Bewegung.</value>
+  </data>
+  <data name="General_AutostartFailed" xml:space="preserve">
+    <value>Autostart konnte nicht geändert werden: {0}</value>
+  </data>
+  <data name="Bar_MonitorPrimary" xml:space="preserve">
+    <value>Primärer Monitor</value>
+  </data>
+  <data name="Bar_MonitorMouse" xml:space="preserve">
+    <value>Monitor unter der Maus</value>
+  </data>
+  <data name="Bar_PrimarySuffix" xml:space="preserve">
+    <value>(primär)</value>
+  </data>
+  <data name="Bar_MonitorMissing" xml:space="preserve">
+    <value>Gewählter Monitor fehlt → Primärmonitor</value>
+  </data>
+  <data name="Bar_Monitor" xml:space="preserve">
+    <value>Monitor</value>
+  </data>
+  <data name="Bar_Monitor_Hint" xml:space="preserve">
+    <value>Wo die Bar erscheint.</value>
+  </data>
+  <data name="Bar_TriggerWidth" xml:space="preserve">
+    <value>Breite des Auslösebereichs</value>
+  </data>
+  <data name="Bar_TriggerWidth_Hint" xml:space="preserve">
+    <value>Mittiger Streifen am oberen Rand, der die Pill öffnet.</value>
+  </data>
+  <data name="Bar_Dwell" xml:space="preserve">
+    <value>Verweilzeit</value>
+  </data>
+  <data name="Bar_Dwell_Hint" xml:space="preserve">
+    <value>So lange muss die Maus oben bleiben.</value>
+  </data>
+  <data name="Bar_HideDelay" xml:space="preserve">
+    <value>Ausblende-Verzögerung</value>
+  </data>
+  <data name="Bar_HideDelay_Hint" xml:space="preserve">
+    <value>Nach dem Verlassen der Bar.</value>
+  </data>
+  <data name="Bar_BlockFullscreen" xml:space="preserve">
+    <value>Bei Vollbild deaktivieren</value>
+  </data>
+  <data name="Bar_BlockFullscreen_Hint" xml:space="preserve">
+    <value>Spiele, Videos, Präsentationen: keine Bar und keine Benachrichtigungs-Pill.</value>
+  </data>
+  <data name="Bar_RespectDnd" xml:space="preserve">
+    <value>Windows „Nicht stören“ beachten</value>
+  </data>
+  <data name="Bar_RespectDnd_Hint" xml:space="preserve">
+    <value>Benachrichtigungen dann nur im Verlauf.</value>
+  </data>
+  <data name="Bar_Pause_Hint" xml:space="preserve">
+    <value>Die Bar erscheint nicht mehr am Rand (Schnellsuche geht weiter).</value>
+  </data>
+  <data name="Hotkey_Title" xml:space="preserve">
+    <value>Tastenkürzel Schnellsuche</value>
+  </data>
+  <data name="Hotkey_Hint" xml:space="preserve">
+    <value>Feld anklicken und das neue Kürzel drücken. Esc bricht ab, Entf setzt auf {0} zurück.</value>
+  </data>
+  <data name="Bar_SoftwareRendering" xml:space="preserve">
+    <value>Grafikkarte nicht verwenden (Software-Rendering)</value>
+  </data>
+  <data name="Bar_SoftwareRendering_Hint" xml:space="preserve">
+    <value>Spart 35–50 MB Arbeitsspeicher. Wirkt nach dem nächsten Start.</value>
+  </data>
+  <data name="Bar_Unpin" xml:space="preserve">
+    <value>Fixierung lösen</value>
+  </data>
+  <data name="Bar_Unpin_Hint" xml:space="preserve">
+    <value>Fixierte Bar zurück an den oberen Rand.</value>
+  </data>
+  <data name="Hotkey_Tip" xml:space="preserve">
+    <value>Anklicken und das neue Kürzel drücken · Esc = abbrechen · Entf = Standard ({0})</value>
+  </data>
+  <data name="Hotkey_Active" xml:space="preserve">
+    <value>Aktiv.</value>
+  </data>
+  <data name="Hotkey_InUse" xml:space="preserve">
+    <value>{0} ist schon belegt (anderes Programm oder Windows). Das bisherige Kürzel bleibt aktiv.</value>
+  </data>
+  <data name="Hotkey_Invalid" xml:space="preserve">
+    <value>{0} geht nicht. Das bisherige Kürzel bleibt aktiv.</value>
+  </data>
+  <data name="Hotkey_ActiveWith" xml:space="preserve">
+    <value>Aktiv: {0}</value>
+  </data>
+  <data name="Hotkey_PressNow" xml:space="preserve">
+    <value>Drücke das Kürzel …</value>
+  </data>
+  <data name="Hotkey_RecordingHint" xml:space="preserve">
+    <value>Esc = abbrechen · Entf = Standard. Kommt eine Kombination nicht an, ist sie woanders belegt oder gehört Windows – dann „Manuell wählen“.</value>
+  </data>
+  <data name="Hotkey_Manual" xml:space="preserve">
+    <value>Manuell wählen …</value>
+  </data>
+  <data name="Hotkey_NeedModifier" xml:space="preserve">
+    <value>Mindestens Win, {0}, Alt oder {1} einschalten.</value>
+  </data>
+  <data name="Oled_Dim" xml:space="preserve">
+    <value>Fixierte Bar abdunkeln nach</value>
+  </data>
+  <data name="Oled_Dim_Hint" xml:space="preserve">
+    <value>Ohne Maus über dem Panel. Fährt die Maus darüber, wird es sofort wieder hell. Eingeklappt ist ohnehin nichts sichtbar.</value>
+  </data>
+  <data name="Oled_Never" xml:space="preserve">
+    <value>Nie</value>
+  </data>
+  <data name="Oled_OneMinute" xml:space="preserve">
+    <value>1 Minute</value>
+  </data>
+  <data name="Oled_Minutes" xml:space="preserve">
+    <value>{0} Minuten</value>
+  </data>
+  <data name="Oled_PixelShift" xml:space="preserve">
+    <value>Pixel-Shift</value>
+  </data>
+  <data name="Oled_PixelShift_Hint" xml:space="preserve">
+    <value>Fixiertes Panel alle 3 Minuten um 1–2 Pixel verschieben, damit nichts einbrennt.</value>
+  </data>
+  <data name="Oled_Tip" xml:space="preserve">
+    <value>Tipp: Zum Ausprobieren kurz „1 Minute“ wählen und die Maus vom Panel wegnehmen.</value>
+  </data>
+  <data name="Notify_HistoryEmpty" xml:space="preserve">
+    <value>Der Verlauf ist leer.</value>
+  </data>
+  <data name="Notify_HistoryOne" xml:space="preserve">
+    <value>1 Meldung im Verlauf.</value>
+  </data>
+  <data name="Notify_HistoryMany" xml:space="preserve">
+    <value>{0} Meldungen im Verlauf.</value>
+  </data>
+  <data name="Notify_ClearHistory" xml:space="preserve">
+    <value>Verlauf löschen</value>
+  </data>
+  <data name="Notify_Duration" xml:space="preserve">
+    <value>Anzeigedauer</value>
+  </data>
+  <data name="Notify_Duration_Hint" xml:space="preserve">
+    <value>Wie lange eine Meldung als Pill zu sehen ist (wenn das Modul nichts anderes sagt).</value>
+  </data>
+  <data name="Notify_RespectDnd_Hint" xml:space="preserve">
+    <value>Dann nur in den Verlauf (Glocke im Panel).</value>
+  </data>
+  <data name="Notify_History" xml:space="preserve">
+    <value>Verlauf</value>
+  </data>
+  <data name="Layout_StoreAuto" xml:space="preserve">
+    <value>Automatisch</value>
+  </data>
+  <data name="Layout_StoreLocal" xml:space="preserve">
+    <value>Nur lokal (dieser PC)</value>
+  </data>
+  <data name="Layout_StoreNow" xml:space="preserve">
+    <value>Jetzt: {0} · {1}</value>
+  </data>
+  <data name="Layout_PendingUpload" xml:space="preserve">
+    <value>Änderungen warten aufs Hochladen</value>
+  </data>
+  <data name="Layout_Store" xml:space="preserve">
+    <value>Speicherort</value>
+  </data>
+  <data name="Layout_Store_Hint" xml:space="preserve">
+    <value>Automatisch: im ersten Modul, das einen Speicher anbietet (z. B. pro Benutzer im Smart Home), sonst nur auf diesem PC. Eine lokale Kopie gibt es immer.</value>
+  </data>
+  <data name="Layout_Transfer" xml:space="preserve">
+    <value>Sichern und übertragen</value>
+  </data>
+  <data name="Layout_Transfer_Hint" xml:space="preserve">
+    <value>Als Datei speichern oder aus einer Datei übernehmen (das bisherige Layout wird vorher gesichert).</value>
+  </data>
+  <data name="Layout_SetupAgain" xml:space="preserve">
+    <value>Erststart erneut zeigen</value>
+  </data>
+  <data name="Layout_SetupAgain_Hint" xml:space="preserve">
+    <value>Schlägt das Layout neu vor (z. B. nach Bereichen). Öffnet die Bar; „Abbrechen“ lässt alles, wie es ist.</value>
+  </data>
+  <data name="Layout_Show" xml:space="preserve">
+    <value>Anzeigen</value>
+  </data>
+  <data name="Modules_Hint" xml:space="preserve">
+    <value>Module laufen getrennt voneinander: stürzt eines ab, läuft der Rest weiter und es startet von selbst neu.</value>
+  </data>
+  <data name="Modules_Developer" xml:space="preserve">
+    <value>Entwickler</value>
+  </data>
+  <data name="Modules_Restart" xml:space="preserve">
+    <value>Neu starten</value>
+  </data>
+  <data name="Modules_OnOff" xml:space="preserve">
+    <value>Ein/aus</value>
+  </data>
+  <data name="Modules_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Modules_Enabled" xml:space="preserve">
+    <value>Aktiviert</value>
+  </data>
+  <data name="Modules_DeveloperHint" xml:space="preserve">
+    <value>Test-Modul für Entwickler – in der normalen Version aus.</value>
+  </data>
+  <data name="Modules_Restart_Hint" xml:space="preserve">
+    <value>Verbindung neu aufbauen.</value>
+  </data>
+  <data name="Modules_NotResponding" xml:space="preserve">
+    <value>Das Modul reagiert gerade nicht – Einstellungen später noch einmal öffnen.</value>
+  </data>
+  <data name="Modules_NoDiagnostics" xml:space="preserve">
+    <value>Keine Diagnose verfügbar</value>
+  </data>
+  <data name="Modules_Diagnostics" xml:space="preserve">
+    <value>Diagnose</value>
+  </data>
+  <data name="Modules_Diagnostics_Hint" xml:space="preserve">
+    <value>Aktualisiert sich alle paar Sekunden.</value>
+  </data>
+  <data name="Info_Version" xml:space="preserve">
+    <value>Version {0} · {1} · {2} · Vertrag v{3}</value>
+  </data>
+  <data name="Info_Portable" xml:space="preserve">
+    <value>portabel</value>
+  </data>
+  <data name="Info_Installed" xml:space="preserve">
+    <value>installiert</value>
+  </data>
+  <data name="Info_Data" xml:space="preserve">
+    <value>Daten</value>
+  </data>
+  <data name="Info_OpenLogs" xml:space="preserve">
+    <value>Log-Ordner öffnen</value>
+  </data>
+  <data name="Info_OpenData" xml:space="preserve">
+    <value>Datenordner öffnen</value>
+  </data>
+  <data name="Info_BarStuck" xml:space="preserve">
+    <value>Bar hängt?</value>
+  </data>
+  <data name="Info_BarStuck_Hint" xml:space="preserve">
+    <value>Versteckt die Bar, setzt Fokus und Tastenkürzel zurück – ohne Neustart.</value>
+  </data>
+  <data name="Info_Licenses" xml:space="preserve">
+    <value>Verwendete Software</value>
+  </data>
+  <data name="Info_LicenseText" xml:space="preserve">
+    <value>ue Bar verwendet:
+• .NET 10 und WPF – © .NET Foundation und Mitwirkende, MIT-Lizenz
+• CommunityToolkit.Mvvm – © .NET Foundation und Mitwirkende, MIT-Lizenz
+• Microsoft.Diagnostics.NETCore.Client – © Microsoft, MIT-Lizenz
+• Microsoft.Extensions.Logging.Abstractions und Microsoft.Extensions.DependencyInjection.Abstractions – © Microsoft, MIT-Lizenz
+• Installer: Inno Setup – © Jordan Russell und Martijn Laan (jrsoftware.org)
+• Symbole: Segoe Fluent Icons (Schriftart von Windows, nicht mitgeliefert)
+
+Einzelheiten in THIRD-PARTY-NOTICES.md im Repository.
+
+ue Bar ist kein offizielles Projekt von Home Assistant, Nabu Casa oder Samsung; diese Namen beschreiben nur, womit ue Bar zusammenarbeitet bzw. woran sich das Design orientiert.</value>
+  </data>
+  <data name="Fields_TestConnection" xml:space="preserve">
+    <value>Verbindung testen</value>
+  </data>
+  <data name="Fields_NotFound" xml:space="preserve">
+    <value>{0} (nicht gefunden)</value>
+  </data>
+  <data name="Fields_SecretStored" xml:space="preserve">
+    <value>Gespeichert (verschlüsselt). Leer lassen, um es zu behalten.</value>
+  </data>
+  <data name="Fields_NotANumber" xml:space="preserve">
+    <value>„{0}“ ist keine Zahl.</value>
+  </data>
+  <data name="Fields_Saved" xml:space="preserve">
+    <value>Gespeichert – das Modul verbindet sich gleich neu …</value>
+  </data>
+  <data name="Fields_NotSaved" xml:space="preserve">
+    <value>Nicht gespeichert: {0}</value>
+  </data>
+  <data name="Info_LicenseTitle" xml:space="preserve">
+    <value>Lizenz</value>
+  </data>
+  <data name="Info_LicenseLine" xml:space="preserve">
+    <value>ue Bar ist freie Software: Du darfst sie unter den Bedingungen der GNU General Public License, Version 3 oder (nach deiner Wahl) jeder späteren Version, weitergeben und ändern (GPL-3.0-or-later).</value>
+  </data>
+  <data name="Info_Warranty" xml:space="preserve">
+    <value>Das Programm wird ohne jede Gewährleistung bereitgestellt, soweit das Gesetz es zulässt – Einzelheiten in Abschnitt 15 und 16 der Lizenz.</value>
+  </data>
+  <data name="Info_ReadLicense" xml:space="preserve">
+    <value>Lizenz lesen</value>
+  </data>
+  <data name="Info_OpenRepository" xml:space="preserve">
+    <value>Quellcode öffnen</value>
+  </data>
+  <data name="Info_Source" xml:space="preserve">
+    <value>Quellcode</value>
+  </data>
+  <data name="Info_SourcePending" xml:space="preserve">
+    <value>Der Link zum öffentlichen Repository folgt.</value>
+  </data>
+</root>

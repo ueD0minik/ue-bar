@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "tabs": [
+    {
+      "id": "zimmer", "name": "Zimmer", "icon": "Home",
+      "tiles": [
+        { "id": "t1", "module": "homeassistant", "type": "ha.light", "size": "2x1",
+          "entities": { "main": "light.office_desk" }, "label": "Desk" },
+        { "id": "t2", "module": "homeassistant", "type": "ha.light", "size": "2x1",
+          "entities": { "main": "light.office_ceiling" }, "label": "Deckenlampe" },
+        { "id": "t3", "module": "homeassistant", "type": "ha.climate_ir", "size": "2x2",
+          "entities": {
+            "power": "switch.office_ac_power",
+            "target": "number.office_ac_target",
+            "fan": "select.office_ac_fan"
+          }, "label": "Klima" },
+        { "id": "t4", "module": "homeassistant", "type": "ha.media", "size": "2x2",
+          "entities": { "main": "media_player.monitor" }, "label": "Monitor" }
+      ]
+    },
+    {
+      "id": "routinen", "name": "Routinen", "icon": "Lightning",
+      "tiles": [
+        { "id": "r1", "module": "homeassistant", "type": "ha.script", "size": "1x1", "entities": { "main": "script.focus" } },
+        { "id": "r2", "module": "homeassistant", "type": "ha.script", "size": "1x1", "entities": { "main": "script.movie_night" } },
+        { "id": "r3", "module": "homeassistant", "type": "ha.script", "size": "1x1", "entities": { "main": "script.good_night" } },
+        { "id": "r4", "module": "homeassistant", "type": "ha.script", "size": "1x1", "entities": { "main": "script.leave_home" } },
+        { "id": "r5", "module": "homeassistant", "type": "ha.script", "size": "1x1", "entities": { "main": "script.lock_pc" } },
+        { "id": "r6", "module": "homeassistant", "type": "ha.vacuum", "size": "2x1", "entities": { "main": "vacuum.robot" } }
+      ]
+    },
+    {
+      "id": "medien", "name": "Medien", "icon": "Tv",
+      "tiles": [
+        { "id": "m1", "module": "homeassistant", "type": "ha.media", "size": "2x2", "entities": { "main": "media_player.living_room_tv" }, "label": "Living room TV" },
+        { "id": "m2", "module": "homeassistant", "type": "ha.media", "size": "2x2", "entities": { "main": "media_player.office_pc" }, "label": "PC" }
+      ]
+    }
+  ],
+  "status": [
+    { "module": "homeassistant", "entity": "weather.forecast_home" }
+  ]
+}

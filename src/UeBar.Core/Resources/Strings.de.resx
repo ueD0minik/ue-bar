@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ModuleState_Stopped" xml:space="preserve">
+    <value>Gestoppt</value>
+  </data>
+  <data name="ModuleState_Starting" xml:space="preserve">
+    <value>Startet …</value>
+  </data>
+  <data name="ModuleState_Connected" xml:space="preserve">
+    <value>Verbunden</value>
+  </data>
+  <data name="ModuleState_Disconnected" xml:space="preserve">
+    <value>Getrennt</value>
+  </data>
+  <data name="ModuleState_NotConfigured" xml:space="preserve">
+    <value>Nicht konfiguriert</value>
+  </data>
+  <data name="ModuleState_Disabled" xml:space="preserve">
+    <value>Deaktiviert</value>
+  </data>
+  <data name="ModuleState_Error" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="Layout_DeviceFileInvalid" xml:space="preserve">
+    <value>Geräte-Layout „{0}“ ist kein gültiges JSON: {1}</value>
+  </data>
+  <data name="Layout_NewTab" xml:space="preserve">
+    <value>Neuer Tab</value>
+  </data>
+  <data name="Layout_ImportInvalid" xml:space="preserve">
+    <value>Keine gültige Layout-Datei: {0}</value>
+  </data>
+  <data name="Layout_ImportNoTabs" xml:space="preserve">
+    <value>Die Datei enthält keine Tabs.</value>
+  </data>
+  <data name="Layout_ImportTooNew" xml:space="preserve">
+    <value>Layout-Version {0} ist neuer als diese App ({1}).</value>
+  </data>
+  <data name="Layout_LocalStoreName" xml:space="preserve">
+    <value>Lokale Datei (kein Sync)</value>
+  </data>
+  <data name="Layout_FileInvalid" xml:space="preserve">
+    <value>Layout-Datei „{0}“ ist kein gültiges JSON: {1}</value>
+  </data>
+  <data name="Command_TimedOut" xml:space="preserve">
+    <value>Keine Antwort (Zeitüberschreitung)</value>
+  </data>
+  <data name="Command_Failed" xml:space="preserve">
+    <value>Befehl fehlgeschlagen</value>
+  </data>
+  <data name="Assist_NoProvider" xml:space="preserve">
+    <value>Kein Assistent verfügbar.</value>
+  </data>
+  <data name="Assist_TimedOut" xml:space="preserve">
+    <value>Keine Antwort nach {0:0} Sekunden.</value>
+  </data>
+  <data name="Assist_Unreachable" xml:space="preserve">
+    <value>{0} ist gerade nicht erreichbar.</value>
+  </data>
+  <data name="Setup_NoChoiceTitle" xml:space="preserve">
+    <value>{0}: gerade keine Auswahl möglich</value>
+  </data>
+  <data name="Setup_NoChoiceText" xml:space="preserve">
+    <value>Status: {0}. Sobald das Modul bereit ist, erscheint die Auswahl hier.</value>
+  </data>
+  <data name="Setup_SuggestionFrom" xml:space="preserve">
+    <value>Vorschlag von „{0}“</value>
+  </data>
+  <data name="Setup_UseSuggestion" xml:space="preserve">
+    <value>Vorschlag übernehmen</value>
+  </data>
+  <data name="Module_TileTypesUnreadable" xml:space="preserve">
+    <value>Kacheltypen nicht lesbar: {0}</value>
+  </data>
+  <data name="Module_ErrorRestartStopped" xml:space="preserve">
+    <value>Fehler: {0} – automatischer Neustart gestoppt</value>
+  </data>
+  <data name="Module_ErrorRestartIn" xml:space="preserve">
+    <value>Fehler: {0} – Neustart in {1:0} s</value>
+  </data>
+  <data name="Placeholder_ModuleMissing" xml:space="preserve">
+    <value>Modul „{0}“ fehlt</value>
+  </data>
+  <data name="Placeholder_ModuleDisabled" xml:space="preserve">
+    <value>Modul deaktiviert</value>
+  </data>
+  <data name="Placeholder_ModuleError" xml:space="preserve">
+    <value>Modul-Fehler</value>
+  </data>
+  <data name="Placeholder_UnknownType" xml:space="preserve">
+    <value>Unbekannter Kacheltyp „{0}“</value>
+  </data>
+</root>

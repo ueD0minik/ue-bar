@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ModuleState_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="ModuleState_Starting" xml:space="preserve">
+    <value>Starting …</value>
+  </data>
+  <data name="ModuleState_Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="ModuleState_Disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="ModuleState_NotConfigured" xml:space="preserve">
+    <value>Not configured</value>
+  </data>
+  <data name="ModuleState_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="ModuleState_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Layout_DeviceFileInvalid" xml:space="preserve">
+    <value>Device layout "{0}" is not valid JSON: {1}</value>
+  </data>
+  <data name="Layout_NewTab" xml:space="preserve">
+    <value>New tab</value>
+  </data>
+  <data name="Layout_ImportInvalid" xml:space="preserve">
+    <value>Not a valid layout file: {0}</value>
+  </data>
+  <data name="Layout_ImportNoTabs" xml:space="preserve">
+    <value>The file contains no tabs.</value>
+  </data>
+  <data name="Layout_ImportTooNew" xml:space="preserve">
+    <value>Layout version {0} is newer than this app ({1}).</value>
+  </data>
+  <data name="Layout_LocalStoreName" xml:space="preserve">
+    <value>Local file (no sync)</value>
+  </data>
+  <data name="Layout_FileInvalid" xml:space="preserve">
+    <value>Layout file "{0}" is not valid JSON: {1}</value>
+  </data>
+  <data name="Command_TimedOut" xml:space="preserve">
+    <value>No answer (timed out)</value>
+  </data>
+  <data name="Command_Failed" xml:space="preserve">
+    <value>Command failed</value>
+  </data>
+  <data name="Assist_NoProvider" xml:space="preserve">
+    <value>No assistant available.</value>
+  </data>
+  <data name="Assist_TimedOut" xml:space="preserve">
+    <value>No answer after {0:0} seconds.</value>
+  </data>
+  <data name="Assist_Unreachable" xml:space="preserve">
+    <value>{0} is not reachable right now.</value>
+  </data>
+  <data name="Setup_NoChoiceTitle" xml:space="preserve">
+    <value>{0}: no selection possible right now</value>
+  </data>
+  <data name="Setup_NoChoiceText" xml:space="preserve">
+    <value>Status: {0}. The selection appears here as soon as the module is ready.</value>
+  </data>
+  <data name="Setup_SuggestionFrom" xml:space="preserve">
+    <value>Suggestion from "{0}"</value>
+  </data>
+  <data name="Setup_UseSuggestion" xml:space="preserve">
+    <value>Use suggestion</value>
+  </data>
+  <data name="Module_TileTypesUnreadable" xml:space="preserve">
+    <value>Tile types not readable: {0}</value>
+  </data>
+  <data name="Module_ErrorRestartStopped" xml:space="preserve">
+    <value>Error: {0} – automatic restart stopped</value>
+  </data>
+  <data name="Module_ErrorRestartIn" xml:space="preserve">
+    <value>Error: {0} – restart in {1:0} s</value>
+  </data>
+  <data name="Placeholder_ModuleMissing" xml:space="preserve">
+    <value>Module "{0}" missing</value>
+  </data>
+  <data name="Placeholder_ModuleDisabled" xml:space="preserve">
+    <value>Module disabled</value>
+  </data>
+  <data name="Placeholder_ModuleError" xml:space="preserve">
+    <value>Module error</value>
+  </data>
+  <data name="Placeholder_UnknownType" xml:space="preserve">
+    <value>Unknown tile type "{0}"</value>
+  </data>
+</root>

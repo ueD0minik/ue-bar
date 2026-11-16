@@ -1,0 +1,14 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Dominik Poschinger -->
+<UserControl x:Class="UeBar.App.Bar.Views.ValueDisplayElementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Margin="0,4,0,0">
+    <StackPanel>
+        <TextBlock FontSize="26" FontWeight="SemiBold">
+            <Run Text="{Binding Value, Mode=OneWay}" /><Run Text=" " FontSize="13" /><Run Text="{Binding Unit, Mode=OneWay}" FontSize="13" />
+        </TextBlock>
+        <TextBlock Style="{StaticResource SubText}" Text="{Binding Label}"
+                   Visibility="{Binding Label, Converter={StaticResource NullToCollapsed}}" />
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,37 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please do not paste tokens, passwords or other private data.
+  - type: input
+    id: version
+    attributes:
+      label: ue Bar version
+      description: Settings → About (e.g. 1.1.1, installed or portable)
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 24H2
+  - type: input
+    id: homeassistant
+    attributes:
+      label: Home Assistant version (if relevant)
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log excerpt
+      description: From %APPDATA%\ueBar\logs – check it for private data first.
+      render: text

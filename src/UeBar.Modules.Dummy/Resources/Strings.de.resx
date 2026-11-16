@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Dummy_FanAuto" xml:space="preserve">
+    <value>Lüfter Auto</value>
+  </data>
+  <data name="Dummy_Fan1" xml:space="preserve">
+    <value>Stufe 1</value>
+  </data>
+  <data name="Dummy_Fan2" xml:space="preserve">
+    <value>Stufe 2</value>
+  </data>
+  <data name="Dummy_Fan3" xml:space="preserve">
+    <value>Stufe 3</value>
+  </data>
+  <data name="Dummy_On" xml:space="preserve">
+    <value>An</value>
+  </data>
+  <data name="Dummy_Off" xml:space="preserve">
+    <value>Aus</value>
+  </data>
+  <data name="Dummy_OnLevel" xml:space="preserve">
+    <value>An · {0:0} %</value>
+  </data>
+  <data name="Dummy_OnThermostat" xml:space="preserve">
+    <value>An · {0:0.0} °C · {1}</value>
+  </data>
+  <data name="Dummy_Playing" xml:space="preserve">
+    <value>Spielt: {0}</value>
+  </data>
+  <data name="Dummy_Paused" xml:space="preserve">
+    <value>Pausiert</value>
+  </data>
+  <data name="Dummy_CrashState" xml:space="preserve">
+    <value>Testet den Fehlerschutz</value>
+  </data>
+  <data name="Dummy_Fan" xml:space="preserve">
+    <value>Ventilator</value>
+  </data>
+  <data name="Dummy_DeskLamp" xml:space="preserve">
+    <value>Schreibtischlampe</value>
+  </data>
+  <data name="Dummy_Thermostat" xml:space="preserve">
+    <value>Thermostat</value>
+  </data>
+  <data name="Dummy_Music" xml:space="preserve">
+    <value>Musik</value>
+  </data>
+  <data name="Dummy_Crash" xml:space="preserve">
+    <value>Absturz auslösen</value>
+  </data>
+  <data name="Dummy_ModuleName" xml:space="preserve">
+    <value>Test-Modul</value>
+  </data>
+  <data name="Dummy_Running" xml:space="preserve">
+    <value>Läuft (nur im Speicher)</value>
+  </data>
+  <data name="Dummy_SecondTab" xml:space="preserve">
+    <value>Zweiter Tab</value>
+  </data>
+  <data name="Dummy_TargetTemperature" xml:space="preserve">
+    <value>{0:0.0} °C</value>
+  </data>
+  <data name="Dummy_ClimateOff" xml:space="preserve">
+    <value>Klima aus</value>
+  </data>
+  <data name="Dummy_Room" xml:space="preserve">
+    <value>Testzimmer</value>
+  </data>
+  <data name="Dummy_SlotDevice" xml:space="preserve">
+    <value>Gerät</value>
+  </data>
+  <data name="Dummy_TypeSwitch" xml:space="preserve">
+    <value>Test-Schalter</value>
+  </data>
+  <data name="Dummy_Toggle" xml:space="preserve">
+    <value>Umschalten</value>
+  </data>
+  <data name="Dummy_TypeDimmer" xml:space="preserve">
+    <value>Test-Dimmer</value>
+  </data>
+  <data name="Dummy_Brightness" xml:space="preserve">
+    <value>Helligkeit</value>
+  </data>
+  <data name="Dummy_TypeThermostat" xml:space="preserve">
+    <value>Test-Thermostat</value>
+  </data>
+  <data name="Dummy_Power" xml:space="preserve">
+    <value>Ein/Aus</value>
+  </data>
+  <data name="Dummy_Target" xml:space="preserve">
+    <value>Solltemperatur</value>
+  </data>
+  <data name="Dummy_FanChoice" xml:space="preserve">
+    <value>Lüfter</value>
+  </data>
+  <data name="Dummy_TypeMedia" xml:space="preserve">
+    <value>Test-Medienplayer</value>
+  </data>
+  <data name="Dummy_PlayPause" xml:space="preserve">
+    <value>Wiedergabe/Pause</value>
+  </data>
+  <data name="Dummy_Previous" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="Dummy_Play" xml:space="preserve">
+    <value>Wiedergabe</value>
+  </data>
+  <data name="Dummy_Next" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="Dummy_Volume" xml:space="preserve">
+    <value>Lautstärke</value>
+  </data>
+  <data name="Dummy_Pause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+</root>

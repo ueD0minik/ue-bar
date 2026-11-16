@@ -1,0 +1,98 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Dominik Poschinger -->
+<UserControl x:Class="UeBar.App.Bar.Views.TileView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="{Binding Width}" Height="{Binding Height}">
+    <Grid x:Name="Root">
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="DragShift" />
+        </Grid.RenderTransform>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsDragging}" Value="True">
+                        <Setter Property="Opacity" Value="0.75" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+        <!-- Placeholder frame (module missing / off / error) -->
+        <Rectangle RadiusX="22" RadiusY="22" Stroke="{StaticResource GripBrush}" StrokeThickness="1.5" StrokeDashArray="4 3"
+                   Visibility="{Binding Model.IsPlaceholder, Converter={StaticResource BoolToVisibility}}" />
+
+        <Border x:Name="Card"
+                CornerRadius="{StaticResource TileRadius}"
+                Background="{Binding CardBrush}"
+                Padding="14,12"
+                ClipToBounds="True"
+                Cursor="Hand"
+                Opacity="{Binding CardOpacity}"
+                RenderTransformOrigin="0.5,0.5"
+                MouseLeftButtonDown="OnCardDown"
+                MouseLeftButtonUp="OnCardUp"
+                MouseMove="OnCardMove"
+                MouseLeave="OnCardLeave"
+                LostMouseCapture="OnCardLostCapture"
+                ToolTip="{Binding DisplayState}">
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+            </Border.RenderTransform>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- 1x1: icon top left, name + state at the bottom -->
+                <Grid Grid.RowSpan="2" Visibility="{Binding IsSmall, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Style="{StaticResource IconText}" FontSize="22" VerticalAlignment="Top" HorizontalAlignment="Left"
+                               Foreground="{Binding IconBrush}" Text="{Binding Model.Icon, Converter={StaticResource IconGlyph}}" />
+                    <StackPanel VerticalAlignment="Bottom">
+                        <TextBlock Text="{Binding Model.Title}" FontSize="13" FontWeight="SemiBold" Foreground="{Binding TitleBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding DisplayState}" FontSize="11" Foreground="{Binding StateBrush}" Opacity="0.9" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- larger: header with icon, name, state -->
+                <Grid x:Name="Header">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSmall}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource IconText}" FontSize="22" Foreground="{Binding IconBrush}"
+                               Text="{Binding Model.Icon, Converter={StaticResource IconGlyph}}" />
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Model.Title}" FontSize="13" FontWeight="SemiBold" Foreground="{Binding TitleBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding DisplayState}" FontSize="11" Foreground="{Binding StateBrush}" Opacity="0.9" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Grid>
+
+                <ItemsControl Grid.Row="1" Margin="0,2,0,0" VerticalAlignment="Bottom"
+                              ItemsSource="{Binding VisibleElements}"
+                              IsHitTestVisible="{Binding IsInteractive}"
+                              Visibility="{Binding ShowElements, Converter={StaticResource BoolToVisibility}}" />
+            </Grid>
+        </Border>
+
+        <!-- Editing: selection (white, solid) / drop target (white, dashed) – visible on blue tiles too -->
+        <Border CornerRadius="{StaticResource TileRadius}" BorderThickness="3" IsHitTestVisible="False" BorderBrush="{StaticResource TextBrush}"
+                Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibility}}" />
+        <Rectangle RadiusX="22" RadiusY="22" StrokeThickness="2.5" StrokeDashArray="3 2" Stroke="{StaticResource TextBrush}" IsHitTestVisible="False"
+                   Visibility="{Binding IsDropTarget, Converter={StaticResource BoolToVisibility}}" />
+        <Border Width="22" Height="22" CornerRadius="11" Background="{StaticResource PanelBrush}" Opacity="0.9"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8,8,0" IsHitTestVisible="False"
+                Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Style="{StaticResource IconText}" FontSize="11" HorizontalAlignment="Center" Text="&#xE759;" />
+        </Border>
+    </Grid>
+</UserControl>

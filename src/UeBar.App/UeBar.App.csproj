@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- Only for the tray icon (NotifyIcon). WPF has none of its own. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>ueBar</AssemblyName>
+    <RootNamespace>UeBar.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- M7: real app icon (created with build/make-icon.ps1) -->
+    <ApplicationIcon>Assets\ueBar.ico</ApplicationIcon>
+    <!-- WFO0003 applies to pure WinForms apps. With WPF the DPI setting in the manifest is right;
+         WinForms only serves the tray icon here. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <!-- Memory (M5-Fix 1): small heap, no background GC needed. Blocking gen2 runs clean up
+         more thoroughly and return memory; pauses are not noticeable with a ~5 MB heap. -->
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <!-- ReadyToRun when publishing (shorter cold start), see Properties/PublishProfiles/Release.pubxml -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- WinForms/Drawing namespaces not global, otherwise name clashes with WPF -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\ueBar.ico" />
+    <Resource Include="Assets\ueBar-256.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UeBar.Core\UeBar.Core.csproj" />
+    <ProjectReference Include="..\UeBar.Modules.Dummy\UeBar.Modules.Dummy.csproj" />
+    <ProjectReference Include="..\UeBar.Modules.HomeAssistant\UeBar.Modules.HomeAssistant.csproj" />
+    <ProjectReference Include="..\UeBar.Bar\UeBar.Bar.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.750501" />
+  </ItemGroup>
+</Project>

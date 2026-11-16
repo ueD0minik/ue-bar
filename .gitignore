@@ -1,0 +1,37 @@
+# Build output
+bin/
+obj/
+[Oo]ut/
+publish/
+artifacts/
+TestResults/
+dist/
+installer/Output/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.rsuser
+
+# Local settings and secrets – never commit
+*.local.json
+settings.json
+device.json
+layout.json
+layout.sync.json
+secrets*.json
+*.token
+*.secret
+*token*.txt
+.env
+.env.*
+
+# Logs and dumps
+*.log
+*.dmp
+
+# Misc
+Thumbs.db

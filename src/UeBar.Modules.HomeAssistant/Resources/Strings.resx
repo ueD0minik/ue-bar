@@ -1,0 +1,810 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="State_Unavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="State_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="State_Script_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="State_Script_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="State_Scene" xml:space="preserve">
+    <value>Scene</value>
+  </data>
+  <data name="State_Button" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="State_Weather_sunny" xml:space="preserve">
+    <value>Sunny</value>
+  </data>
+  <data name="State_Weather_clear_night" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="State_Weather_cloudy" xml:space="preserve">
+    <value>Cloudy</value>
+  </data>
+  <data name="State_Weather_partlycloudy" xml:space="preserve">
+    <value>Partly cloudy</value>
+  </data>
+  <data name="State_Weather_fog" xml:space="preserve">
+    <value>Fog</value>
+  </data>
+  <data name="State_Weather_rainy" xml:space="preserve">
+    <value>Rain</value>
+  </data>
+  <data name="State_Weather_pouring" xml:space="preserve">
+    <value>Pouring</value>
+  </data>
+  <data name="State_Weather_snowy" xml:space="preserve">
+    <value>Snow</value>
+  </data>
+  <data name="State_Weather_snowy_rainy" xml:space="preserve">
+    <value>Sleet</value>
+  </data>
+  <data name="State_Weather_hail" xml:space="preserve">
+    <value>Hail</value>
+  </data>
+  <data name="State_Weather_lightning" xml:space="preserve">
+    <value>Thunderstorm</value>
+  </data>
+  <data name="State_Weather_lightning_rainy" xml:space="preserve">
+    <value>Thunderstorm</value>
+  </data>
+  <data name="State_Weather_windy" xml:space="preserve">
+    <value>Windy</value>
+  </data>
+  <data name="State_Weather_windy_variant" xml:space="preserve">
+    <value>Windy</value>
+  </data>
+  <data name="State_Weather_exceptional" xml:space="preserve">
+    <value>Severe weather</value>
+  </data>
+  <data name="State_Binary_door_On" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="State_Binary_door_Off" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="State_Binary_garage_door_On" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="State_Binary_garage_door_Off" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="State_Binary_opening_On" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="State_Binary_opening_Off" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="State_Binary_window_On" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="State_Binary_window_Off" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="State_Binary_lock_On" xml:space="preserve">
+    <value>Unlocked</value>
+  </data>
+  <data name="State_Binary_lock_Off" xml:space="preserve">
+    <value>Locked</value>
+  </data>
+  <data name="State_Binary_motion_On" xml:space="preserve">
+    <value>Motion</value>
+  </data>
+  <data name="State_Binary_motion_Off" xml:space="preserve">
+    <value>No motion</value>
+  </data>
+  <data name="State_Binary_occupancy_On" xml:space="preserve">
+    <value>Occupied</value>
+  </data>
+  <data name="State_Binary_occupancy_Off" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="State_Binary_presence_On" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="State_Binary_presence_Off" xml:space="preserve">
+    <value>Away</value>
+  </data>
+  <data name="State_Binary_moisture_On" xml:space="preserve">
+    <value>Wet</value>
+  </data>
+  <data name="State_Binary_moisture_Off" xml:space="preserve">
+    <value>Dry</value>
+  </data>
+  <data name="State_Binary_battery_On" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="State_Binary_battery_Off" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="State_Binary_battery_charging_On" xml:space="preserve">
+    <value>Charging</value>
+  </data>
+  <data name="State_Binary_battery_charging_Off" xml:space="preserve">
+    <value>Not charging</value>
+  </data>
+  <data name="State_Binary_connectivity_On" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="State_Binary_connectivity_Off" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="State_Binary_plug_On" xml:space="preserve">
+    <value>Plugged in</value>
+  </data>
+  <data name="State_Binary_plug_Off" xml:space="preserve">
+    <value>Unplugged</value>
+  </data>
+  <data name="State_Binary_power_On" xml:space="preserve">
+    <value>Power</value>
+  </data>
+  <data name="State_Binary_power_Off" xml:space="preserve">
+    <value>No power</value>
+  </data>
+  <data name="State_Binary_problem_On" xml:space="preserve">
+    <value>Problem</value>
+  </data>
+  <data name="State_Binary_problem_Off" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="State_Binary_safety_On" xml:space="preserve">
+    <value>Unsafe</value>
+  </data>
+  <data name="State_Binary_safety_Off" xml:space="preserve">
+    <value>Safe</value>
+  </data>
+  <data name="State_Binary_smoke_On" xml:space="preserve">
+    <value>Smoke detected</value>
+  </data>
+  <data name="State_Binary_smoke_Off" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="State_Binary_gas_On" xml:space="preserve">
+    <value>Gas detected</value>
+  </data>
+  <data name="State_Binary_gas_Off" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="State_Binary_carbon_monoxide_On" xml:space="preserve">
+    <value>CO detected</value>
+  </data>
+  <data name="State_Binary_carbon_monoxide_Off" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="State_Binary_heat_On" xml:space="preserve">
+    <value>Hot</value>
+  </data>
+  <data name="State_Binary_heat_Off" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="State_Binary_cold_On" xml:space="preserve">
+    <value>Cold</value>
+  </data>
+  <data name="State_Binary_cold_Off" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="State_Binary_light_On" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="State_Binary_light_Off" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="State_Binary_sound_On" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="State_Binary_sound_Off" xml:space="preserve">
+    <value>Quiet</value>
+  </data>
+  <data name="State_Binary_vibration_On" xml:space="preserve">
+    <value>Vibration</value>
+  </data>
+  <data name="State_Binary_vibration_Off" xml:space="preserve">
+    <value>Still</value>
+  </data>
+  <data name="State_Binary_moving_On" xml:space="preserve">
+    <value>Moving</value>
+  </data>
+  <data name="State_Binary_moving_Off" xml:space="preserve">
+    <value>Not moving</value>
+  </data>
+  <data name="State_Binary_running_On" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="State_Binary_running_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="State_Binary_tamper_On" xml:space="preserve">
+    <value>Tampered</value>
+  </data>
+  <data name="State_Binary_tamper_Off" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="State_Binary_update_On" xml:space="preserve">
+    <value>Update available</value>
+  </data>
+  <data name="State_Binary_update_Off" xml:space="preserve">
+    <value>Up to date</value>
+  </data>
+  <data name="State_Hvac_off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="State_Hvac_heat" xml:space="preserve">
+    <value>Heat</value>
+  </data>
+  <data name="State_Hvac_cool" xml:space="preserve">
+    <value>Cool</value>
+  </data>
+  <data name="State_Hvac_heat_cool" xml:space="preserve">
+    <value>Heat/cool</value>
+  </data>
+  <data name="State_Hvac_auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="State_Hvac_dry" xml:space="preserve">
+    <value>Dry</value>
+  </data>
+  <data name="State_Hvac_fan_only" xml:space="preserve">
+    <value>Fan only</value>
+  </data>
+  <data name="State_Lock_locked" xml:space="preserve">
+    <value>Locked</value>
+  </data>
+  <data name="State_Lock_unlocked" xml:space="preserve">
+    <value>Unlocked</value>
+  </data>
+  <data name="State_Lock_locking" xml:space="preserve">
+    <value>Locking …</value>
+  </data>
+  <data name="State_Lock_unlocking" xml:space="preserve">
+    <value>Unlocking …</value>
+  </data>
+  <data name="State_Lock_jammed" xml:space="preserve">
+    <value>Jammed</value>
+  </data>
+  <data name="State_Lock_open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="State_Cover_open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="State_Cover_closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="State_Cover_opening" xml:space="preserve">
+    <value>Opening …</value>
+  </data>
+  <data name="State_Cover_closing" xml:space="preserve">
+    <value>Closing …</value>
+  </data>
+  <data name="State_Person_home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="State_Person_not_home" xml:space="preserve">
+    <value>Away</value>
+  </data>
+  <data name="State_OnOff_on" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="State_OnOff_off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="State_Media_playing" xml:space="preserve">
+    <value>Playing</value>
+  </data>
+  <data name="State_Media_paused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="State_Media_idle" xml:space="preserve">
+    <value>Idle</value>
+  </data>
+  <data name="State_Media_buffering" xml:space="preserve">
+    <value>Buffering …</value>
+  </data>
+  <data name="State_Media_standby" xml:space="preserve">
+    <value>Standby</value>
+  </data>
+  <data name="State_Media_off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="State_Media_on" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="State_Vacuum_cleaning" xml:space="preserve">
+    <value>Cleaning</value>
+  </data>
+  <data name="State_Vacuum_docked" xml:space="preserve">
+    <value>Docked</value>
+  </data>
+  <data name="State_Vacuum_paused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="State_Vacuum_idle" xml:space="preserve">
+    <value>Idle</value>
+  </data>
+  <data name="State_Vacuum_returning" xml:space="preserve">
+    <value>Returning</value>
+  </data>
+  <data name="State_Vacuum_error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Setting_LocalUrl" xml:space="preserve">
+    <value>Local URL</value>
+  </data>
+  <data name="Setting_LocalUrl_Hint" xml:space="preserve">
+    <value>Address in the home network, tried first (1.5 s).</value>
+  </data>
+  <data name="Setting_ExternalUrl" xml:space="preserve">
+    <value>External URL</value>
+  </data>
+  <data name="Setting_ExternalUrl_Hint" xml:space="preserve">
+    <value>Address when away (HTTPS, e.g. Nabu Casa or your own domain). Optional.</value>
+  </data>
+  <data name="Setting_Token" xml:space="preserve">
+    <value>Access token</value>
+  </data>
+  <data name="Setting_Token_Hint" xml:space="preserve">
+    <value>Long-lived access token (HA → Profile → Security). Create a separate one per device, e.g. "ue Bar – PC".</value>
+  </data>
+  <data name="Setting_PreferLocal" xml:space="preserve">
+    <value>Try local first</value>
+  </data>
+  <data name="Setting_PreferLocal_Hint" xml:space="preserve">
+    <value>Off: only use the external URL (local as a fallback).</value>
+  </data>
+  <data name="Setting_NowPlaying" xml:space="preserve">
+    <value>Now Playing: media players</value>
+  </data>
+  <data name="Setting_NowPlaying_HintChoice" xml:space="preserve">
+    <value>None chosen = the media players in the layout.</value>
+  </data>
+  <data name="Setting_NowPlaying_HintText" xml:space="preserve">
+    <value>Entity IDs separated by commas (e.g. media_player.living_room). Empty = the media players in the layout.</value>
+  </data>
+  <data name="Setting_TodoList" xml:space="preserve">
+    <value>List for "+ …"</value>
+  </data>
+  <data name="Setting_TodoList_HintChoice" xml:space="preserve">
+    <value>To-do list for quick commands.</value>
+  </data>
+  <data name="Setting_TodoList_HintText" xml:space="preserve">
+    <value>To-do list for quick commands. If it is missing, the first existing one is used.</value>
+  </data>
+  <data name="Slot_Entity" xml:space="preserve">
+    <value>Entity</value>
+  </data>
+  <data name="Type_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Type_Toggle" xml:space="preserve">
+    <value>Switch</value>
+  </data>
+  <data name="Type_Script" xml:space="preserve">
+    <value>Script/scene</value>
+  </data>
+  <data name="Type_ClimateIr" xml:space="preserve">
+    <value>Climate (IR)</value>
+  </data>
+  <data name="Slot_Power" xml:space="preserve">
+    <value>Power switch</value>
+  </data>
+  <data name="Slot_Target" xml:space="preserve">
+    <value>Target temperature</value>
+  </data>
+  <data name="Slot_Fan" xml:space="preserve">
+    <value>Fan</value>
+  </data>
+  <data name="Type_Climate" xml:space="preserve">
+    <value>Climate</value>
+  </data>
+  <data name="Type_Media" xml:space="preserve">
+    <value>Media</value>
+  </data>
+  <data name="Type_Vacuum" xml:space="preserve">
+    <value>Vacuum</value>
+  </data>
+  <data name="Slot_Battery" xml:space="preserve">
+    <value>Battery sensor</value>
+  </data>
+  <data name="Type_Sensor" xml:space="preserve">
+    <value>Sensor</value>
+  </data>
+  <data name="Type_Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="Type_Entity" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Status_NotConfigured" xml:space="preserve">
+    <value>Not configured</value>
+  </data>
+  <data name="Status_Connecting" xml:space="preserve">
+    <value>Connecting …</value>
+  </data>
+  <data name="Status_ConnectedLocal" xml:space="preserve">
+    <value>Connected (local)</value>
+  </data>
+  <data name="Status_ConnectedExternal" xml:space="preserve">
+    <value>Connected (external)</value>
+  </data>
+  <data name="Status_DisconnectedRetry" xml:space="preserve">
+    <value>Disconnected – next attempt in {0}</value>
+  </data>
+  <data name="Status_Disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="Status_TokenInvalid" xml:space="preserve">
+    <value>Token invalid</value>
+  </data>
+  <data name="Status_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Error_NotConnected" xml:space="preserve">
+    <value>Not connected to Home Assistant</value>
+  </data>
+  <data name="Where_Local" xml:space="preserve">
+    <value>local</value>
+  </data>
+  <data name="Where_External" xml:space="preserve">
+    <value>external</value>
+  </data>
+  <data name="User_Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="User_NoAdmin" xml:space="preserve">
+    <value>no admin</value>
+  </data>
+  <data name="User_RightsUnknown" xml:space="preserve">
+    <value>rights unknown</value>
+  </data>
+  <data name="Index_Registry" xml:space="preserve">
+    <value>entity registry</value>
+  </data>
+  <data name="Index_Display" xml:space="preserve">
+    <value>short form list_for_display</value>
+  </data>
+  <data name="Index_States" xml:space="preserve">
+    <value>states only</value>
+  </data>
+  <data name="Assist_NotConnected" xml:space="preserve">
+    <value>Home Assistant is not connected.</value>
+  </data>
+  <data name="Assist_UnknownError" xml:space="preserve">
+    <value>Unknown error</value>
+  </data>
+  <data name="Assist_Error" xml:space="preserve">
+    <value>Assist error: {0}</value>
+  </data>
+  <data name="Assist_NoAnswer" xml:space="preserve">
+    <value>No answer received.</value>
+  </data>
+  <data name="Assist_NotPossible" xml:space="preserve">
+    <value>Assist not possible ({0}).</value>
+  </data>
+  <data name="Assist_Failed" xml:space="preserve">
+    <value>That did not work.</value>
+  </data>
+  <data name="Assist_Done" xml:space="preserve">
+    <value>Done.</value>
+  </data>
+  <data name="Test_Missing" xml:space="preserve">
+    <value>missing</value>
+  </data>
+  <data name="Test_Local" xml:space="preserve">
+    <value>Local</value>
+  </data>
+  <data name="Test_External" xml:space="preserve">
+    <value>External</value>
+  </data>
+  <data name="Test_InvalidUrl" xml:space="preserve">
+    <value>not a valid URL</value>
+  </data>
+  <data name="Test_TokenValid" xml:space="preserve">
+    <value>reachable · token valid · HA {0} · {1}</value>
+  </data>
+  <data name="Test_TokenInvalid" xml:space="preserve">
+    <value>reachable · token invalid · {0}</value>
+  </data>
+  <data name="Test_Unreachable" xml:space="preserve">
+    <value>not reachable: {0} · {1}</value>
+  </data>
+  <data name="Test_Address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Test_NoAddress" xml:space="preserve">
+    <value>none entered (local or external)</value>
+  </data>
+  <data name="Quick_AddToList" xml:space="preserve">
+    <value>Add to the shopping list</value>
+  </data>
+  <data name="Quick_Unknown" xml:space="preserve">
+    <value>Unknown command "{0}"</value>
+  </data>
+  <data name="Quick_NoList" xml:space="preserve">
+    <value>No to-do list found in Home Assistant</value>
+  </data>
+  <data name="Quick_Added" xml:space="preserve">
+    <value>"{0}" → {1}</value>
+  </data>
+  <data name="Quick_NotAdded" xml:space="preserve">
+    <value>Not added: {0}</value>
+  </data>
+  <data name="Diag_Status" xml:space="preserve">
+    <value>Status: {0}</value>
+  </data>
+  <data name="Diag_Server" xml:space="preserve">
+    <value>Server: {0}</value>
+  </data>
+  <data name="Diag_Version" xml:space="preserve">
+    <value>HA version: {0}</value>
+  </data>
+  <data name="Diag_User" xml:space="preserve">
+    <value>User: {0}</value>
+  </data>
+  <data name="Diag_ConnectedSince" xml:space="preserve">
+    <value>Connected since: {0}</value>
+  </data>
+  <data name="Diag_Entities" xml:space="preserve">
+    <value>Entities in the layout: {0} · found in HA: {1}</value>
+  </data>
+  <data name="Diag_Registry" xml:space="preserve">
+    <value>Registry: {0} entities, {1} areas ({2})</value>
+  </data>
+  <data name="Diag_Layout" xml:space="preserve">
+    <value>Layout in HA: {0}</value>
+  </data>
+  <data name="Diag_Notifications" xml:space="preserve">
+    <value>Notifications: {0} · service {1} · received {2}</value>
+  </data>
+  <data name="Diag_NowPlaying" xml:space="preserve">
+    <value>Now Playing: {0} · players: {1}</value>
+  </data>
+  <data name="Diag_Playing" xml:space="preserve">
+    <value>playing</value>
+  </data>
+  <data name="Diag_Paused" xml:space="preserve">
+    <value>paused</value>
+  </data>
+  <data name="Diag_None" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="Diag_Missing" xml:space="preserve">
+    <value>Missing in HA ({0}): {1}</value>
+  </data>
+  <data name="Diag_Tiles" xml:space="preserve">
+    <value>Active tiles: {0}</value>
+  </data>
+  <data name="Diag_LastError" xml:space="preserve">
+    <value>Last error: {0}</value>
+  </data>
+  <data name="Diag_RecentNone" xml:space="preserve">
+    <value>Recent changes: –</value>
+  </data>
+  <data name="Diag_Recent" xml:space="preserve">
+    <value>Recent changes:</value>
+  </data>
+  <data name="Diag_Removed" xml:space="preserve">
+    <value>removed</value>
+  </data>
+  <data name="Diag_LayoutSaved" xml:space="preserve">
+    <value>saved {0}</value>
+  </data>
+  <data name="Diag_LayoutNotSaved" xml:space="preserve">
+    <value>not saved in this session</value>
+  </data>
+  <data name="Diag_LayoutLoaded" xml:space="preserve">
+    <value>read {0}</value>
+  </data>
+  <data name="Diag_LayoutStamp" xml:space="preserve">
+    <value>as of {0}</value>
+  </data>
+  <data name="Diag_Live" xml:space="preserve">
+    <value>live</value>
+  </data>
+  <data name="Diag_NotLive" xml:space="preserve">
+    <value>without live subscription</value>
+  </data>
+  <data name="Status_NoData" xml:space="preserve">
+    <value>no data</value>
+  </data>
+  <data name="Error_NoWebSocket" xml:space="preserve">
+    <value>Not a Home Assistant WebSocket (auth_required missing)</value>
+  </data>
+  <data name="Error_UnexpectedAuthAnswer" xml:space="preserve">
+    <value>Unexpected answer during login</value>
+  </data>
+  <data name="Error_Timeout" xml:space="preserve">
+    <value>Timed out</value>
+  </data>
+  <data name="Error_NoAnswer" xml:space="preserve">
+    <value>No answer from Home Assistant</value>
+  </data>
+  <data name="Error_Disconnected" xml:space="preserve">
+    <value>Connection lost</value>
+  </data>
+  <data name="Error_NoSubscriptionAnswer" xml:space="preserve">
+    <value>No answer to the subscription</value>
+  </data>
+  <data name="Kind_Lights" xml:space="preserve">
+    <value>Lights</value>
+  </data>
+  <data name="Kind_Climate" xml:space="preserve">
+    <value>Climate</value>
+  </data>
+  <data name="Kind_Media" xml:space="preserve">
+    <value>Media</value>
+  </data>
+  <data name="Kind_Covers" xml:space="preserve">
+    <value>Covers</value>
+  </data>
+  <data name="Kind_Vacuums" xml:space="preserve">
+    <value>Vacuums</value>
+  </data>
+  <data name="Kind_Switches" xml:space="preserve">
+    <value>Switches</value>
+  </data>
+  <data name="Suggest_AreasQuestion" xml:space="preserve">
+    <value>Which areas do you want in the bar?</value>
+  </data>
+  <data name="Suggest_KindsQuestion" xml:space="preserve">
+    <value>Which device kinds do you want in the bar?</value>
+  </data>
+  <data name="Suggest_AreasNotReadable" xml:space="preserve">
+    <value>Areas are not readable for this user – so by device kind.</value>
+  </data>
+  <data name="Suggest_NoAreas" xml:space="preserve">
+    <value>There are no areas in Home Assistant – so by device kind.</value>
+  </data>
+  <data name="Suggest_AreasEmpty" xml:space="preserve">
+    <value>No suitable devices are assigned to the areas – so by device kind.</value>
+  </data>
+  <data name="Suggest_Routines" xml:space="preserve">
+    <value>Routines</value>
+  </data>
+  <data name="Suggest_RoutinesDetail" xml:space="preserve">
+    <value>{0} scripts/scenes</value>
+  </data>
+  <data name="Suggest_TilesOf" xml:space="preserve">
+    <value>{0} of {1} tiles</value>
+  </data>
+  <data name="Suggest_OneTile" xml:space="preserve">
+    <value>1 tile</value>
+  </data>
+  <data name="Suggest_Tiles" xml:space="preserve">
+    <value>{0} tiles</value>
+  </data>
+  <data name="Notify_NoSecretStore" xml:space="preserve">
+    <value>not available (no secret store)</value>
+  </data>
+  <data name="Notify_ConnectedAs" xml:space="preserve">
+    <value>connected as "{0}"</value>
+  </data>
+  <data name="Notify_NoIntegration" xml:space="preserve">
+    <value>HA has not loaded the "Mobile App" integration</value>
+  </data>
+  <data name="Notify_NoPushChannel" xml:space="preserve">
+    <value>Push channel not possible ({0})</value>
+  </data>
+  <data name="Notify_RegisterNoConnection" xml:space="preserve">
+    <value>Registration not possible (no connection)</value>
+  </data>
+  <data name="Notify_RegisterDenied" xml:space="preserve">
+    <value>Registration denied (permissions)</value>
+  </data>
+  <data name="Notify_RegisterFailed" xml:space="preserve">
+    <value>Registration failed (HTTP {0})</value>
+  </data>
+  <data name="Tile_NotFound" xml:space="preserve">
+    <value>Not found</value>
+  </data>
+  <data name="Tile_Loading" xml:space="preserve">
+    <value>Loading …</value>
+  </data>
+  <data name="Tile_NotSetUp" xml:space="preserve">
+    <value>Not set up</value>
+  </data>
+  <data name="Tile_NotConnected" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="Tile_NoFeedback" xml:space="preserve">
+    <value>No response</value>
+  </data>
+  <data name="Tile_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Tile_NoAnswer" xml:space="preserve">
+    <value>No answer</value>
+  </data>
+  <data name="Tile_ServiceMissing" xml:space="preserve">
+    <value>Service missing</value>
+  </data>
+  <data name="Tile_NoPermission" xml:space="preserve">
+    <value>No permission</value>
+  </data>
+  <data name="Tile_InvalidValue" xml:space="preserve">
+    <value>Invalid value</value>
+  </data>
+  <data name="Element_Toggle" xml:space="preserve">
+    <value>Toggle</value>
+  </data>
+  <data name="Element_Brightness" xml:space="preserve">
+    <value>Brightness</value>
+  </data>
+  <data name="Element_ColorTemp" xml:space="preserve">
+    <value>Color temperature</value>
+  </data>
+  <data name="Element_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="Tile_Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Element_Power" xml:space="preserve">
+    <value>On/off</value>
+  </data>
+  <data name="Element_Mode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="Climate_Current" xml:space="preserve">
+    <value>(now {0} {1})</value>
+  </data>
+  <data name="Element_Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="Element_Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Element_Play" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="Element_Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Element_Mute" xml:space="preserve">
+    <value>Mute</value>
+  </data>
+  <data name="Element_Pause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="Element_TurnOff" xml:space="preserve">
+    <value>Turn off</value>
+  </data>
+  <data name="Element_TurnOn" xml:space="preserve">
+    <value>Turn on</value>
+  </data>
+  <data name="Element_Unmute" xml:space="preserve">
+    <value>Unmute</value>
+  </data>
+  <data name="Element_Battery" xml:space="preserve">
+    <value>Battery</value>
+  </data>
+  <data name="Element_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Element_Dock" xml:space="preserve">
+    <value>Return to dock</value>
+  </data>
+  <data name="Tile_Activated" xml:space="preserve">
+    <value>Activated</value>
+  </data>
+  <data name="State_Light_OnPercent" xml:space="preserve">
+    <value>On · {0:0} %</value>
+  </data>
+</root>

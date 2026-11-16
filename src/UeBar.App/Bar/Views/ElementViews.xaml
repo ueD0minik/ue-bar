@@ -1,0 +1,29 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Dominik Poschinger -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:tiles="clr-namespace:UeBar.Core.Tiles;assembly=UeBar.Core"
+                    xmlns:views="clr-namespace:UeBar.App.Bar.Views">
+    <!-- One DataTemplate per element (SPEC 4.2). TapAction has no look of its own – the whole tile is the button. -->
+    <DataTemplate DataType="{x:Type tiles:TapAction}">
+        <Grid Visibility="Collapsed" />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type tiles:SliderElement}">
+        <views:SliderElementView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type tiles:StepperElement}">
+        <views:StepperElementView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type tiles:ButtonRowElement}">
+        <views:ButtonRowElementView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type tiles:ChoiceElement}">
+        <views:ChoiceElementView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type tiles:ValueDisplayElement}">
+        <views:ValueDisplayElementView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type tiles:MediaInfoElement}">
+        <views:MediaInfoElementView />
+    </DataTemplate>
+</ResourceDictionary>
