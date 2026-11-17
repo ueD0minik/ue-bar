@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 using UeBar.Core.Settings;

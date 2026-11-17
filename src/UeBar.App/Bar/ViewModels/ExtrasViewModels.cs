@@ -7,7 +7,7 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using UeBar.Bar;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 

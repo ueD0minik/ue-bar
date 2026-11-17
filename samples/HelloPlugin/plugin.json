@@ -1,0 +1,17 @@
+{
+  "id": "hello",
+  "name": {
+    "en": "Hello plugin",
+    "de": "Hallo-Plugin"
+  },
+  "description": {
+    "en": "Sample plugin: one tile that counts how often it was tapped.",
+    "de": "Beispiel-Plugin: eine Kachel, die zählt, wie oft sie angetippt wurde."
+  },
+  "version": "1.0.0",
+  "author": "Dominik Poschinger",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/ueD0minik/ue-bar/tree/main/samples/HelloPlugin",
+  "sdkVersion": "1.0",
+  "entryAssembly": "HelloPlugin.dll"
+}

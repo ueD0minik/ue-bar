@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Test fixture for the plugin loader tests: several modules in one assembly (good, throwing,
+       slow, with a private dependency …). The tests build plugin folders from it at run time. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
+    <ProjectReference Include="..\UeBar.TestPlugin.Dependency\UeBar.TestPlugin.Dependency.csproj" />
+  </ItemGroup>
+</Project>

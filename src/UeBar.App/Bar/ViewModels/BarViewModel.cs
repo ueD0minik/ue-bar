@@ -9,11 +9,10 @@ using CommunityToolkit.Mvvm.Input;
 using UeBar.App.Bar.Edit;
 using UeBar.App.Tiles;
 using UeBar.Bar;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Layout;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
-using UeBar.Core.Tiles;
 
 namespace UeBar.App.Bar.ViewModels;
 
@@ -506,9 +505,9 @@ internal sealed class BarViewModel : ObservableObject
     public bool HasNowPlaying => NowPlaying is not null;
 
     public RelayCommand<string> NowPlayingCommand => field ??= new RelayCommand<string>(c =>
-        NowPlayingRequested?.Invoke(this, c switch { "next" => UeBar.Core.Abstractions.NowPlayingCommand.Next, "previous" => UeBar.Core.Abstractions.NowPlayingCommand.Previous, _ => UeBar.Core.Abstractions.NowPlayingCommand.PlayPause }));
+        NowPlayingRequested?.Invoke(this, c switch { "next" => UeBar.Sdk.NowPlayingCommand.Next, "previous" => UeBar.Sdk.NowPlayingCommand.Previous, _ => UeBar.Sdk.NowPlayingCommand.PlayPause }));
 
-    public event EventHandler<UeBar.Core.Abstractions.NowPlayingCommand>? NowPlayingRequested;
+    public event EventHandler<UeBar.Sdk.NowPlayingCommand>? NowPlayingRequested;
 
     /// <summary>What the pill shows: message > playback > status value.</summary>
     public PillContent PillContent

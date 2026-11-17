@@ -2,8 +2,9 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using UeBar.Core.Layout;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 using UeBar.Modules.Dummy;
+using UeBar.Core.Modules;
 
 namespace UeBar.Core.Tests;
 

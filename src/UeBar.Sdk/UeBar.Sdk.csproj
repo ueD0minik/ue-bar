@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Public contract between ue Bar and its plugins (SPEC 4): interfaces, tile building blocks,
+       models. No WPF, no implementation, no NuGet packages. Plugins reference only this. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>UeBar.Sdk</RootNamespace>
+    <!-- The SDK has its own version: major.minor = contract version (CoreApiVersion), independent
+         of the app version. A test checks that they match. -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1591: not every public member needs a doc comment -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- No satellite assemblies: the SDK has no UI texts -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>UeBar.Sdk</PackageId>
+    <Title>ue Bar plugin SDK</Title>
+    <Description>Contracts for writing plugins (modules) for ue Bar, the slide-out dashboard for Windows: IModule, tile building blocks, optional capabilities.</Description>
+    <PackageTags>uebar;plugin;sdk;home-assistant;dashboard</PackageTags>
+    <PackageProjectUrl>https://github.com/ueD0minik/ue-bar</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ueD0minik/ue-bar</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- The package holds the SDK as a reference assembly only (ref/): plugins compile against it,
+         but nothing is copied next to the plugin – at run time UeBar.Sdk always comes from the app. -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddSdkReferenceAssembly</TargetsForTfmSpecificContentInPackage>
+    <NoWarn>$(NoWarn);NU5128;NU5131</NoWarn>
+  </PropertyGroup>
+  <Target Name="AddSdkReferenceAssembly">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="ref/$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="$(TargetDir)$(TargetName).xml" PackagePath="ref/$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="build/_._" PackagePath="lib/$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <!-- Build logic every plugin project gets with the package (plugin.json, PackPlugin) -->
+    <None Include="build\UeBar.Sdk.props" Pack="true" PackagePath="build\" />
+    <None Include="build\UeBar.Sdk.targets" Pack="true" PackagePath="build\" />
+  </ItemGroup>
+</Project>

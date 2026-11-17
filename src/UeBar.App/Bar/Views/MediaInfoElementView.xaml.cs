@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using UeBar.App.Bar.Media;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.App.Bar.Views;
 

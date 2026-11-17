@@ -1,0 +1,91 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Dominik Poschinger -->
+<!-- Plugins that come with ue Bar (SPEC 4.4). Imported by UeBar.App, which lists them as
+     <BundledPlugin Include="…csproj" /> (order = order of the modules).
+
+       dotnet build     →  <output>\plugins\<id>\…  +  <output>\plugins\bundled.sha256
+       dotnet publish   →  <publish>\plugins\<id>\… +  <publish>\plugins\bundled.sha256
+                           (the plugin assemblies go through ReadyToRun like the app's own)
+
+     bundled.sha256 lists the checksum of every bundled file; plugins that match it load without
+     asking the user. The app has NO assembly reference to the plugins – they are only built first.
+
+     Portable single exe (build/publish.ps1): the already published plugins folder is zipped and
+     embedded with -p:BundledPluginsZip=<zip> -p:StageBundledPlugins=false. -->
+<Project>
+  <PropertyGroup>
+    <StageBundledPlugins Condition="'$(StageBundledPlugins)' == ''">true</StageBundledPlugins>
+    <_BundledPluginSymbols Condition="'$(Configuration)' == 'Debug'">true</_BundledPluginSymbols>
+    <_BundledPluginSymbols Condition="'$(_BundledPluginSymbols)' == ''">false</_BundledPluginSymbols>
+    <!-- What must not leak from "dotnet publish -r … -o …" into the plugin projects -->
+    <_BundledPluginRemoveProperties>RuntimeIdentifier;SelfContained;PublishDir;PublishProfile;PublishSingleFile;PublishReadyToRun;PublishTrimmed;IncludeNativeLibrariesForSelfExtract;TargetFramework;OutDir;OutputPath;BundledPluginsZip;StageBundledPlugins;_CommandLineDefinedOutputPath</_BundledPluginRemoveProperties>
+  </PropertyGroup>
+
+  <!-- Build order only: no reference, nothing copied into the app's own folder -->
+  <ItemGroup Condition="'$(StageBundledPlugins)' == 'true'">
+    <ProjectReference Include="@(BundledPlugin)" ReferenceOutputAssembly="false" Private="false" />
+  </ItemGroup>
+
+  <!-- Portable: the plugins travel inside the exe -->
+  <ItemGroup Condition="'$(BundledPluginsZip)' != ''">
+    <EmbeddedResource Include="$(BundledPluginsZip)" LogicalName="UeBar.BundledPlugins.zip" Link="BundledPlugins.zip" />
+  </ItemGroup>
+
+  <!-- Every plugin project copies its plugin folder to obj\…\bundled-plugins\<id>\ (target StagePlugin of the SDK) -->
+  <Target Name="_StageBundledPlugins" Condition="'$(StageBundledPlugins)' == 'true'">
+    <PropertyGroup>
+      <_BundledPluginStage>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)bundled-plugins\</_BundledPluginStage>
+    </PropertyGroup>
+    <RemoveDir Directories="$(_BundledPluginStage)" />
+    <MSBuild Projects="@(BundledPlugin)" Targets="StagePlugin" Properties="Configuration=$(Configuration);PluginStageDir=$(_BundledPluginStage);PluginIncludeSymbols=$(_BundledPluginSymbols)" RemoveProperties="$(_BundledPluginRemoveProperties)" />
+    <MSBuild Projects="@(BundledPlugin)" Targets="GetPluginId" Properties="Configuration=$(Configuration)" RemoveProperties="$(_BundledPluginRemoveProperties)">
+      <Output TaskParameter="TargetOutputs" ItemName="_BundledPluginId" />
+    </MSBuild>
+    <ItemGroup>
+      <_BundledPluginFile Remove="@(_BundledPluginFile)" />
+      <_BundledPluginFile Include="$(_BundledPluginStage)**\*" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Build: next to the app -->
+  <Target Name="CopyBundledPluginsToOutput" AfterTargets="Build" DependsOnTargets="_StageBundledPlugins" Condition="'$(StageBundledPlugins)' == 'true'">
+    <RemoveDir Directories="$(OutDir)plugins" />
+    <Copy SourceFiles="@(_BundledPluginFile)" DestinationFiles="@(_BundledPluginFile->'$(OutDir)plugins\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <_BundledOutFile Include="$(OutDir)plugins\**\*" Exclude="$(OutDir)plugins\bundled.sha256" />
+      <_BundledOutRelative Include="@(_BundledOutFile)">
+        <RelativeFile>$([System.String]::Copy('%(RecursiveDir)%(Filename)%(Extension)').Replace('\', '/'))</RelativeFile>
+      </_BundledOutRelative>
+    </ItemGroup>
+    <GetFileHash Files="@(_BundledOutRelative)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="_BundledOutHashed" />
+    </GetFileHash>
+    <WriteLinesToFile File="$(OutDir)plugins\bundled.sha256" Lines="@(_BundledPluginId->'# plugin: %(Identity)');@(_BundledOutHashed->'%(FileHash)  %(RelativeFile)')" Overwrite="true" />
+  </Target>
+
+  <!-- Publish: part of the published files (so ReadyToRun compiles them too), never inside the single file -->
+  <Target Name="AddBundledPluginsToPublish" AfterTargets="ComputeResolvedFilesToPublishList" DependsOnTargets="_StageBundledPlugins" Condition="'$(StageBundledPlugins)' == 'true'">
+    <ItemGroup>
+      <ResolvedFileToPublish Include="@(_BundledPluginFile)" Condition="'%(Extension)' != '.pdb'">
+        <RelativePath>plugins\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <!-- Assemblies in the plugin's root folder (not the language files below it) are precompiled -->
+        <PostprocessAssembly Condition="'%(Extension)' == '.dll' and $([System.String]::Copy('%(RecursiveDir)').TrimEnd('\').Contains('\')) == 'false'">true</PostprocessAssembly>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="WriteBundledPluginChecksumsAfterPublish" AfterTargets="Publish" Condition="'$(StageBundledPlugins)' == 'true'">
+    <ItemGroup>
+      <_BundledPublishedFile Include="$(PublishDir)plugins\**\*" Exclude="$(PublishDir)plugins\bundled.sha256" />
+      <_BundledPublishedRelative Include="@(_BundledPublishedFile)">
+        <RelativeFile>$([System.String]::Copy('%(RecursiveDir)%(Filename)%(Extension)').Replace('\', '/'))</RelativeFile>
+      </_BundledPublishedRelative>
+    </ItemGroup>
+    <GetFileHash Files="@(_BundledPublishedRelative)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="_BundledPublishedHashed" />
+    </GetFileHash>
+    <WriteLinesToFile File="$(PublishDir)plugins\bundled.sha256" Lines="@(_BundledPluginId->'# plugin: %(Identity)');@(_BundledPublishedHashed->'%(FileHash)  %(RelativeFile)')" Overwrite="true" />
+  </Target>
+</Project>

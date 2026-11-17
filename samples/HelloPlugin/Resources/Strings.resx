@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="Hello_ModuleName" xml:space="preserve">
+    <value>Hello plugin</value>
+  </data>
+  <data name="Hello_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Hello_Counter" xml:space="preserve">
+    <value>Counter</value>
+  </data>
+  <data name="Hello_TileType" xml:space="preserve">
+    <value>Counter</value>
+  </data>
+  <data name="Hello_Slot" xml:space="preserve">
+    <value>Counter</value>
+  </data>
+  <data name="Hello_Count" xml:space="preserve">
+    <value>Tapped {0} times</value>
+  </data>
+  <data name="Hello_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Hello_Tab" xml:space="preserve">
+    <value>Hello</value>
+  </data>
+  <data name="Hello_Setting_Step" xml:space="preserve">
+    <value>Step</value>
+  </data>
+  <data name="Hello_Setting_Step_Hint" xml:space="preserve">
+    <value>How much one tap adds to the counter (1–10).</value>
+  </data>
+  <data name="Hello_Setting_Label" xml:space="preserve">
+    <value>Name of the counter</value>
+  </data>
+  <data name="Hello_Setting_Label_Hint" xml:space="preserve">
+    <value>Shown on the tile. Empty = "Counter".</value>
+  </data>
+</root>

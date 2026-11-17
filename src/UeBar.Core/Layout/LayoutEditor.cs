@@ -2,8 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using UeBar.Core.Localization;
-using UeBar.Core.Json;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.Core.Layout;
 

@@ -2,13 +2,11 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Text.Json.Nodes;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Bus;
-using UeBar.Core.Json;
 using UeBar.Core.Layout;
 using UeBar.Core.Modules;
 using UeBar.Core.Settings;
-using UeBar.Core.Tiles;
 
 namespace UeBar.Modules.HomeAssistant.Tests;
 

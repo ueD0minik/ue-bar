@@ -5,8 +5,7 @@ using UeBar.Core.Localization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Json;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 
 namespace UeBar.Core.Layout;

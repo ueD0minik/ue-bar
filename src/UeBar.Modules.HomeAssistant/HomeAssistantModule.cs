@@ -4,10 +4,7 @@
 using System.Globalization;
 using System.Net.NetworkInformation;
 using System.Text.Json.Nodes;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Layout;
-using UeBar.Core.Logging;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 using UeBar.Modules.HomeAssistant.Tiles;
 
 namespace UeBar.Modules.HomeAssistant;
@@ -321,10 +318,10 @@ public sealed class HomeAssistantModule :
             : new QuickCommandResult(false, HaText.T.Format("Quick_NotAdded", result.ErrorMessage));
     }
 
-    /// <summary>Configured list, otherwise the first existing <c>todo.*</c>.</summary>
+    /// <summary>Chosen list (if it exists), otherwise the first existing <c>todo.*</c>.</summary>
     internal string? ResolveTodoList()
     {
-        if (_client.Index.Get(_todoList) is not null || _client.Index.Count == 0)
+        if (_todoList.Length > 0 && (_client.Index.Get(_todoList) is not null || _client.Index.Count == 0))
         {
             return _todoList;
         }

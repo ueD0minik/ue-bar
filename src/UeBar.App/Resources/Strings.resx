@@ -785,4 +785,180 @@ ue Bar is not an official project of Home Assistant, Nabu Casa or Samsung; these
   <data name="Info_SourcePending" xml:space="preserve">
     <value>The link to the public repository will follow.</value>
   </data>
+  <data name="Settings_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Plugins_Bundled" xml:space="preserve">
+    <value>Comes with ue Bar</value>
+  </data>
+  <data name="Plugins_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Plugins_NoneInstalled" xml:space="preserve">
+    <value>No plugins added yet.</value>
+  </data>
+  <data name="Plugins_Hint" xml:space="preserve">
+    <value>Plugins run separately from each other: if one crashes, the rest keeps running and it restarts by itself. Plugins you add yourself run with all your rights – add them only from sources you trust.</value>
+  </data>
+  <data name="Plugins_Meta" xml:space="preserve">
+    <value>Version {0} · {1} · {2}</value>
+  </data>
+  <data name="Plugins_UnknownAuthor" xml:space="preserve">
+    <value>unknown author</value>
+  </data>
+  <data name="Plugins_NoLicense" xml:space="preserve">
+    <value>no license stated</value>
+  </data>
+  <data name="Plugins_Add" xml:space="preserve">
+    <value>Add plugin …</value>
+  </data>
+  <data name="Plugins_AddFolder" xml:space="preserve">
+    <value>Add from folder …</value>
+  </data>
+  <data name="Plugins_OpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="Plugins_OpenUserFolder" xml:space="preserve">
+    <value>Open plugin folder</value>
+  </data>
+  <data name="Plugins_Add_Title" xml:space="preserve">
+    <value>Add a plugin</value>
+  </data>
+  <data name="Plugins_Add_Hint" xml:space="preserve">
+    <value>A plugin is a ZIP file or a folder with a plugin.json. It is checked and copied to your plugin folder.</value>
+  </data>
+  <data name="Plugins_ZipFilter" xml:space="preserve">
+    <value>ue Bar plugin (*.zip)|*.zip|All files|*.*</value>
+  </data>
+  <data name="Plugins_PickFolder" xml:space="preserve">
+    <value>Choose the folder with the plugin.json</value>
+  </data>
+  <data name="Plugins_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Plugins_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Plugins_Remove_Confirm" xml:space="preserve">
+    <value>Remove the plugin "{0}"?
+
+Its tiles stay in the layout as placeholders, its settings are kept.</value>
+  </data>
+  <data name="Plugins_Allow" xml:space="preserve">
+    <value>Allow …</value>
+  </data>
+  <data name="Plugins_RestartNeeded" xml:space="preserve">
+    <value>Changes take effect after ue Bar restarts.</value>
+  </data>
+  <data name="Plugins_RestartNow" xml:space="preserve">
+    <value>Restart now</value>
+  </data>
+  <data name="Plugins_State_Loaded" xml:space="preserve">
+    <value>Loaded</value>
+  </data>
+  <data name="Plugins_State_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Plugins_State_NotAllowed" xml:space="preserve">
+    <value>Not allowed – it is not loaded</value>
+  </data>
+  <data name="Plugins_State_NeedsApproval" xml:space="preserve">
+    <value>Waiting for your permission</value>
+  </data>
+  <data name="Plugins_State_Incompatible" xml:space="preserve">
+    <value>Does not fit: {0}</value>
+  </data>
+  <data name="Plugins_State_Error" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="Plugins_Pending_Load" xml:space="preserve">
+    <value>Is loaded after the restart</value>
+  </data>
+  <data name="Plugins_Pending_Remove" xml:space="preserve">
+    <value>Is removed after the restart</value>
+  </data>
+  <data name="Plugins_Pending_Update" xml:space="preserve">
+    <value>Version {0} takes its place after the restart</value>
+  </data>
+  <data name="Plugins_Pending_Off" xml:space="preserve">
+    <value>Stopped – no longer loaded from the next start on</value>
+  </data>
+  <data name="Plugins_Detail_Id" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="Plugins_Detail_Api" xml:space="preserve">
+    <value>Plugin interface</value>
+  </data>
+  <data name="Plugins_Detail_ApiValue" xml:space="preserve">
+    <value>needs {0} (ue Bar offers {1})</value>
+  </data>
+  <data name="Plugins_Detail_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Plugins_Detail_Homepage" xml:space="preserve">
+    <value>Website</value>
+  </data>
+  <data name="Plugins_Detail_Checksum" xml:space="preserve">
+    <value>Checksum</value>
+  </data>
+  <data name="Plugins_Detail_Verified" xml:space="preserve">
+    <value>unchanged since ue Bar was built</value>
+  </data>
+  <data name="Plugins_Detail_Changed" xml:space="preserve">
+    <value>files were changed</value>
+  </data>
+  <data name="Plugins_AddFailed" xml:space="preserve">
+    <value>This plugin cannot be added</value>
+  </data>
+  <data name="Plugins_Added" xml:space="preserve">
+    <value>"{0}" was added.</value>
+  </data>
+  <data name="Plugins_NotAdded" xml:space="preserve">
+    <value>"{0}" was not added.</value>
+  </data>
+  <data name="Plugins_Problems_Title" xml:space="preserve">
+    <value>Plugin problem</value>
+  </data>
+  <data name="Plugins_Problems_Text" xml:space="preserve">
+    <value>{0} plugin(s) could not be loaded. Details: Settings → Plugins.</value>
+  </data>
+  <data name="Trust_Title" xml:space="preserve">
+    <value>Allow plugin?</value>
+  </data>
+  <data name="Trust_Heading" xml:space="preserve">
+    <value>"{0}" does not come with ue Bar.</value>
+  </data>
+  <data name="Trust_Changed" xml:space="preserve">
+    <value>The files of this plugin have changed since you last decided.</value>
+  </data>
+  <data name="Trust_ChangedBundled" xml:space="preserve">
+    <value>The files of this bundled plugin differ from the ones ue Bar was built with.</value>
+  </data>
+  <data name="Trust_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Trust_Author" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="Trust_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Trust_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Trust_Source" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="Trust_Warning" xml:space="preserve">
+    <value>This plugin has full access to your PC and your Home Assistant connection. Only install plugins from sources you trust.</value>
+  </data>
+  <data name="Trust_Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="Trust_Deny" xml:space="preserve">
+    <value>Do not load</value>
+  </data>
+  <data name="Modules_PluginHint" xml:space="preserve">
+    <value>Developer plugin for trying things out.</value>
+  </data>
 </root>

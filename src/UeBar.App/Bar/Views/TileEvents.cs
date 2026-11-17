@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Windows;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.App.Bar.Views;
 

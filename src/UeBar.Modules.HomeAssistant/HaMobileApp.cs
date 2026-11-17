@@ -4,8 +4,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json.Nodes;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Logging;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant;
 

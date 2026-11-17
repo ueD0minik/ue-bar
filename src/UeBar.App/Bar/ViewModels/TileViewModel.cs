@@ -10,7 +10,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using UeBar.Core.Layout;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.App.Bar.ViewModels;
 

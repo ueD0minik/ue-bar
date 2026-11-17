@@ -2,13 +2,13 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Globalization;
-using UeBar.Core.Localization;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant;
 
 /// <summary>
 /// Texts of the Home Assistant module (own resources, R1). The language comes from the module
-/// context (<see cref="UeBar.Core.Abstractions.IUiLanguageInfo"/>); before the start the current UI culture applies.
+/// context (<see cref="UeBar.Sdk.IUiLanguageInfo"/>); before the start the current UI culture applies.
 /// </summary>
 internal static class HaText
 {

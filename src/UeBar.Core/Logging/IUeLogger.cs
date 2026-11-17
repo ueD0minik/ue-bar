@@ -1,15 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
-namespace UeBar.Core.Logging;
+using UeBar.Sdk;
 
-public enum LogLevel
-{
-    Debug,
-    Info,
-    Warning,
-    Error,
-}
+namespace UeBar.Core.Logging;
 
 /// <summary>Simple log with a module ID per entry (SPEC 4.6). Never log secrets.</summary>
 public interface IUeLogger
@@ -39,12 +33,6 @@ public static class UeLoggerExtensions
         public void Log(LogLevel level, string message, Exception? exception = null) =>
             inner.Log(level, moduleId, message, exception);
     }
-}
-
-/// <summary>Logger a module gets – the module ID is added automatically.</summary>
-public interface IModuleLogger
-{
-    void Log(LogLevel level, string message, Exception? exception = null);
 }
 
 /// <summary>Discards everything. For tests.</summary>

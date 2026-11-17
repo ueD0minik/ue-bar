@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
-using UeBar.Core.Abstractions;
-using UeBar.Core.Layout;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant;
 
@@ -38,7 +37,7 @@ internal sealed class HaSlotAssistant(EntityIndex index, EntityStore store, Func
 
     public TileConfig Complete(TileConfig draft)
     {
-        var result = LayoutLayers.Clone(draft);
+        var result = UeBarJson.Clone(draft);
         if (findType(draft.Type) is not { } type)
         {
             return result;

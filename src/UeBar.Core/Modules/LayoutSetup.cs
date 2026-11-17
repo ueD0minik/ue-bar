@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using UeBar.Core.Localization;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Layout;
 
 namespace UeBar.Core.Modules;

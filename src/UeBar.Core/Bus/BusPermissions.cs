@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 
 namespace UeBar.Core.Bus;
 

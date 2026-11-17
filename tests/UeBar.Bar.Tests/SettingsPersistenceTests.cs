@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Settings;
 

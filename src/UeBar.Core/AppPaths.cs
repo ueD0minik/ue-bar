@@ -30,4 +30,10 @@ public sealed class AppPaths
     public string DeviceFile => Path.Combine(Root, "device.json");
     public string LayoutSyncFile => Path.Combine(Root, "layout.sync.json");
     public string Backups => Path.Combine(Root, "backups");
+
+    /// <summary>Plugins the user added (one folder per plugin, SPEC 4.4).</summary>
+    public string Plugins => Path.Combine(Root, "plugins");
+
+    /// <summary>Which plugins the user allowed or refused.</summary>
+    public string PluginTrustFile => Path.Combine(Root, "plugin-trust.json");
 }

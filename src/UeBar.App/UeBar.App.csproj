@@ -32,10 +32,17 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UeBar.Core\UeBar.Core.csproj" />
-    <ProjectReference Include="..\UeBar.Modules.Dummy\UeBar.Modules.Dummy.csproj" />
-    <ProjectReference Include="..\UeBar.Modules.HomeAssistant\UeBar.Modules.HomeAssistant.csproj" />
     <ProjectReference Include="..\UeBar.Bar\UeBar.Bar.csproj" />
   </ItemGroup>
+  <!-- Plugins that come with ue Bar (SPEC 4.4). The app does NOT reference their assemblies: they are
+       built first and copied to plugins\<id>\ next to the app, together with a checksum list
+       (build/BundledPlugins.targets). Order = order of the modules. The test module is bundled with
+       debug builds only. -->
+  <ItemGroup>
+    <BundledPlugin Include="..\UeBar.Modules.HomeAssistant\UeBar.Modules.HomeAssistant.csproj" />
+    <BundledPlugin Include="..\UeBar.Modules.Dummy\UeBar.Modules.Dummy.csproj" Condition="'$(Configuration)' == 'Debug'" />
+  </ItemGroup>
+  <Import Project="..\..\build\BundledPlugins.targets" />
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.750501" />

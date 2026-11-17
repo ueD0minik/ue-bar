@@ -4,7 +4,7 @@
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 

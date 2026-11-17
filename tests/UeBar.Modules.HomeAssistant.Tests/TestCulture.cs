@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using UeBar.Sdk;
 using UeBar.Core.Localization;
 
 namespace UeBar.Modules.HomeAssistant.Tests;

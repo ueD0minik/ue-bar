@@ -5,8 +5,7 @@ using UeBar.Core.Localization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Json;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 
 namespace UeBar.Core.Layout;
@@ -127,7 +126,7 @@ public static class LayoutLayers
     };
 
     /// <summary>Deep copy (through JSON – keeps unknown fields too).</summary>
-    public static T Clone<T>(T value) => UeBarJson.Deserialize<T>(UeBarJson.Serialize(value))!;
+    public static T Clone<T>(T value) => UeBarJson.Clone(value);
 }
 
 /// <summary>Reads/writes <c>device.json</c> atomically. Missing file: empty device layout.</summary>

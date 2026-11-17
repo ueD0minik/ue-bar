@@ -87,7 +87,16 @@ de.HaDeviceHint=Hinweis: Hast du ue Bar mit Home Assistant verbunden, steht dort
 [Tasks]
 Name: "autostart"; Description: "{cm:TaskAutostart}"; Flags: checkedonce
 
+[InstallDelete]
+; Up to 1.1.1 the modules were assemblies in the app folder. Since 1.2.0 they are plugins in plugins\<id>\.
+Type: files; Name: "{app}\UeBar.Modules.*.dll"
+Type: files; Name: "{app}\de\UeBar.Modules.*.resources.dll"
+; The bundled plugins are replaced as a whole: a file left over from an older version would no longer
+; match the checksum list, and ue Bar would ask before loading its own plugin.
+Type: filesandordirs; Name: "{app}\plugins"
+
 [Files]
+; Includes plugins\<id>\ (the plugins that come with ue Bar) and plugins\bundled.sha256.
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]

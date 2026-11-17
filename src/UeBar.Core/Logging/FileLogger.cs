@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using System.Text;
+using UeBar.Sdk;
 
 namespace UeBar.Core.Logging;
 

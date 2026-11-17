@@ -1,0 +1,57 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Dominik Poschinger -->
+<!-- Build logic for ue Bar plugin projects. Comes with the UeBar.Sdk NuGet package (imported
+     automatically); projects inside the ue Bar repository import it by path.
+
+       dotnet build                     plugin.json is copied next to the plugin DLL
+       dotnet build -t:PackPlugin       additionally: bin\<Configuration>\plugin\<id>\  (the plugin folder)
+                                        and           bin\<Configuration>\plugin\<id>-<version>.zip
+
+     The ZIP (or the folder) is what "Add plugin …" in the ue Bar settings takes. -->
+<Project>
+  <PropertyGroup>
+    <PluginManifest Condition="'$(PluginManifest)' == ''">$(MSBuildProjectDirectory)\plugin.json</PluginManifest>
+    <_PluginManifestText Condition="Exists('$(PluginManifest)')">$([System.IO.File]::ReadAllText('$(PluginManifest)'))</_PluginManifestText>
+    <!-- "id" and "version" are read from plugin.json (one place) -->
+    <PluginId Condition="'$(PluginId)' == '' and '$(_PluginManifestText)' != ''">$([System.Text.RegularExpressions.Regex]::Match($(_PluginManifestText), `"id"\s*:\s*"([^"]+)"`).Groups[1].Value)</PluginId>
+    <PluginVersion Condition="'$(PluginVersion)' == '' and '$(_PluginManifestText)' != ''">$([System.Text.RegularExpressions.Regex]::Match($(_PluginManifestText), `"version"\s*:\s*"([^"]+)"`).Groups[1].Value)</PluginVersion>
+    <PluginStageDir Condition="'$(PluginStageDir)' == ''">$(MSBuildProjectDirectory)\bin\$(Configuration)\plugin\</PluginStageDir>
+    <PluginStageDir Condition="!HasTrailingSlash('$(PluginStageDir)')">$(PluginStageDir)\</PluginStageDir>
+    <PluginPackageDir Condition="'$(PluginPackageDir)' == ''">$(PluginStageDir)</PluginPackageDir>
+    <PluginPackageDir Condition="!HasTrailingSlash('$(PluginPackageDir)')">$(PluginPackageDir)\</PluginPackageDir>
+    <!-- Debug symbols are left out of the plugin folder unless asked for -->
+    <PluginIncludeSymbols Condition="'$(PluginIncludeSymbols)' == ''">false</PluginIncludeSymbols>
+  </PropertyGroup>
+
+  <ItemGroup Condition="Exists('$(PluginManifest)')">
+    <None Remove="plugin.json" />
+    <Content Remove="plugin.json" />
+    <None Include="$(PluginManifest)" Link="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="CheckPluginManifest" BeforeTargets="CoreCompile">
+    <Error Condition="!Exists('$(PluginManifest)')" Text="plugin.json is missing next to $(MSBuildProjectFile). Every ue Bar plugin needs one (see docs/WRITING-A-PLUGIN.md)." />
+    <Error Condition="'$(PluginId)' == ''" Text="plugin.json has no &quot;id&quot;." />
+    <Error Condition="'$(PluginVersion)' == ''" Text="plugin.json has no &quot;version&quot;." />
+  </Target>
+
+  <Target Name="GetPluginId" Returns="$(PluginId)" />
+
+  <!-- Copies the built plugin into <PluginStageDir>\<id>\ – exactly the folder ue Bar loads.
+       Does not build: call it after Build (PackPlugin does). -->
+  <Target Name="StagePlugin">
+    <ItemGroup>
+      <_PluginFile Include="$(OutDir)**\*" Exclude="$(OutDir)UeBar.Sdk.*;$(OutDir)**\*.runtimeconfig.json" />
+      <_PluginFile Remove="$(OutDir)**\*.pdb" Condition="'$(PluginIncludeSymbols)' != 'true'" />
+    </ItemGroup>
+    <RemoveDir Directories="$(PluginStageDir)$(PluginId)" />
+    <Copy SourceFiles="@(_PluginFile)" DestinationFiles="@(_PluginFile->'$(PluginStageDir)$(PluginId)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
+  </Target>
+
+  <!-- Builds the plugin and packs the plugin folder into <id>-<version>.zip -->
+  <Target Name="PackPlugin" DependsOnTargets="Build;StagePlugin">
+    <MakeDir Directories="$(PluginPackageDir)" />
+    <ZipDirectory SourceDirectory="$(PluginStageDir)$(PluginId)" DestinationFile="$(PluginPackageDir)$(PluginId)-$(PluginVersion).zip" Overwrite="true" />
+    <Message Importance="high" Text="Plugin package: $(PluginPackageDir)$(PluginId)-$(PluginVersion).zip" />
+  </Target>
+</Project>

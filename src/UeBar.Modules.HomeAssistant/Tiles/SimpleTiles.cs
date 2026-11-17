@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
-using UeBar.Core.Layout;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant.Tiles;
 

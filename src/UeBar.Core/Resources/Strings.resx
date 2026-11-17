@@ -102,4 +102,79 @@
   <data name="Placeholder_UnknownType" xml:space="preserve">
     <value>Unknown tile type "{0}"</value>
   </data>
+  <data name="Plugin_ManifestMissing" xml:space="preserve">
+    <value>plugin.json is missing.</value>
+  </data>
+  <data name="Plugin_ManifestInvalid" xml:space="preserve">
+    <value>plugin.json cannot be read: {0}</value>
+  </data>
+  <data name="Plugin_ManifestField" xml:space="preserve">
+    <value>plugin.json: "{0}" is missing or invalid.</value>
+  </data>
+  <data name="Plugin_EntryMissing" xml:space="preserve">
+    <value>The file {0} named in plugin.json is missing.</value>
+  </data>
+  <data name="Plugin_NotAnAssembly" xml:space="preserve">
+    <value>{0} is damaged or not a .NET assembly.</value>
+  </data>
+  <data name="Plugin_NoSdkReference" xml:space="preserve">
+    <value>{0} was not built with the ue Bar SDK (UeBar.Sdk).</value>
+  </data>
+  <data name="Plugin_HostReference" xml:space="preserve">
+    <value>The plugin uses internal parts of ue Bar ({0}). Plugins may only use UeBar.Sdk.</value>
+  </data>
+  <data name="Plugin_ApiNewer" xml:space="preserve">
+    <value>Needs plugin interface {0}, this ue Bar offers {1}. Update ue Bar to use this plugin.</value>
+  </data>
+  <data name="Plugin_ApiOlder" xml:space="preserve">
+    <value>Made for plugin interface {0}, this ue Bar offers {1}. Look for a newer version of the plugin.</value>
+  </data>
+  <data name="Plugin_DuplicateId" xml:space="preserve">
+    <value>The ID "{0}" is already used by another plugin ({1}).</value>
+  </data>
+  <data name="Plugin_BundledId" xml:space="preserve">
+    <value>The ID "{0}" belongs to a plugin that comes with ue Bar and cannot be replaced.</value>
+  </data>
+  <data name="Plugin_NoModule" xml:space="preserve">
+    <value>{0} contains no module (a public class that implements IModule and has a constructor without parameters).</value>
+  </data>
+  <data name="Plugin_SeveralModules" xml:space="preserve">
+    <value>{0} contains several modules ({1}). Name one with "entryType" in plugin.json.</value>
+  </data>
+  <data name="Plugin_EntryTypeMissing" xml:space="preserve">
+    <value>The class {0} named in plugin.json was not found.</value>
+  </data>
+  <data name="Plugin_DependencyMissing" xml:space="preserve">
+    <value>Something the plugin needs is missing or does not fit: {0}</value>
+  </data>
+  <data name="Plugin_ConstructorFailed" xml:space="preserve">
+    <value>The plugin failed while being created: {0}</value>
+  </data>
+  <data name="Plugin_IdMismatch" xml:space="preserve">
+    <value>The module calls itself "{0}", plugin.json says "{1}". Both must be the same.</value>
+  </data>
+  <data name="Plugin_LoadTimeout" xml:space="preserve">
+    <value>The plugin did not finish loading within {0:0} seconds.</value>
+  </data>
+  <data name="Plugin_LoadFailed" xml:space="preserve">
+    <value>The plugin could not be loaded: {0}</value>
+  </data>
+  <data name="Plugin_NotAllowed" xml:space="preserve">
+    <value>Not allowed</value>
+  </data>
+  <data name="Plugin_PackageNoManifest" xml:space="preserve">
+    <value>No plugin.json found – this is not a ue Bar plugin.</value>
+  </data>
+  <data name="Plugin_PackageUnsafe" xml:space="preserve">
+    <value>The ZIP contains paths that point outside the plugin folder.</value>
+  </data>
+  <data name="Plugin_PackageTooBig" xml:space="preserve">
+    <value>The ZIP is too big or contains too many files.</value>
+  </data>
+  <data name="Plugin_PackageUnreadable" xml:space="preserve">
+    <value>Cannot be read: {0}</value>
+  </data>
+  <data name="Plugin_InstallFailed" xml:space="preserve">
+    <value>The plugin folder could not be changed: {0}</value>
+  </data>
 </root>

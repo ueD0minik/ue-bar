@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Dominik Poschinger
-# On a tag v*: build installer + portable executable and attach them to a GitHub release.
+# On a tag v*: build installer + portable executable, the SDK package and the plugin ZIPs
+# (sample plugin, test module) and attach them to a GitHub release.
 name: Release
 
 on:
@@ -42,3 +43,5 @@ jobs:
           files: |
             dist/ueBar-Setup-*.exe
             dist/ueBar-*-portable.exe
+            dist/UeBar.Sdk.*.nupkg
+            dist/ueBar-plugin-*.zip

@@ -785,4 +785,180 @@ ue Bar ist kein offizielles Projekt von Home Assistant, Nabu Casa oder Samsung; 
   <data name="Info_SourcePending" xml:space="preserve">
     <value>Der Link zum öffentlichen Repository folgt.</value>
   </data>
+  <data name="Settings_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Plugins_Bundled" xml:space="preserve">
+    <value>Mitgeliefert</value>
+  </data>
+  <data name="Plugins_Installed" xml:space="preserve">
+    <value>Installiert</value>
+  </data>
+  <data name="Plugins_NoneInstalled" xml:space="preserve">
+    <value>Noch keine Plugins hinzugefügt.</value>
+  </data>
+  <data name="Plugins_Hint" xml:space="preserve">
+    <value>Plugins laufen getrennt voneinander: stürzt eines ab, läuft der Rest weiter und es startet von selbst neu. Selbst hinzugefügte Plugins laufen mit all deinen Rechten – nur aus vertrauenswürdigen Quellen hinzufügen.</value>
+  </data>
+  <data name="Plugins_Meta" xml:space="preserve">
+    <value>Version {0} · {1} · {2}</value>
+  </data>
+  <data name="Plugins_UnknownAuthor" xml:space="preserve">
+    <value>Autor unbekannt</value>
+  </data>
+  <data name="Plugins_NoLicense" xml:space="preserve">
+    <value>keine Lizenz angegeben</value>
+  </data>
+  <data name="Plugins_Add" xml:space="preserve">
+    <value>Plugin hinzufügen …</value>
+  </data>
+  <data name="Plugins_AddFolder" xml:space="preserve">
+    <value>Aus Ordner hinzufügen …</value>
+  </data>
+  <data name="Plugins_OpenFolder" xml:space="preserve">
+    <value>Ordner öffnen</value>
+  </data>
+  <data name="Plugins_OpenUserFolder" xml:space="preserve">
+    <value>Plugin-Ordner öffnen</value>
+  </data>
+  <data name="Plugins_Add_Title" xml:space="preserve">
+    <value>Plugin hinzufügen</value>
+  </data>
+  <data name="Plugins_Add_Hint" xml:space="preserve">
+    <value>Ein Plugin ist eine ZIP-Datei oder ein Ordner mit einer plugin.json. Es wird geprüft und in deinen Plugin-Ordner kopiert.</value>
+  </data>
+  <data name="Plugins_ZipFilter" xml:space="preserve">
+    <value>ue-Bar-Plugin (*.zip)|*.zip|Alle Dateien|*.*</value>
+  </data>
+  <data name="Plugins_PickFolder" xml:space="preserve">
+    <value>Ordner mit der plugin.json wählen</value>
+  </data>
+  <data name="Plugins_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Plugins_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Plugins_Remove_Confirm" xml:space="preserve">
+    <value>Plugin „{0}“ entfernen?
+
+Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erhalten.</value>
+  </data>
+  <data name="Plugins_Allow" xml:space="preserve">
+    <value>Erlauben …</value>
+  </data>
+  <data name="Plugins_RestartNeeded" xml:space="preserve">
+    <value>Änderungen werden nach einem Neustart von ue Bar wirksam.</value>
+  </data>
+  <data name="Plugins_RestartNow" xml:space="preserve">
+    <value>Jetzt neu starten</value>
+  </data>
+  <data name="Plugins_State_Loaded" xml:space="preserve">
+    <value>Geladen</value>
+  </data>
+  <data name="Plugins_State_Disabled" xml:space="preserve">
+    <value>Deaktiviert</value>
+  </data>
+  <data name="Plugins_State_NotAllowed" xml:space="preserve">
+    <value>Nicht erlaubt – wird nicht geladen</value>
+  </data>
+  <data name="Plugins_State_NeedsApproval" xml:space="preserve">
+    <value>Wartet auf deine Erlaubnis</value>
+  </data>
+  <data name="Plugins_State_Incompatible" xml:space="preserve">
+    <value>Passt nicht: {0}</value>
+  </data>
+  <data name="Plugins_State_Error" xml:space="preserve">
+    <value>Fehler: {0}</value>
+  </data>
+  <data name="Plugins_Pending_Load" xml:space="preserve">
+    <value>Wird nach dem Neustart geladen</value>
+  </data>
+  <data name="Plugins_Pending_Remove" xml:space="preserve">
+    <value>Wird nach dem Neustart entfernt</value>
+  </data>
+  <data name="Plugins_Pending_Update" xml:space="preserve">
+    <value>Version {0} ersetzt es nach dem Neustart</value>
+  </data>
+  <data name="Plugins_Pending_Off" xml:space="preserve">
+    <value>Angehalten – wird ab dem nächsten Start nicht mehr geladen</value>
+  </data>
+  <data name="Plugins_Detail_Id" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="Plugins_Detail_Api" xml:space="preserve">
+    <value>Plugin-Schnittstelle</value>
+  </data>
+  <data name="Plugins_Detail_ApiValue" xml:space="preserve">
+    <value>braucht {0} (ue Bar bietet {1})</value>
+  </data>
+  <data name="Plugins_Detail_Folder" xml:space="preserve">
+    <value>Ordner</value>
+  </data>
+  <data name="Plugins_Detail_Homepage" xml:space="preserve">
+    <value>Webseite</value>
+  </data>
+  <data name="Plugins_Detail_Checksum" xml:space="preserve">
+    <value>Prüfsumme</value>
+  </data>
+  <data name="Plugins_Detail_Verified" xml:space="preserve">
+    <value>unverändert seit dem Bau von ue Bar</value>
+  </data>
+  <data name="Plugins_Detail_Changed" xml:space="preserve">
+    <value>Dateien wurden geändert</value>
+  </data>
+  <data name="Plugins_AddFailed" xml:space="preserve">
+    <value>Dieses Plugin kann nicht hinzugefügt werden</value>
+  </data>
+  <data name="Plugins_Added" xml:space="preserve">
+    <value>„{0}“ wurde hinzugefügt.</value>
+  </data>
+  <data name="Plugins_NotAdded" xml:space="preserve">
+    <value>„{0}“ wurde nicht hinzugefügt.</value>
+  </data>
+  <data name="Plugins_Problems_Title" xml:space="preserve">
+    <value>Plugin-Problem</value>
+  </data>
+  <data name="Plugins_Problems_Text" xml:space="preserve">
+    <value>{0} Plugin(s) konnten nicht geladen werden. Details: Einstellungen → Plugins.</value>
+  </data>
+  <data name="Trust_Title" xml:space="preserve">
+    <value>Plugin erlauben?</value>
+  </data>
+  <data name="Trust_Heading" xml:space="preserve">
+    <value>„{0}“ ist kein mitgeliefertes Plugin.</value>
+  </data>
+  <data name="Trust_Changed" xml:space="preserve">
+    <value>Die Dateien dieses Plugins haben sich seit deiner letzten Entscheidung geändert.</value>
+  </data>
+  <data name="Trust_ChangedBundled" xml:space="preserve">
+    <value>Die Dateien dieses mitgelieferten Plugins weichen von denen ab, mit denen ue Bar gebaut wurde.</value>
+  </data>
+  <data name="Trust_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Trust_Author" xml:space="preserve">
+    <value>Autor</value>
+  </data>
+  <data name="Trust_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Trust_Folder" xml:space="preserve">
+    <value>Ordner</value>
+  </data>
+  <data name="Trust_Source" xml:space="preserve">
+    <value>Quelle</value>
+  </data>
+  <data name="Trust_Warning" xml:space="preserve">
+    <value>Dieses Plugin hat vollen Zugriff auf deinen PC und deine Home-Assistant-Verbindung. Nur aus vertrauenswürdigen Quellen installieren.</value>
+  </data>
+  <data name="Trust_Allow" xml:space="preserve">
+    <value>Erlauben</value>
+  </data>
+  <data name="Trust_Deny" xml:space="preserve">
+    <value>Nicht laden</value>
+  </data>
+  <data name="Modules_PluginHint" xml:space="preserve">
+    <value>Entwickler-Plugin zum Ausprobieren.</value>
+  </data>
 </root>

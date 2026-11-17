@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Windows.Threading;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 
 namespace UeBar.App.Infrastructure;

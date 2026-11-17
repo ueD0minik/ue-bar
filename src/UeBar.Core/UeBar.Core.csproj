@@ -1,9 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Core: interfaces and models. Deliberately without WPF and without NuGet packages. -->
+  <!-- Core: implementation behind the contract in UeBar.Sdk (registry, guard, bus, stores, plugin loader).
+       Deliberately without WPF and without NuGet packages. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>UeBar.Core</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UeBar.Sdk\UeBar.Sdk.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="UeBar.Core.Tests" />
   </ItemGroup>

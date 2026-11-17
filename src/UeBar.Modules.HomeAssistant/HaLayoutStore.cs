@@ -5,10 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Json;
-using UeBar.Core.Layout;
-using UeBar.Core.Logging;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant;
 

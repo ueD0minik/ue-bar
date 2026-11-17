@@ -1,0 +1,14 @@
+{
+  "id": "homeassistant",
+  "name": "Home Assistant",
+  "description": {
+    "en": "Controls Home Assistant: lights, climate, media, scripts, notifications, Assist and a layout synchronized per Home Assistant user.",
+    "de": "Steuert Home Assistant: Licht, Klima, Medien, Skripte, Benachrichtigungen, Assist und ein pro Home-Assistant-Benutzer synchronisiertes Layout."
+  },
+  "version": "1.2.0",
+  "author": "Dominik Poschinger",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/ueD0minik/ue-bar",
+  "sdkVersion": "1.0",
+  "entryAssembly": "UeBar.Modules.HomeAssistant.dll"
+}

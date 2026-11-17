@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Globalization;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Localization;
 using UeBar.Core.Logging;
 

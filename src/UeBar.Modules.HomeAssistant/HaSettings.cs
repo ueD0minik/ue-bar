@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant;
 
@@ -14,7 +14,8 @@ internal sealed record HaSettings(Uri? LocalUrl, Uri? ExternalUrl, string? Token
     public const string KeyPreferLocal = "preferLocal";
     public const string KeyNowPlayingPlayers = "nowPlayingPlayers";
     public const string KeyTodoList = "todoList";
-    public const string DefaultTodoList = "todo.einkaufsliste";
+    /// <summary>No fixed default: without a choice the first existing to-do list is used.</summary>
+    public const string DefaultTodoList = "";
 
     // M7: no default addresses any more (distribution) – only placeholders as examples.
     public const string LocalUrlPlaceholder = "http://homeassistant.local:8123";
@@ -54,8 +55,9 @@ internal sealed record HaSettings(Uri? LocalUrl, Uri? ExternalUrl, string? Token
             : new(KeyNowPlayingPlayers, HaText.T["Setting_NowPlaying"], SettingFieldKind.Text, null,
                 HaText.T["Setting_NowPlaying_HintText"]),
         todoLists.Count > 0
-            ? new(KeyTodoList, HaText.T["Setting_TodoList"], SettingFieldKind.Choice, DefaultTodoList, HaText.T["Setting_TodoList_HintChoice"], todoLists)
-            : new(KeyTodoList, HaText.T["Setting_TodoList"], SettingFieldKind.Text, DefaultTodoList, HaText.T["Setting_TodoList_HintText"]),
+            ? new(KeyTodoList, HaText.T["Setting_TodoList"], SettingFieldKind.Choice, DefaultTodoList, HaText.T["Setting_TodoList_HintChoice"],
+                [new SettingChoice(DefaultTodoList, HaText.T["Setting_TodoList_First"]), .. todoLists])
+            : new(KeyTodoList, HaText.T["Setting_TodoList"], SettingFieldKind.Text, null, HaText.T["Setting_TodoList_HintText"]),
     ];
 
     /// <summary>Configured Now Playing players (empty = those in the layout).</summary>

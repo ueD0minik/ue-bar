@@ -2,9 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Globalization;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Layout;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.Dummy;
 
@@ -67,7 +65,7 @@ public sealed class DummyModule : IModule, IEntitySource, ILayoutSuggestionProvi
 
     public Task StartAsync(IModuleContext context, CancellationToken cancellationToken)
     {
-        context.Log.Log(Core.Logging.LogLevel.Info, "Test module started (values in memory only)");
+        context.Log.Info("Test module started (values in memory only)");
         if (context is IUiLanguageInfo language)
         {
             DummyText.Culture = language.UiCulture;

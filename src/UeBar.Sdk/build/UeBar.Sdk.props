@@ -1,0 +1,13 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Dominik Poschinger -->
+<!-- Settings every ue Bar plugin project needs. Comes with the UeBar.Sdk NuGet package
+     (imported automatically); projects inside the ue Bar repository import it by path. -->
+<Project>
+  <PropertyGroup>
+    <!-- A plugin is loaded into its own AssemblyLoadContext: copy its NuGet dependencies next to
+         it and write a .deps.json the loader can resolve them with. -->
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <!-- A plugin is not an application -->
+    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+</Project>

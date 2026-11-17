@@ -3,7 +3,7 @@
 
 using System.Globalization;
 using System.Text.Json.Nodes;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Bus;
 using UeBar.Core.Localization;
 using UeBar.Core.Modules;

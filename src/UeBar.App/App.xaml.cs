@@ -8,6 +8,8 @@ using UeBar.App.Localization;
 using UeBar.App.Bar.Edit;
 using UeBar.App.Bar.ViewModels;
 using UeBar.App.Infrastructure;
+using UeBar.App.Plugins;
+using UeBar.Core.Plugins;
 using UeBar.App.Settings;
 using UeBar.App.Tiles;
 using UeBar.App.Tray;
@@ -17,14 +19,14 @@ using UeBar.Core.Bus;
 using UeBar.Core.Layout;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Settings;
 
 namespace UeBar.App;
 
 /// <summary>
 /// Entry point: no visible main window, only a tray icon (M1). Builds the core (guard, bus, registry),
-/// registers the modules in one place (<see cref="ModuleCatalog"/>) and starts them.
+/// loads the plugins (<see cref="PluginHost"/>, SPEC 4.4), registers their modules and starts them.
 /// </summary>
 public partial class App : Application
 {
@@ -70,7 +72,10 @@ public partial class App : Application
         HookGlobalExceptionHandlers(_log);
 
         // Very first line – even before the single-instance check.
-        _log.Info(null, $"Process starting: PID {Environment.ProcessId}, {BuildVariant}, {Environment.ProcessPath}, contract v{CoreApiVersion.Current}, {Environment.OSVersion}{(AppPaths.IsCustom ? $", data folder {paths.Root}" : "")}");
+        _log.Info(null, $"Process starting: PID {Environment.ProcessId}, {BuildVariant}, {Environment.ProcessPath}, plugin interface {CoreApiVersion.Text}, {Environment.OSVersion}{(AppPaths.IsCustom ? $", data folder {paths.Root}" : "")}{(CultureOverride is null ? "" : $", formats {CultureOverride}")}");
+
+        // Restart after a plugin change: wait until the previous process has released the lock.
+        await AppRestart.WaitForPredecessorAsync(e.Args, _log);
 
         _singleInstance = SingleInstance.TryAcquire();
         if (_singleInstance is null && !await HandleOtherInstanceAsync())
@@ -127,11 +132,21 @@ public partial class App : Application
             var bus = new ModuleBus(guard, settings.BusPolicy, _log);
             _registry = new ModuleRegistry(guard, bus, _log, settings, paths.Root)
             {
-                // Test module: off in release without a saved setting (M7, distribution).
-                DeveloperModulesEnabledByDefault = AppInfo.BuildVariant == "Debug",
                 DeviceName = () => general.Current.DeviceName,
             };
-            ModuleCatalog.RegisterAll(_registry);
+
+            // Plugins (SPEC 4.4): find them, ask for every one that does not come with ue Bar (first time
+            // and whenever its files changed), load them, hand their modules to the registry. A broken
+            // plugin only gets a status – the app starts anyway.
+            var plugins = PluginStartup.CreateHost(paths, settings, _log);
+            plugins.Discover();
+            foreach (var plugin in plugins.Plugins.Where(p => p.State == PluginState.NeedsApproval).ToList())
+            {
+                plugins.Decide(plugin, PluginTrustDialog.Ask(null, PluginTrustRequest.From(plugin)));
+            }
+
+            await plugins.LoadAsync();
+            plugins.RegisterAll(_registry);
 
             _tiles = new TileHost(_registry, _log);
             await _registry.StartAllAsync();
@@ -242,6 +257,19 @@ public partial class App : Application
                 Layout = layout,
                 Paths = paths,
                 Log = log,
+                Plugins = plugins,
+                Restart = async () =>
+                {
+                    if (layout.IsEditing)
+                    {
+                        await layout.FinishEditAsync();
+                    }
+
+                    if (AppRestart.StartSuccessor(log))
+                    {
+                        await ExitAsync();
+                    }
+                },
                 ResetBar = () => tray.ResetBar?.Invoke() ?? Task.CompletedTask,
                 ClearNotificationHistory = extras.ClearHistory,
                 NotificationHistoryCount = () => extras.HistoryCount,
@@ -255,6 +283,13 @@ public partial class App : Application
                 },
             };
             _tray.OpenSettings = () => SettingsWindow.Show(settingsHost);
+
+            // "ueBar.exe --settings" or "--settings=plugins": open the settings right after the start.
+            if (e.Args.FirstOrDefault(a => a.StartsWith("--settings", StringComparison.OrdinalIgnoreCase)) is { } settingsArg)
+            {
+                var page = settingsArg.Contains('=') ? settingsArg[(settingsArg.IndexOf('=') + 1)..] : null;
+                _ = Dispatcher.BeginInvoke(() => SettingsWindow.Show(settingsHost, string.IsNullOrWhiteSpace(page) ? null : page), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            }
             viewModel.SettingsRequested += (_, _) =>
             {
                 extras.CloseQuickSearch("settings opened"); // do not leave the pinned panel above the window
@@ -269,6 +304,13 @@ public partial class App : Application
             if (_bar.HotkeyStatus.Result != UeBar.Bar.HotkeyRegistration.Registered)
             {
                 _tray.ShowInfo(Loc.Get("Tray_QuickSearch"), _bar.HotkeyStatus.Message);
+            }
+
+            // Plugins that could not be loaded: say so once (details on the Plugins page).
+            var brokenPlugins = plugins.Plugins.Count(p => p.State is PluginState.Error or PluginState.Incompatible);
+            if (brokenPlugins > 0)
+            {
+                _tray.ShowInfo(Loc.Get("Plugins_Problems_Title"), Loc.F("Plugins_Problems_Text", brokenPlugins));
             }
 
             _heartbeat = new Heartbeat(_registry, _log, location);
@@ -316,7 +358,7 @@ public partial class App : Application
         Action<Func<bool>> holdPanelWhile,
         TrayIcon tray)
     {
-        var needsSetup = registry.Modules.Any(m => m.IsEnabled && m.Module is IModuleSettings && m.Status.State == UeBar.Core.Abstractions.ModuleState.NotConfigured);
+        var needsSetup = registry.Modules.Any(m => m.IsEnabled && m.Module is IModuleSettings && m.Status.State == UeBar.Sdk.ModuleState.NotConfigured);
         if (!WelcomeRules.ShouldShow(settings.FileExisted, general.Current.WelcomeDone, needsSetup))
         {
             return;
@@ -349,6 +391,39 @@ public partial class App : Application
 
         // No module needs input: only the first-start layout is left (if needed).
         general.Update(g => g.WelcomeDone = true);
+    }
+
+    /// <summary>
+    /// Developers (screenshots, format tests): <c>UEBAR_CULTURE=en-US</c> sets the culture for numbers and
+    /// dates without changing the Windows region. Runs in the static constructor – before the app's
+    /// resources are loaded, which already read the format culture.
+    /// </summary>
+    static App()
+    {
+        CultureOverride = ApplyCultureOverride();
+    }
+
+    private static string? CultureOverride { get; }
+
+    /// <summary>Environment variable <c>UEBAR_CULTURE</c> (e.g. "en-US"). Returns its name or null.</summary>
+    private static string? ApplyCultureOverride()
+    {
+        if (Environment.GetEnvironmentVariable("UEBAR_CULTURE") is not { Length: > 0 } name)
+        {
+            return null;
+        }
+
+        try
+        {
+            var culture = System.Globalization.CultureInfo.GetCultureInfo(name.Trim());
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            System.Globalization.CultureInfo.CurrentCulture = culture;
+            return culture.Name;
+        }
+        catch (System.Globalization.CultureNotFoundException)
+        {
+            return null;
+        }
     }
 
     /// <summary>General settings changed (M7/R1): apply accent color, columns, device name and language right away.</summary>

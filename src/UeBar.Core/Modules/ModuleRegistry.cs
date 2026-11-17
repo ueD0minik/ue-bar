@@ -2,12 +2,11 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using UeBar.Core.Localization;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Bus;
 using UeBar.Core.Layout;
 using UeBar.Core.Logging;
 using UeBar.Core.Settings;
-using UeBar.Core.Tiles;
 
 namespace UeBar.Core.Modules;
 
@@ -34,6 +33,12 @@ public sealed class ModuleEntry
     public IModule Module { get; }
 
     public bool IsEnabled { get; internal set; } = true;
+
+    /// <summary>
+    /// false: only announced (<see cref="ModuleRegistry.RegisterUnavailable"/>) – the plugin behind it is
+    /// off, not allowed or could not be loaded. It cannot be started; a change takes effect after a restart.
+    /// </summary>
+    public bool IsLoaded { get; internal init; } = true;
 
     /// <summary>Developer/test module (<see cref="IDeveloperModule"/>, M7).</summary>
     public bool IsDeveloper => Module is IDeveloperModule;
@@ -228,6 +233,38 @@ public sealed class ModuleRegistry : IAsyncDisposable
         return entry;
     }
 
+    /// <summary>
+    /// Announces a module that is not loaded (plugin off, not allowed, incompatible or broken), so that
+    /// its tiles show the fitting placeholder instead of "module missing" and it appears in lists
+    /// (SPEC 4.5). It has no tile types and cannot be started.
+    /// </summary>
+    public ModuleEntry? RegisterUnavailable(string id, string displayName, ModuleStatus status)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        ArgumentNullException.ThrowIfNull(status);
+        if (Find(id) is not null)
+        {
+            return null;
+        }
+
+        var isError = status.State == ModuleState.Error;
+        var entry = new ModuleEntry(new UnloadedModule(id, displayName, status), id, displayName, "Puzzle")
+        {
+            IsLoaded = false,
+            IsEnabled = isError,
+            Status = status,
+            LastError = isError ? status.Text ?? CoreText.T["ModuleState_Error"] : null,
+            AutoRestartGivenUp = isError,
+        };
+        lock (_lock)
+        {
+            _modules.Add(entry);
+        }
+
+        _log.Info(id, $"Module not loaded: {status.State}{(status.Text is null ? "" : " – " + status.Text)}");
+        return entry;
+    }
+
     public Task StartAllAsync(CancellationToken cancellationToken = default) =>
         Task.WhenAll(Modules.Where(m => m.IsEnabled).Select(m => StartModuleAsync(m.Id, cancellationToken)));
 
@@ -283,6 +320,11 @@ public sealed class ModuleRegistry : IAsyncDisposable
             return false;
         }
 
+        if (!entry.IsLoaded)
+        {
+            return false;
+        }
+
         await entry.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
@@ -311,6 +353,11 @@ public sealed class ModuleRegistry : IAsyncDisposable
         }
 
         _state.SetModuleEnabled(entry.Id, enabled);
+        if (!entry.IsLoaded)
+        {
+            return; // saved; takes effect when the plugin is loaded on the next start
+        }
+
         await entry.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
@@ -532,6 +579,11 @@ public sealed class ModuleRegistry : IAsyncDisposable
 
     private async Task<bool> StartCoreAsync(ModuleEntry entry, CancellationToken cancellationToken)
     {
+        if (!entry.IsLoaded)
+        {
+            return false;
+        }
+
         if (!entry.IsEnabled)
         {
             SetStatus(entry, ModuleStatus.Disabled);
@@ -637,6 +689,11 @@ public sealed class ModuleRegistry : IAsyncDisposable
 
     private async Task StopCoreAsync(ModuleEntry entry)
     {
+        if (!entry.IsLoaded)
+        {
+            return;
+        }
+
         var context = entry.Context;
         if (context is not null)
         {
@@ -694,7 +751,7 @@ public sealed class ModuleRegistry : IAsyncDisposable
     private void OnModuleFaulted(object? sender, ModuleFaultEventArgs e)
     {
         var entry = Find(e.ModuleId);
-        if (entry is null || !entry.IsEnabled)
+        if (entry is null || !entry.IsEnabled || !entry.IsLoaded)
         {
             return;
         }
@@ -804,4 +861,29 @@ public sealed class ModuleRegistry : IAsyncDisposable
             }
         }
     }
+}
+
+/// <summary>Stand-in for a module whose plugin is not loaded. Never started.</summary>
+internal sealed class UnloadedModule(string id, string displayName, ModuleStatus status) : IModule
+{
+    public string Id => id;
+
+    public string DisplayName => displayName;
+
+    public string Icon => "Puzzle";
+
+    public ModuleStatus Status => status;
+
+    public event EventHandler<ModuleStatus>? StatusChanged
+    {
+        add { }
+        remove { }
+    }
+
+    public IReadOnlyList<ITileType> TileTypes => [];
+
+    public Task StartAsync(IModuleContext context, CancellationToken cancellationToken) =>
+        Task.FromException(new InvalidOperationException("The plugin of this module is not loaded."));
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

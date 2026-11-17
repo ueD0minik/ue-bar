@@ -14,11 +14,12 @@ using UeBar.App.Bar.Edit;
 using UeBar.Bar;
 using UeBar.App.Localization;
 using UeBar.Core;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Layout;
 using UeBar.Core.Localization;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
+using UeBar.Core.Plugins;
 using UeBar.Core.Settings;
 using static UeBar.App.Settings.SettingsUi;
 
@@ -45,6 +46,12 @@ internal sealed class SettingsHost
 
     public required IUeLogger Log { get; init; }
 
+    /// <summary>Plugins found at the start, and adding/removing them (SPEC 4.4).</summary>
+    public required PluginHost Plugins { get; init; }
+
+    /// <summary>Ends this process and starts ue Bar again (plugin changes need it).</summary>
+    public required Func<Task> Restart { get; init; }
+
     public required Func<Task> ResetBar { get; init; }
 
     public required Action ClearNotificationHistory { get; init; }
@@ -62,7 +69,7 @@ internal sealed class SettingsHost
 /// Settings window (SPEC 11, M7) in One UI style: sidebar on the left, page on the right. Every change
 /// takes effect right away and is saved. Module pages are created automatically from <see cref="IModuleSettings"/>.
 /// </summary>
-internal sealed class SettingsWindow : Window
+internal sealed partial class SettingsWindow : Window
 {
     private static SettingsWindow? _open;
 
@@ -173,8 +180,8 @@ internal sealed class SettingsWindow : Window
         Nav("oled", Loc.Get("Settings_Oled"), "");
         Nav("notifications", Loc.Get("Settings_Notifications"), "");
         Nav("layout", Loc.Get("Settings_Layout"), "");
-        Nav("modules", Loc.Get("Settings_Modules"), "");
-        foreach (var module in _host.Registry.Modules)
+        Nav("plugins", Loc.Get("Settings_Plugins"), "");
+        foreach (var module in _host.Registry.Modules.Where(m => m.IsLoaded))
         {
             Nav("module:" + module.Id, module.DisplayName, null, indent: true);
         }
@@ -253,8 +260,8 @@ internal sealed class SettingsWindow : Window
                 case "layout":
                     BuildLayout(page);
                     break;
-                case "modules":
-                    BuildModules(page);
+                case "plugins":
+                    BuildPlugins(page);
                     break;
                 case "info":
                     BuildInfo(page);
@@ -735,61 +742,7 @@ internal sealed class SettingsWindow : Window
                 Button(Loc.Get("Layout_Show"), () => _host.ShowSetupAgain()), controlBelow: false)));
     }
 
-    // ------------------------------------------------------------------ Modules
-
-    private void BuildModules(StackPanel page)
-    {
-        page.Children.Add(Heading(Loc.Get("Settings_Modules")));
-        var list = new StackPanel();
-        void Fill()
-        {
-            list.Children.Clear();
-            foreach (var module in _host.Registry.Modules)
-            {
-                list.Children.Add(ModuleCard(module));
-            }
-        }
-
-        Fill();
-        _onRefresh = Fill;
-        page.Children.Add(list);
-        page.Children.Add(Hint(Loc.Get("Modules_Hint")));
-    }
-
-    private Border ModuleCard(ModuleEntry module)
-    {
-        var header = new StackPanel { Orientation = Orientation.Horizontal };
-        header.Children.Add(new System.Windows.Shapes.Ellipse { Width = 10, Height = 10, Fill = StateBrush(module.Status.State), Margin = new Thickness(0, 0, 10, 0), VerticalAlignment = VerticalAlignment.Center });
-        header.Children.Add(new TextBlock { Text = module.DisplayName, FontSize = 15, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center });
-        if (module.IsDeveloper)
-        {
-            header.Children.Add(Badge(Loc.Get("Modules_Developer")));
-        }
-
-        var info = new StackPanel();
-        info.Children.Add(header);
-        info.Children.Add(Hint(module.Status.DisplayText + (module.LastError is { Length: > 0 } error && module.Status.State != ModuleState.Error ? $" · {error}" : ""), 4));
-        var enabled = Switch(module.IsEnabled, async v => await _host.Registry.SetEnabledAsync(module.Id, v));
-        var actions = Buttons(
-            Button(Loc.Get("Settings_Title"), () => ShowPage("module:" + module.Id), icon: ""),
-            Button(Loc.Get("Modules_Restart"), async () => await _host.Registry.RestartModuleAsync(module.Id), icon: ""));
-        actions.Margin = new Thickness(0, 10, 0, 0);
-        if (!module.IsEnabled)
-        {
-            actions.Children[1].IsEnabled = false;
-        }
-
-        info.Children.Add(actions);
-        var grid = new Grid();
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        grid.Children.Add(info);
-        enabled.VerticalAlignment = VerticalAlignment.Top;
-        enabled.ToolTip = Loc.Get("Modules_OnOff");
-        Grid.SetColumn(enabled, 1);
-        grid.Children.Add(enabled);
-        return Card(grid);
-    }
+    // ------------------------------------------------------------------ Module pages (the list of plugins: SettingsWindow.Plugins.cs)
 
     private async Task BuildModuleAsync(StackPanel page, ModuleEntry module)
     {
@@ -817,7 +770,7 @@ internal sealed class SettingsWindow : Window
         UpdateStatus();
         page.Children.Add(Card(
             Row(Loc.Get("Modules_Status"), null, statusRow),
-            SwitchRow(Loc.Get("Modules_Enabled"), module.IsDeveloper ? Loc.Get("Modules_DeveloperHint") : null, module.IsEnabled,
+            SwitchRow(Loc.Get("Modules_Enabled"), module.IsDeveloper ? Loc.Get("Modules_PluginHint") : null, module.IsEnabled,
                 async v => await _host.Registry.SetEnabledAsync(module.Id, v)),
             Row(Loc.Get("Modules_Restart"), Loc.Get("Modules_Restart_Hint"), Button(Loc.Get("Modules_Restart"), async () => await _host.Registry.RestartModuleAsync(module.Id), icon: ""))));
 
@@ -874,7 +827,7 @@ internal sealed class SettingsWindow : Window
         header.Children.Add(new Image { Source = AppIcon.ImageSource, Width = 48, Height = 48, Margin = new Thickness(0, 0, 14, 0) });
         var name = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
         name.Children.Add(new TextBlock { Text = "ue Bar", FontSize = 20, FontWeight = FontWeights.SemiBold });
-        name.Children.Add(Hint(Loc.F("Info_Version", AppInfo.Version, AppInfo.IsPortable ? Loc.Get("Info_Portable") : Loc.Get("Info_Installed"), AppInfo.BuildVariant, CoreApiVersion.Current)));
+        name.Children.Add(Hint(Loc.F("Info_Version", AppInfo.Version, AppInfo.IsPortable ? Loc.Get("Info_Portable") : Loc.Get("Info_Installed"), AppInfo.BuildVariant, CoreApiVersion.Text)));
         header.Children.Add(name);
 
         page.Children.Add(Card(
@@ -897,7 +850,7 @@ internal sealed class SettingsWindow : Window
         license.Children.Add(links);
         page.Children.Add(Card(
             Row(Loc.Get("Info_LicenseTitle"), null, license, controlBelow: true),
-            Row(Loc.Get("Info_Source"), hasRepository ? AppInfo.RepositoryUrl : Loc.Get("Info_SourcePending"), new Border(), controlBelow: true)));
+            Row(Loc.Get("Info_Source"), AppInfo.RepositoryUrl, new Border(), controlBelow: true)));
 
         page.Children.Add(Card(Row(Loc.Get("Info_Licenses"), null, new TextBlock
         {

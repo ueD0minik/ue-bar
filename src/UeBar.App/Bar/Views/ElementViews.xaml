@@ -2,7 +2,7 @@
 <!-- Copyright (C) 2026 Dominik Poschinger -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:tiles="clr-namespace:UeBar.Core.Tiles;assembly=UeBar.Core"
+                    xmlns:tiles="clr-namespace:UeBar.Sdk;assembly=UeBar.Sdk"
                     xmlns:views="clr-namespace:UeBar.App.Bar.Views">
     <!-- One DataTemplate per element (SPEC 4.2). TapAction has no look of its own – the whole tile is the button. -->
     <DataTemplate DataType="{x:Type tiles:TapAction}">

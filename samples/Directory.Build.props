@@ -1,0 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Dominik Poschinger -->
+<!-- Deliberately (almost) empty: the samples do not inherit the settings of the ue Bar repository,
+     so they build exactly the same when their folder is copied somewhere else. -->
+<Project />

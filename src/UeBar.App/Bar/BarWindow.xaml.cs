@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using UeBar.Sdk;
 using UeBar.App.Bar.ViewModels;
 using UeBar.App.Interop;
 using UeBar.Bar;

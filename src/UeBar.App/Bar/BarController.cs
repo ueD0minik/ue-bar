@@ -3,6 +3,7 @@
 
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
+using UeBar.Sdk;
 using UeBar.App.Bar.ViewModels;
 using UeBar.App.Interop;
 using UeBar.Bar;

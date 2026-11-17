@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Globalization;
+using UeBar.Sdk;
 using UeBar.Core.Localization;
 
 namespace UeBar.Bar.Tests;

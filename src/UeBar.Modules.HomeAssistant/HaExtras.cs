@@ -2,8 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Text.Json.Nodes;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Logging;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant;
 

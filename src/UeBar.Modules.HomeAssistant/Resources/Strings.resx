@@ -381,11 +381,14 @@
   <data name="Setting_TodoList" xml:space="preserve">
     <value>List for "+ …"</value>
   </data>
+  <data name="Setting_TodoList_First" xml:space="preserve">
+    <value>First list (automatic)</value>
+  </data>
   <data name="Setting_TodoList_HintChoice" xml:space="preserve">
-    <value>To-do list for quick commands.</value>
+    <value>To-do list for quick commands. Without a choice the first existing list is used.</value>
   </data>
   <data name="Setting_TodoList_HintText" xml:space="preserve">
-    <value>To-do list for quick commands. If it is missing, the first existing one is used.</value>
+    <value>Entity ID of the to-do list for quick commands (e.g. todo.shopping_list). Empty = the first existing list.</value>
   </data>
   <data name="Slot_Entity" xml:space="preserve">
     <value>Entity</value>

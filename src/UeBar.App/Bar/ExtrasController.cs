@@ -5,7 +5,7 @@ using System.Windows.Threading;
 using UeBar.App.Bar.ViewModels;
 using UeBar.App.Interop;
 using UeBar.Bar;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 

@@ -7,11 +7,10 @@ using System.Windows;
 using System.Windows.Threading;
 using UeBar.App.Bar.ViewModels;
 using UeBar.App.Tiles;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Layout;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
-using UeBar.Core.Tiles;
 
 namespace UeBar.App.Bar.Edit;
 

@@ -3,6 +3,7 @@
 
 using System.Security.Cryptography;
 using System.Text;
+using UeBar.Sdk;
 using UeBar.Core.Settings;
 
 namespace UeBar.App.Infrastructure;

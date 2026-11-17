@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using UeBar.Sdk;
 using UeBar.Core.Layout;
 
 namespace UeBar.Modules.HomeAssistant.Tests;

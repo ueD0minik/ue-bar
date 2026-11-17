@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using UeBar.Bar;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 using UeBar.Core.Settings;

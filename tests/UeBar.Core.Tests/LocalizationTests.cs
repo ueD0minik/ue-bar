@@ -4,11 +4,11 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Layout;
 using UeBar.Core.Localization;
-using UeBar.Core.Tiles;
 using UeBar.Modules.Dummy;
+using UeBar.Core.Modules;
 
 namespace UeBar.Core.Tests;
 
@@ -106,7 +106,11 @@ public sealed class ResourceCompletenessTests
         {
             // Without comment lines (doc examples like {l:T Key}).
             var text = string.Join(Environment.NewLine, File.ReadAllLines(file).Where(l => !l.TrimStart().StartsWith("//", StringComparison.Ordinal)));
-            var project = SourceTree.Projects.First(p => file.Contains(Path.DirectorySeparatorChar + p.Value + Path.DirectorySeparatorChar, StringComparison.Ordinal)).Key;
+            var project = SourceTree.Projects.FirstOrDefault(p => file.Contains(Path.DirectorySeparatorChar + p.Value + Path.DirectorySeparatorChar, StringComparison.Ordinal)).Key;
+            if (project is null)
+            {
+                continue; // UeBar.Sdk: contracts only, no texts of its own
+            }
             foreach (Match m in call.Matches(text))
             {
                 used++;

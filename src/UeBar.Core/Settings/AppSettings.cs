@@ -3,9 +3,8 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Bus;
-using UeBar.Core.Json;
 using UeBar.Core.Logging;
 
 namespace UeBar.Core.Settings;

@@ -13,18 +13,22 @@ private before attaching it** (it never contains tokens, but it may contain enti
 - Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 - `dotnet build` and `dotnet test` must pass with 0 warnings (warnings are errors).
 - Set `UEBAR_DATA_DIR` to a test folder while developing, so your real settings stay untouched.
+  `UEBAR_CULTURE=en-US` sets the number/date format, `UEBAR_LOG_LEVEL=Debug` logs more.
 - The tests for Home Assistant run against a fake HA server with an example home; no real
   Home Assistant is needed.
 
 ## Rules for code
 
 - Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first. Most importantly:
-  - `UeBar.Core` knows nothing about Home Assistant and references no WPF.
-  - Everything module-specific lives in the module. A new module = a new project + one line in
-    `ModuleCatalog.cs`; if the core has to change for it, the interface is wrong – open an issue.
-  - Modules never reference each other; they talk through the module bus.
-  - Interfaces in `UeBar.Core` are only extended, never changed in a breaking way.
-  - In modules: no `async void`, no own timers or threads – use `IModuleContext.RunBackground`.
+  - `UeBar.Sdk` (the contract) and `UeBar.Core` (the implementation) know nothing about Home
+    Assistant and reference no WPF.
+  - Every module is a plugin: a new project that references **only** `UeBar.Sdk`, with a
+    `plugin.json` (see [docs/WRITING-A-PLUGIN.md](docs/WRITING-A-PLUGIN.md)). The app and the core
+    do not change for it; if they have to, the interface is wrong – open an issue.
+  - Plugins never reference each other; they talk through the module bus.
+  - Interfaces in `UeBar.Sdk` are only extended, never changed in a breaking way; each extension
+    raises the minor version of `CoreApiVersion` and of the SDK package.
+  - In plugins: no `async void`, no own timers or threads – use `IModuleContext.RunBackground`.
 - UI texts go into `Resources/Strings.resx` (English) **and** `Strings.de.resx` (German) of the
   project; tests fail if a key is missing in one language or a text is hard-wired.
 - Code, comments, log messages and commit messages in English.

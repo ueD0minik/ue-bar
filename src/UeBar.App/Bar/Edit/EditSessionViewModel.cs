@@ -6,12 +6,10 @@ using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Json;
+using UeBar.Sdk;
 using UeBar.Core.Layout;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
-using UeBar.Core.Tiles;
 
 namespace UeBar.App.Bar.Edit;
 

@@ -3,12 +3,11 @@
 
 using System.Collections.Concurrent;
 using System.Text.Json.Nodes;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Bus;
 using UeBar.Core.Layout;
 using UeBar.Core.Modules;
 using UeBar.Core.Settings;
-using UeBar.Core.Tiles;
 
 namespace UeBar.Modules.HomeAssistant.Tests;
 
@@ -288,6 +287,29 @@ public class ExtrasTests
         Assert.True(await env.Connected());
 
         Assert.Equal("todo.baumarkt", env.Module.ResolveTodoList());
+    }
+
+    [Fact]
+    public async Task A_chosen_todo_list_stays_and_no_list_at_all_gives_a_clear_answer()
+    {
+        // P2-1: no built-in default name any more; an existing choice (also the former default) is kept.
+        await using var server = new FakeHaServer();
+        server.AddState("todo.baumarkt", "0", "Baumarkt");
+        server.AddState("todo.einkaufsliste", "3", "Einkaufsliste");
+        await using var env = new Env(server);
+        env.State.SetValue(HomeAssistantModule.ModuleId, HaSettings.KeyTodoList, "todo.einkaufsliste");
+        await env.Registry.StartAllAsync();
+        Assert.True(await env.Connected());
+
+        Assert.Equal("todo.einkaufsliste", env.Module.ResolveTodoList());
+        Assert.Equal("", HaSettings.DefaultTodoList);
+        Assert.Equal("", HaSettings.TodoList(ModuleSettingValues.Empty));
+
+        // A chosen list that no longer exists falls back to the first one.
+        env.State.SetValue(HomeAssistantModule.ModuleId, HaSettings.KeyTodoList, "todo.deleted");
+        await env.Registry.RestartModuleAsync(HomeAssistantModule.ModuleId);
+        Assert.True(await env.Connected());
+        Assert.True(await Wait.UntilAsync(() => env.Module.ResolveTodoList() == "todo.baumarkt"));
     }
 
     // ------------------------------------------------------------------ Now Playing

@@ -4,8 +4,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Json;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 

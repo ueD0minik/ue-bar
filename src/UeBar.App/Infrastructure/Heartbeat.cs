@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Diagnostics;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 

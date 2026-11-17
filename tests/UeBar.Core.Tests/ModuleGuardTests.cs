@@ -3,7 +3,7 @@
 
 using System.Diagnostics;
 using Microsoft.Extensions.Time.Testing;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Modules;
 
 namespace UeBar.Core.Tests;

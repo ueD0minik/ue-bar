@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 
 namespace UeBar.Core.Modules;
@@ -165,7 +166,7 @@ public sealed class ModuleGuard
             {
                 ReportFault(moduleId, operation, ex);
             }
-            else if (ex is Abstractions.LayoutStoreUnavailableException)
+            else if (ex is LayoutStoreUnavailableException)
             {
                 _log.Info(moduleId, $"{operation}: {ex.Message}"); // expected (offline), no stack
             }
@@ -191,7 +192,7 @@ public sealed class ModuleGuard
             {
                 ReportFault(moduleId, operation, ex);
             }
-            else if (ex is Abstractions.LayoutStoreUnavailableException)
+            else if (ex is LayoutStoreUnavailableException)
             {
                 _log.Info(moduleId, $"{operation}: {ex.Message}"); // expected (offline), no stack
             }

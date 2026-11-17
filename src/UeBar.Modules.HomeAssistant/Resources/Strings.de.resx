@@ -381,11 +381,14 @@
   <data name="Setting_TodoList" xml:space="preserve">
     <value>Liste für „+ …“</value>
   </data>
+  <data name="Setting_TodoList_First" xml:space="preserve">
+    <value>Erste Liste (automatisch)</value>
+  </data>
   <data name="Setting_TodoList_HintChoice" xml:space="preserve">
-    <value>Todo-Liste für Schnellbefehle.</value>
+    <value>Todo-Liste für Schnellbefehle. Ohne Auswahl wird die erste vorhandene Liste verwendet.</value>
   </data>
   <data name="Setting_TodoList_HintText" xml:space="preserve">
-    <value>Todo-Liste für Schnellbefehle. Fehlt sie, wird die erste vorhandene genommen.</value>
+    <value>Entitäts-ID der Todo-Liste für Schnellbefehle (z. B. todo.einkaufsliste). Leer = die erste vorhandene Liste.</value>
   </data>
   <data name="Slot_Entity" xml:space="preserve">
     <value>Entität</value>

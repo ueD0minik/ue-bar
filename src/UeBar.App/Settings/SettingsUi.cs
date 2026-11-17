@@ -347,12 +347,12 @@ internal static class SettingsUi
         },
     };
 
-    public static Brush StateBrush(UeBar.Core.Abstractions.ModuleState state) => new SolidColorBrush(state switch
+    public static Brush StateBrush(UeBar.Sdk.ModuleState state) => new SolidColorBrush(state switch
     {
-        UeBar.Core.Abstractions.ModuleState.Connected => Color.FromRgb(0x34, 0xC7, 0x59),
-        UeBar.Core.Abstractions.ModuleState.Error => Color.FromRgb(0xFF, 0x45, 0x3A),
-        UeBar.Core.Abstractions.ModuleState.Starting or UeBar.Core.Abstractions.ModuleState.Disconnected
-            or UeBar.Core.Abstractions.ModuleState.NotConfigured => Color.FromRgb(0xFF, 0xB0, 0x20),
+        UeBar.Sdk.ModuleState.Connected => Color.FromRgb(0x34, 0xC7, 0x59),
+        UeBar.Sdk.ModuleState.Error => Color.FromRgb(0xFF, 0x45, 0x3A),
+        UeBar.Sdk.ModuleState.Starting or UeBar.Sdk.ModuleState.Disconnected
+            or UeBar.Sdk.ModuleState.NotConfigured => Color.FromRgb(0xFF, 0xB0, 0x20),
         _ => Color.FromRgb(0x8E, 0x8E, 0x93),
     });
 

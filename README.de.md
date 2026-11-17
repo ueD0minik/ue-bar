@@ -5,8 +5,7 @@
 Ein ausfahrbares Dashboard am oberen Bildschirmrand von Windows. Maus an den oberen Rand: Eine
 kleine Pill erscheint und mit ihr deine Smart-Home-Kacheln, eine Statuszeile, Benachrichtigungen
 und eine Schnellsuche. Vorbild ist die „Now Bar“ von Samsung One UI. Home Assistant ist das erste
-Modul; die App ist so gebaut, dass weitere Module (Windows, Handy, MQTT …) ohne Umbau am Kern
-dazukommen können.
+Plugin; weitere (Windows, Handy, MQTT …) kommen als Plugins dazu, ohne die App neu zu bauen.
 
 ![Panel mit Kacheln eines Beispiel-Zuhauses](docs/images/panel.png)
 
@@ -30,6 +29,9 @@ dazukommen können.
   schalten, `+ Milch` landet auf der Einkaufsliste.
 - **Assist**-Feld: den Sprachassistenten von Home Assistant per Text fragen.
 - **Now Playing** in der Pill.
+- **Plugins**: neue Kachel-Quellen als ZIP unter Einstellungen → Plugins hinzufügen. ue Bar fragt,
+  bevor es ein nicht mitgeliefertes Plugin lädt. Eigene schreiben mit dem
+  [Plugin-SDK](docs/WRITING-A-PLUGIN.md) (Englisch).
 - **Layout-Sync** über Home Assistant (pro HA-Benutzer), mit lokaler Kopie für unterwegs.
 - **Deutsch und Englisch**, im laufenden Betrieb umschaltbar. Zahlen und Uhrzeiten nach der
   Windows-Region.
@@ -40,7 +42,7 @@ dazukommen können.
 - Windows 10 (ab Version 1809) oder Windows 11, x64
 - .NET 10 Desktop Runtime – der Installer lädt sie bei Bedarf von Microsoft; die portable
   Version braucht sie nicht
-- Für das Home-Assistant-Modul: eine vom PC erreichbare Home-Assistant-Instanz und ein
+- Für das Home-Assistant-Plugin: eine vom PC erreichbare Home-Assistant-Instanz und ein
   langlebiges Zugriffstoken
 
 ## Installation
@@ -67,7 +69,7 @@ Einstellungen, Layout und Logs liegen in `%APPDATA%\ueBar`.
 3. Bereiche auswählen, die in die Bar sollen – ue Bar schlägt Tabs und Kacheln aus deinen
    Home-Assistant-Bereichen vor. Alles lässt sich später mit dem Stift ändern.
 
-Alle Einstellungen gibt es auch unter **Einstellungen → Module → Home Assistant** (Zahnrad im
+Alle Einstellungen gibt es auch unter **Einstellungen → Plugins → Home Assistant** (Zahnrad im
 Panel oder Doppelklick auf das Tray-Symbol). Das Token wird mit Windows-DPAPI verschlüsselt
 gespeichert.
 
@@ -83,7 +85,7 @@ data:
   message: Die Wäsche ist fertig
 ```
 
-Den genauen Dienstnamen zeigt **Einstellungen → Module → Home Assistant → Diagnose**.
+Den genauen Dienstnamen zeigt **Einstellungen → Plugins → Home Assistant → Diagnose**.
 
 ## Aus dem Quellcode bauen
 
@@ -102,9 +104,11 @@ powershell -ExecutionPolicy Bypass -File build/publish.ps1
 ```
 
 Die Ergebnisse landen in `dist/`. Zum Entwickeln die Umgebungsvariable `UEBAR_DATA_DIR` auf einen
-Testordner setzen, dann bleiben die echten Einstellungen unberührt.
+Testordner setzen, dann bleiben die echten Einstellungen unberührt. `ueBar.exe --settings` (oder
+`--settings=plugins`) öffnet die Einstellungen gleich nach dem Start; `UEBAR_CULTURE=en-US` setzt
+das Zahlen- und Datumsformat, ohne die Windows-Region zu ändern.
 
-Weiterlesen (Englisch): [Architektur](docs/ARCHITECTURE.md) · [Modul schreiben](docs/WRITING-A-MODULE.md)
+Weiterlesen (Englisch): [Architektur](docs/ARCHITECTURE.md) · [Plugin schreiben](docs/WRITING-A-PLUGIN.md)
 · [Mitmachen](CONTRIBUTING.md) · [Änderungen](CHANGELOG.md)
 
 ## Lizenz

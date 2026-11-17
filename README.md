@@ -4,9 +4,8 @@
 
 A slide-out dashboard for the top edge of your Windows screen. Move the mouse to the top
 edge: a small pill appears, and with it your smart-home tiles, a status line, notifications and
-a quick search. Inspired by the "Now Bar" of Samsung One UI. Home Assistant is the first module;
-the app is built so that more modules (Windows, phone, MQTT …) can be added without touching
-the core.
+a quick search. Inspired by the "Now Bar" of Samsung One UI. Home Assistant is the first plugin;
+more (Windows, phone, MQTT …) can be added as plugins without rebuilding the app.
 
 ![Panel with tiles of an example home](docs/images/panel.png)
 
@@ -32,6 +31,9 @@ the core.
 - **Now Playing** in the pill.
 - **Layout sync** through Home Assistant (per HA user), with a local copy for offline use.
 - **German and English**, switchable at runtime. Numbers and times follow your Windows region.
+- **Plugins**: add new tile sources as a ZIP under Settings → Plugins. ue Bar asks before it
+  loads a plugin that does not come with it. Write your own with the
+  [plugin SDK](docs/WRITING-A-PLUGIN.md).
 - OLED protection (dimming, pixel shift), light on resources when collapsed.
 
 ## Requirements
@@ -39,7 +41,7 @@ the core.
 - Windows 10 (version 1809 or later) or Windows 11, x64
 - .NET 10 Desktop Runtime – the installer downloads it from Microsoft if it is missing; the
   portable version does not need it
-- For the Home Assistant module: a Home Assistant instance reachable from the PC and a
+- For the Home Assistant plugin: a Home Assistant instance reachable from the PC and a
   long-lived access token
 
 ## Installation
@@ -49,6 +51,8 @@ Download from the [Releases](../../releases) page:
 - `ueBar-Setup-<version>.exe` – installer (German/English, no admin rights needed, installs to
   `%LOCALAPPDATA%\Programs\ueBar`)
 - `ueBar-<version>-portable.exe` – a single file, nothing to install
+- for plugin authors: `UeBar.Sdk.<version>.nupkg` (the SDK) and `ueBar-plugin-hello-<version>.zip`
+  (the sample plugin, to try "Add plugin …")
 
 **Windows SmartScreen:** the files are not code-signed, so Windows may show "Windows protected
 your PC". Click **More info → Run anyway**. If in doubt, build it yourself from the source code
@@ -66,7 +70,7 @@ Settings, layout and logs are stored in `%APPDATA%\ueBar`.
 3. Choose the areas you want in the bar – ue Bar suggests tabs and tiles from your Home
    Assistant areas. Everything can be changed later with the pen icon.
 
-All settings are also available under **Settings → Modules → Home Assistant** (gear icon in the
+All settings are also available under **Settings → Plugins → Home Assistant** (gear icon in the
 panel or double-click the tray icon). The token is stored encrypted with Windows DPAPI.
 
 ## Notifications
@@ -81,7 +85,7 @@ data:
   message: The laundry is done
 ```
 
-The exact service name is shown under **Settings → Modules → Home Assistant → Diagnostics**.
+The exact service name is shown under **Settings → Plugins → Home Assistant → Diagnostics**.
 
 ## Building from source
 
@@ -93,16 +97,19 @@ dotnet test
 dotnet run --project src/UeBar.App
 ```
 
-Installer and portable executable (needs [Inno Setup 6](https://jrsoftware.org/isinfo.php)):
+Installer, portable executable, SDK package and plugin ZIPs (needs
+[Inno Setup 6](https://jrsoftware.org/isinfo.php)):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File build/publish.ps1
 ```
 
 The results are written to `dist/`. For development, set the environment variable
-`UEBAR_DATA_DIR` to a test folder so your real settings stay untouched.
+`UEBAR_DATA_DIR` to a test folder so your real settings stay untouched. `ueBar.exe --settings`
+(or `--settings=plugins`) opens the settings right after the start; `UEBAR_CULTURE=en-US` sets
+the number and date format without changing the Windows region.
 
-Further reading: [architecture](docs/ARCHITECTURE.md) · [writing a module](docs/WRITING-A-MODULE.md)
+Further reading: [architecture](docs/ARCHITECTURE.md) · [writing a plugin](docs/WRITING-A-PLUGIN.md)
 · [contributing](CONTRIBUTING.md) · [changelog](CHANGELOG.md)
 
 ## License

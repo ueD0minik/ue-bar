@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Sample plugin for ue Bar. Copy this folder, rename things, build:
+         dotnet build -c Release -t:PackPlugin   →   bin\Release\plugin\hello-1.0.0.zip
+       and add the ZIP in ue Bar under Settings → Plugins → "Add plugin …". -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>HelloPlugin</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Texts: Resources/Strings.resx = English (neutral), Strings.de.resx = German -->
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <!-- Outside the ue Bar repository: the SDK as a NuGet package. It brings the build logic
+       (plugin.json, PackPlugin) along; nothing else is needed. -->
+  <ItemGroup Condition="!Exists('..\..\src\UeBar.Sdk\UeBar.Sdk.csproj')">
+    <PackageReference Include="UeBar.Sdk" Version="1.0.0" />
+  </ItemGroup>
+
+  <!-- Inside the ue Bar repository: the SDK project itself, with the same build logic by path. -->
+  <Import Project="..\..\src\UeBar.Sdk\build\UeBar.Sdk.props" Condition="Exists('..\..\src\UeBar.Sdk\UeBar.Sdk.csproj')" />
+  <ItemGroup Condition="Exists('..\..\src\UeBar.Sdk\UeBar.Sdk.csproj')">
+    <ProjectReference Include="..\..\src\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <Import Project="..\..\src\UeBar.Sdk\build\UeBar.Sdk.targets" Condition="Exists('..\..\src\UeBar.Sdk\UeBar.Sdk.csproj')" />
+</Project>

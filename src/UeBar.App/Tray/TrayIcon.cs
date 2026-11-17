@@ -7,7 +7,7 @@ using System.Windows.Threading;
 using UeBar.App.Bar;
 using UeBar.App.Settings;
 using UeBar.Bar;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Modules;
 using Drawing = System.Drawing;
 using Forms = System.Windows.Forms;

@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Bus;
 using UeBar.Core.Layout;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 using UeBar.Core.Settings;
-using UeBar.Core.Tiles;
 
 namespace UeBar.Core.Tests;
 
@@ -191,6 +190,10 @@ internal sealed class TempDirectory : IDisposable
         }
         catch (IOException)
         {
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // loaded plugin assemblies stay in use until the test process ends
         }
     }
 }

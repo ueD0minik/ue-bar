@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Layout;
 using UeBar.Core.Modules;
-using UeBar.Core.Tiles;
 using UeBar.Modules.Dummy;
 
 namespace UeBar.Core.Tests;

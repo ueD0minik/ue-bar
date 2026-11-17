@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using UeBar.Core.Logging;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant;
 

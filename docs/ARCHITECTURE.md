@@ -2,26 +2,66 @@
 
 ue Bar is split into a **core** and **modules**. The core provides the bar, tabs, the tile grid,
 layout storage, settings, search, notifications and the status line. Modules provide content.
-Home Assistant is just one module. The guiding rule:
+Since 1.2.0 every module is a **plugin**: a folder with a `plugin.json` and its DLLs, loaded at
+start-up. Home Assistant is just one plugin. The guiding rule:
 
-> The app must start and run without the Home Assistant module. A new module (Windows, phone,
-> MQTT, Spotify …) needs no change to the core – only a new project and one line of
-> registration.
+> The app must start and run without the Home Assistant plugin. A new module (Windows, phone,
+> MQTT, Spotify …) needs no change to the app or the core – only a new plugin project that
+> references `UeBar.Sdk`.
 
 ## Projects
 
 | Project | Role | References |
 |---|---|---|
-| `UeBar.Core` | the contract (interfaces, models, tile elements) and the core services: module registry, fault protection, module bus, layout, settings, logging, localization | nothing (no WPF, no NuGet packages) |
+| `UeBar.Sdk` | the **contract** with plugins: interfaces, models, tile elements, `CoreApiVersion` – no implementation; also shipped as a NuGet package | nothing (no WPF, no NuGet packages) |
+| `UeBar.Core` | the implementation: plugin loader, module registry, fault protection, module bus, layout, settings, logging, localization | Sdk |
 | `UeBar.Bar` | pure bar logic: state machine, geometry, monitor choice, hotkeys, notification queue, OLED protection | Core |
-| `UeBar.App` | the WPF app: bar window, panel, rendering of tiles, settings window, tray, Win32 interop | Core, Bar, all modules |
-| `UeBar.Modules.HomeAssistant` | Home Assistant over WebSocket: tiles, search, status line, notifications (mobile app), Assist, layout sync | Core |
-| `UeBar.Modules.Dummy` | test module with in-memory devices (off by default in release builds) | Core |
+| `UeBar.App` | the WPF app: bar window, panel, rendering of tiles, settings window, tray, Win32 interop | Core, Bar – **no plugin** |
+| `UeBar.Modules.HomeAssistant` | plugin `homeassistant`: Home Assistant over WebSocket – tiles, search, status line, notifications (mobile app), Assist, layout sync | Sdk only |
+| `UeBar.Modules.Dummy` | plugin `dummy`: test module with in-memory devices (debug builds only; a separate ZIP for developers) | Sdk only |
+| `samples/HelloPlugin` | sample plugin for plugin authors | Sdk only |
 
-Modules never reference each other. The app registers them in one place,
-`src/UeBar.App/ModuleCatalog.cs`.
+Plugins never reference each other or the app. The app only builds the bundled plugins first and
+copies them to `plugins\<id>\` next to it (`build/BundledPlugins.targets`).
 
-## Interfaces in `UeBar.Core`
+## Plugins
+
+A plugin is a folder `<id>\` with `plugin.json` (id, name, description, version, author, license,
+homepage, `sdkVersion`, `entryAssembly`), its DLLs and its language files. It is found in two
+places:
+
+| Where | What |
+|---|---|
+| `<app folder>\plugins\` | **bundled** plugins (Home Assistant), with a checksum list `bundled.sha256` written at build time |
+| `%APPDATA%\ueBar\plugins\` | plugins the **user** added (Settings → Plugins → Add plugin …) |
+
+The portable single exe carries the bundled plugins inside as a ZIP and unpacks them once per
+version to `%LOCALAPPDATA%\ueBar\builtin-plugins\<version>-<checksum>\`. Their checksum list is read
+from the exe, not from the unpacked folder, so files changed afterwards are noticed.
+
+Loading (`PluginHost` in the core), only at start-up:
+
+1. **Discover** every folder and read `plugin.json` – no plugin code runs. Checks: required fields,
+   the entry DLL exists and is a .NET assembly built against `UeBar.Sdk`, no reference to app
+   internals, the interface version fits. A user plugin may not take the ID of a bundled one; of
+   two plugins with the same ID only the first counts.
+2. **Trust**: a bundled plugin whose files match `bundled.sha256` loads without asking. Every other
+   plugin needs the user's permission ("This plugin has full access to your PC …"); the decision
+   is stored with the checksum of its code files in `plugin-trust.json`. Changed files → ask again.
+3. **Load**: each plugin gets its own `AssemblyLoadContext`. `UeBar.Sdk` and everything the app
+   already has (the framework) come from the app – otherwise `IModule` would be two different
+   types. The plugin's own dependencies and language files come from its folder. The module class
+   is created on the thread pool with a time limit.
+4. **Register**: loaded modules go to the module registry. Plugins that are off, not allowed,
+   incompatible or broken are registered as "not loaded" with the reason, so their tiles keep a
+   fitting placeholder.
+
+Nothing about a plugin can stop the app: every problem becomes the state "Error" (or
+"Incompatible") with a reason, shown in Settings → Plugins and once in the tray. Plugins are never
+unloaded while the app runs: switching a loaded plugin off stops it right away; switching it on
+again, adding, updating or removing a loaded one takes effect after a restart ("Restart now").
+
+## Interfaces in `UeBar.Sdk`
 
 | Interface | Purpose |
 |---|---|
@@ -98,17 +138,20 @@ Modules work together only through the bus in the core:
 - **Device level** (`device.json`): tabs only on this device, base tabs hidden on this device.
 - **Location**: tabs can be visible only at home or only away (the HA module knows the location
   from local vs. external connection).
-- Tiles of missing or disabled modules stay in the layout and show a placeholder.
+- Tiles of missing, disabled, refused or broken plugins stay in the layout and show a placeholder.
 
 ## Stable contracts
 
-The interfaces in `UeBar.Core` are the contract between core and modules. The app's look and
+The interfaces in `UeBar.Sdk` are the contract between ue Bar and its plugins. The app's look and
 behavior can change freely as long as the contract stays the same.
 
 - Interfaces are only **extended** (new optional interfaces), never changed in a breaking way.
-- New capabilities always come as their own optional interface, so existing modules keep working.
-- If a breaking change is ever unavoidable, `CoreApiVersion` is increased and noted in the
-  changelog.
+  Every extension increases the minor version of `CoreApiVersion` (and of the SDK package).
+- New capabilities always come as their own optional interface, so existing plugins keep working.
+- A plugin states the version it needs (`sdkVersion`). It loads if the major version is the same
+  and the app's minor version is not older.
+- If a breaking change is ever unavoidable, the major version is increased and noted in the
+  changelog; plugins for the old major version are then not loaded.
 
 ## Threads and resources
 

@@ -3,7 +3,7 @@
 
 using System.Windows;
 using System.Windows.Controls;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.App.Bar.Views;
 

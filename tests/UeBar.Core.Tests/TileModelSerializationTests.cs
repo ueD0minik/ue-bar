@@ -2,8 +2,8 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Text.Json.Nodes;
-using UeBar.Core.Json;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
+using UeBar.Core.Modules;
 
 namespace UeBar.Core.Tests;
 
@@ -109,7 +109,7 @@ public class TileModelSerializationTests
     [Fact]
     public void Placeholder_round_trips()
     {
-        var tile = TileModel.CreatePlaceholder(new Layout.TileConfig { Id = "x", Module = "fehlt", Type = "fehlt.typ" }, TilePlaceholder.ModuleMissing);
+        var tile = TileModel.CreatePlaceholder(new TileConfig { Id = "x", Module = "fehlt", Type = "fehlt.typ" }, TilePlaceholder.ModuleMissing);
 
         var back = UeBarJson.Deserialize<TileModel>(UeBarJson.Serialize(tile))!;
 

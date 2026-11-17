@@ -3,7 +3,7 @@
 
 using System.Text.Json.Nodes;
 using UeBar.Core.Layout;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.Core.Tests;
 

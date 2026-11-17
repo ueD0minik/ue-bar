@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="Hello_ModuleName" xml:space="preserve">
+    <value>Hallo-Plugin</value>
+  </data>
+  <data name="Hello_Running" xml:space="preserve">
+    <value>Läuft</value>
+  </data>
+  <data name="Hello_Counter" xml:space="preserve">
+    <value>Zähler</value>
+  </data>
+  <data name="Hello_TileType" xml:space="preserve">
+    <value>Zähler</value>
+  </data>
+  <data name="Hello_Slot" xml:space="preserve">
+    <value>Zähler</value>
+  </data>
+  <data name="Hello_Count" xml:space="preserve">
+    <value>{0}-mal angetippt</value>
+  </data>
+  <data name="Hello_Reset" xml:space="preserve">
+    <value>Zurücksetzen</value>
+  </data>
+  <data name="Hello_Tab" xml:space="preserve">
+    <value>Hallo</value>
+  </data>
+  <data name="Hello_Setting_Step" xml:space="preserve">
+    <value>Schrittweite</value>
+  </data>
+  <data name="Hello_Setting_Step_Hint" xml:space="preserve">
+    <value>Um wie viel ein Antippen den Zähler erhöht (1–10).</value>
+  </data>
+  <data name="Hello_Setting_Label" xml:space="preserve">
+    <value>Name des Zählers</value>
+  </data>
+  <data name="Hello_Setting_Label_Hint" xml:space="preserve">
+    <value>Steht auf der Kachel. Leer = „Zähler“.</value>
+  </data>
+</root>

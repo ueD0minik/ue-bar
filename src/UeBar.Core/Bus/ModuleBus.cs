@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Text.Json.Nodes;
-using UeBar.Core.Abstractions;
+using UeBar.Sdk;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
 

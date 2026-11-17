@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.Win32;
+using UeBar.Sdk;
 using UeBar.Bar;
 using UeBar.Core.Logging;
 using UeBar.Core.Settings;
@@ -30,8 +31,8 @@ internal static class AppInfo
     /// <summary>SPDX identifier of the license.</summary>
     public const string License = "GPL-3.0-or-later";
 
-    /// <summary>Public source code repository. Empty until the repository exists (then put the URL here).</summary>
-    public const string RepositoryUrl = "";
+    /// <summary>Public source code repository.</summary>
+    public const string RepositoryUrl = "https://github.com/ueD0minik/ue-bar";
 
     /// <summary>Full license text.</summary>
     public const string LicenseUrl = "https://www.gnu.org/licenses/gpl-3.0.html";

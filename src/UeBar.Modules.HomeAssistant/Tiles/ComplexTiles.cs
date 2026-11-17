@@ -2,8 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using System.Globalization;
-using UeBar.Core.Layout;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.Modules.HomeAssistant.Tiles;
 

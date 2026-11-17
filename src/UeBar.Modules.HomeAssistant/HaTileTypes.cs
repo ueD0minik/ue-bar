@@ -3,9 +3,7 @@
 
 using System.Security.Cryptography;
 using System.Text;
-using UeBar.Core.Abstractions;
-using UeBar.Core.Layout;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 using UeBar.Modules.HomeAssistant.Tiles;
 
 namespace UeBar.Modules.HomeAssistant;

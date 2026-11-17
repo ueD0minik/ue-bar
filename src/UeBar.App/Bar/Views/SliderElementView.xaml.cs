@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using UeBar.Core.Tiles;
+using UeBar.Sdk;
 
 namespace UeBar.App.Bar.Views;
 
