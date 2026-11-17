@@ -271,7 +271,7 @@ public sealed class PluginHostTests
     public async Task Real_plugin_folder_of_the_test_module_loads_with_its_language_files()
     {
         using var box = new PluginSandbox();
-        var source = PluginSandbox.BuiltPlugin("UeBar.Modules.Dummy");
+        var source = PluginSandbox.BuiltPlugin("Dummy");
         var target = Path.Combine(box.Bundled, "dummy");
         foreach (var file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories))
         {

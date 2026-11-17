@@ -51,7 +51,8 @@ internal sealed class PluginSandbox : IDisposable
         Path.Combine(SourceTree.AppRoot, "tests", "TestPlugins", "UeBar.TestPlugin", "bin", Configuration, "net10.0");
 
     /// <summary>Output folder of a plugin project in <c>src/</c> (a real plugin folder with plugin.json).</summary>
-    public static string BuiltPlugin(string project) => Path.Combine(SourceTree.Src, project, "bin", Configuration, "net10.0");
+    /// <summary>Build output of an official plugin, by its folder name under <c>plugins/</c> (e.g. "Dummy").</summary>
+    public static string BuiltPlugin(string folder) => Path.Combine(SourceTree.Plugins, folder, "src", "bin", Configuration, "net10.0");
 
     /// <summary>Creates <c>&lt;root&gt;\&lt;folder&gt;</c> with the fixture assembly and a plugin.json.</summary>
     public string Add(

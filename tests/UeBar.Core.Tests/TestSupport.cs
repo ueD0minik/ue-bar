@@ -50,11 +50,17 @@ internal sealed class TestModule(string id) : IModule
         SetStatus(ModuleStatus.Connected);
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public Func<CancellationToken, Task>? OnStop { get; set; }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         Interlocked.Increment(ref _stopCount);
+        if (OnStop is not null)
+        {
+            await OnStop(cancellationToken);
+        }
+
         SetStatus(ModuleStatus.Stopped);
-        return Task.CompletedTask;
     }
 
     public void SetStatus(ModuleStatus status)

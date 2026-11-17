@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.2.1 – clean exit, repository layout
+
+**Plugin interface (`CoreApiVersion`): 1.0** – unchanged; SDK package `UeBar.Sdk 1.0.0`.
+
+### Fixed
+- **Exit no longer hangs.** Exiting (tray, installer, restart) runs in a fixed order – tray and
+  bar, then all plugins at the same time with at most 2 s each, then the layout stores and
+  helpers – and logs each step with its duration ("Exit finished in … ms: …"). A plugin that does
+  not stop in time, or a start that is still running, no longer holds up the exit. Before, the
+  plugins had up to 15 s each behind a blanket 5 s limit, the steps after it had no limit and
+  nothing was logged. As a last line of defense an exit guard ends the process 3 s after the
+  request and logs the stage it hung in.
+- The tray menu's "Exit" runs after the menu has finished handling the click (it used to dispose
+  the menu from inside its own click).
+- Two tests that failed now and then on a busy machine are deterministic: the Home Assistant
+  connection loop takes its clock from `HaClientOptions.Time` (ping interval, pong limit, network
+  debounce, local recheck), the tests use a fake clock and wait on signals instead of fixed
+  delays. The layout-sync test creates its store before the connection starts.
+
+### Changed
+- **Repository layout:** official plugins live in `plugins/<Name>/` with `src/`, `tests/`, their
+  own README (English and German) and images – `plugins/HomeAssistant`, `plugins/Dummy`. The main
+  README is shorter and lists the plugins in a table; everything about Home Assistant (token,
+  addresses, tiles, notifications, Assist, users without admin rights) moved to
+  [plugins/HomeAssistant/README.md](plugins/HomeAssistant/README.md).
+- The release workflow uploads the test results when it fails.
+
 ## 1.2.0 – plugins
 
 **Plugin interface (`CoreApiVersion`): 1.0** – first version with major/minor; the SDK package is

@@ -44,6 +44,14 @@ public partial class App : Application
     private UiWatchdog? _watchdog;
     private ExtrasController? _extras;
     private bool _exiting;
+    private long? _exitStarted;
+    private volatile string _exitStage = "not started";
+
+    /// <summary>The exit guard ends the process if it still runs this long after the exit request.</summary>
+    private static readonly TimeSpan ExitHardLimit = TimeSpan.FromSeconds(3);
+
+    /// <summary>Each plugin gets at most this long to stop when the app exits (P2-1-Fix 1).</summary>
+    private static readonly TimeSpan PluginStopLimit = TimeSpan.FromSeconds(2);
     private string? _lastUiErrorKey;
     private DateTime _lastUiErrorWindow;
     private int _lastUiErrorCount;
@@ -92,8 +100,7 @@ public partial class App : Application
         _exitSignal = new EventWaitHandle(false, EventResetMode.AutoReset, ExitSignalName);
         _exitWait = ThreadPool.RegisterWaitForSingleObject(_exitSignal, (_, _) => Dispatcher.BeginInvoke(async () =>
         {
-            _log?.Info(null, "Exit requested (installer)");
-            await ExitAsync();
+            await ExitAsync("installer");
         }), null, Timeout.Infinite, executeOnlyOnce: true);
 
         _watchdog = new UiWatchdog(Dispatcher, _log, paths.Logs);
@@ -196,7 +203,7 @@ public partial class App : Application
             var layout = _layout;
             _tray = new TrayIcon(_registry, _bar, Dispatcher);
             var tray = _tray;
-            _tray.ExitRequested += async (_, _) => await ExitAsync();
+            _tray.ExitRequested += async (_, _) => await ExitAsync("tray");
             _tray.ExportLayout = _layout.Export;
             _tray.ImportLayout = _layout.Import;
             var layoutStore = _layoutStore;
@@ -267,7 +274,7 @@ public partial class App : Application
 
                     if (AppRestart.StartSuccessor(log))
                     {
-                        await ExitAsync();
+                        await ExitAsync("restart");
                     }
                 },
                 ResetBar = () => tray.ResetBar?.Invoke() ?? Task.CompletedTask,
@@ -341,7 +348,7 @@ public partial class App : Application
         {
             _log.Error(null, "Start failed", ex);
             MessageBox.Show(Loc.F("App_StartFailed", ex.Message, paths.Logs), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
-            await ExitAsync();
+            await ExitAsync("start failed");
         }
     }
 
@@ -532,6 +539,9 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _exitStage = "OnExit";
+
+        // Normally ExitAsync has already done all of this; this covers an early end (start aborted).
         _watchdog?.Dispose();
         _heartbeat?.Dispose();
         _tray?.Dispose();
@@ -541,11 +551,20 @@ public partial class App : Application
         _singleInstance?.Dispose();
         _exitWait?.Unregister(null);
         _exitSignal?.Dispose();
-        _log?.Info(null, $"Process ended: PID {Environment.ProcessId}");
+        var since = _exitStarted is { } started ? $", {ShutdownText(System.Diagnostics.Stopwatch.GetElapsedTime(started))} after the exit request" : "";
+        _log?.Info(null, $"Process ended: PID {Environment.ProcessId}{since}");
+        _exitStage = "runtime shutdown (after OnExit)";
         base.OnExit(e);
     }
 
-    private async Task ExitAsync()
+    /// <summary>
+    /// Ordered exit (P2-1-Fix 1): tray and bar first (nothing new can be triggered), then all
+    /// plugins at the same time with 2 s each, then layout stores and the background helpers.
+    /// Every step is timed and logged; nothing can hold up the steps after it. If the process is
+    /// still there <see cref="ExitHardLimit"/> after the request, the exit guard logs where it hangs and
+    /// ends the process.
+    /// </summary>
+    private async Task ExitAsync(string reason)
     {
         if (_exiting)
         {
@@ -553,18 +572,96 @@ public partial class App : Application
         }
 
         _exiting = true;
-        _tray?.Dispose();
-        _tray = null;
-        _bar?.Dispose();
-        _bar = null;
-        if (_registry is not null)
-        {
-            // Modules get at most a few seconds to clean up.
-            await Task.WhenAny(_registry.DisposeAsync().AsTask(), Task.Delay(TimeSpan.FromSeconds(5)));
-        }
+        _exitStarted = System.Diagnostics.Stopwatch.GetTimestamp();
+        _log?.Info(null, $"Exit requested ({reason})");
+        StartExitGuard();
 
+        var registry = _registry;
+        var layoutStore = _layoutStore;
+        var remoteLayout = _remoteLayout;
+        var layoutCache = _layoutCache;
+        var singleInstance = _singleInstance;
+        _layoutStore = null;
+        _remoteLayout = null;
+        _layoutCache = null;
+        _singleInstance = null;
+
+        var sequence = new ShutdownSequence(_log ?? (IUeLogger)NullLogger.Instance)
+            .Add("tray", () =>
+            {
+                _tray?.Dispose();
+                _tray = null;
+            })
+            .Add("bar", () =>
+            {
+                _bar?.Dispose();
+                _bar = null;
+            })
+            .Add("plugins", async _ =>
+            {
+                if (registry is not null)
+                {
+                    await registry.ShutdownAsync(PluginStopLimit);
+                }
+            }, PluginStopLimit + TimeSpan.FromMilliseconds(300))
+            // Not tied to the UI thread – off it, so a stuck file watcher or lock cannot freeze the exit.
+            .Add("layout", _ => Task.Run(() =>
+            {
+                layoutStore?.Dispose();
+                remoteLayout?.Dispose();
+                layoutCache?.Dispose();
+            }), TimeSpan.FromMilliseconds(500))
+            .Add("helpers", _ => Task.Run(() =>
+            {
+                _heartbeat?.Dispose();
+                _watchdog?.Dispose();
+            }), TimeSpan.FromMilliseconds(500))
+            // The mutex belongs to the UI thread – release it there.
+            .Add("single instance", () => singleInstance?.Dispose());
+#if DEBUG
+        // Debug only: block the UI thread while exiting to check the exit guard.
+        if (int.TryParse(Environment.GetEnvironmentVariable("UEBAR_TEST_EXIT_HANG"), out var exitHangSeconds) && exitHangSeconds > 0)
+        {
+            sequence.Add("test hang", () => Thread.Sleep(TimeSpan.FromSeconds(exitHangSeconds)));
+        }
+#endif
+        sequence.StepStarted += name => _exitStage = name;
+        await sequence.RunAsync();
+
+        _exitStage = "WPF shutdown (closing windows)";
         Shutdown(0);
     }
+
+    /// <summary>
+    /// Last line of defense: a background thread that ends the process if the exit does not finish in
+    /// time – after logging which stage hangs, so the next occurrence can be found in the log.
+    /// </summary>
+    private void StartExitGuard()
+    {
+        var log = _log;
+        var started = _exitStarted ?? System.Diagnostics.Stopwatch.GetTimestamp();
+        var thread = new Thread(() =>
+        {
+            Thread.Sleep(ExitHardLimit);
+            log?.Error(null, $"Exit hangs in '{_exitStage}' – {ShutdownText(System.Diagnostics.Stopwatch.GetElapsedTime(started))} after the request; ending the process");
+
+            // Environment.Exit runs the runtime's exit handlers; should even that get stuck, end hard.
+            new Thread(() =>
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(2));
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+            })
+            { IsBackground = true, Name = "Exit guard (hard)" }.Start();
+            Environment.Exit(0);
+        })
+        {
+            IsBackground = true,
+            Name = "Exit guard",
+        };
+        thread.Start();
+    }
+
+    private static string ShutdownText(TimeSpan time) => $"{time.TotalMilliseconds:0} ms";
 
     private void HookGlobalExceptionHandlers(IUeLogger log)
     {

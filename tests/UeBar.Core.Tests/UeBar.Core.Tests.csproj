@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\UeBar.Core\UeBar.Core.csproj" />
-    <ProjectReference Include="..\..\src\UeBar.Modules.Dummy\UeBar.Modules.Dummy.csproj" />
+    <ProjectReference Include="..\..\plugins\Dummy\src\UeBar.Modules.Dummy.csproj" />
     <!-- Fixtures for the plugin loader tests: built first, loaded from their own output folders -->
     <ProjectReference Include="..\TestPlugins\UeBar.TestPlugin\UeBar.TestPlugin.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>

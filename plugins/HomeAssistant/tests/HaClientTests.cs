@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
+using Microsoft.Extensions.Time.Testing;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 
@@ -244,8 +245,12 @@ public class HaClientTests
     [Fact]
     public async Task Network_change_with_healthy_connection_does_not_reconnect()
     {
+        // P2-1-Fix 1: fake clock instead of real waiting – ping interval and pong limit cannot run out
+        // on their own on a busy machine; only the debounce is moved on until the client has decided.
+        var time = new FakeTimeProvider(DateTimeOffset.Parse("2026-11-17T12:00:00Z"));
+        var options = Fast.Options() with { Time = time, PingInterval = TimeSpan.FromHours(1), PongTimeout = TimeSpan.FromHours(1) };
         await using var server = new FakeHaServer();
-        await using var run = new RunningClient(Settings(server.BaseUrl, null), options: Fast.Options() with { });
+        await using var run = new RunningClient(Settings(server.BaseUrl, null), options: options);
         Assert.True(await run.WaitForAsync(HaConnectionState.ConnectedLocal));
 
         for (var i = 0; i < 5; i++)
@@ -253,9 +258,14 @@ public class HaClientTests
             run.Client.NotifyNetworkChanged(); // several events shortly one after another
         }
 
-        await Task.Delay(600);
+        Assert.True(await Wait.UntilAsync(() =>
+        {
+            time.Advance(options.NetworkDebounce);
+            return run.Log.Lines.Any(l => l.Contains("connection still responds", StringComparison.Ordinal));
+        }));
         Assert.Equal(1, server.Connections);
         Assert.Equal(HaConnectionState.ConnectedLocal, run.Client.Status.State);
+        Assert.Single(run.Log.Lines, l => l.Contains("Network change:", StringComparison.Ordinal)); // the five events count as one
     }
 
     [Fact]

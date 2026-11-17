@@ -3,36 +3,27 @@
 [English](README.md) · **Deutsch**
 
 Ein ausfahrbares Dashboard am oberen Bildschirmrand von Windows. Maus an den oberen Rand: Eine
-kleine Pill erscheint und mit ihr deine Smart-Home-Kacheln, eine Statuszeile, Benachrichtigungen
-und eine Schnellsuche. Vorbild ist die „Now Bar“ von Samsung One UI. Home Assistant ist das erste
-Plugin; weitere (Windows, Handy, MQTT …) kommen als Plugins dazu, ohne die App neu zu bauen.
+kleine Pill erscheint und mit ihr deine Kacheln, eine Statuszeile, Benachrichtigungen und eine
+Schnellsuche. Vorbild ist die „Now Bar“ von Samsung One UI. Was die Kacheln zeigen, kommt aus
+**Plugins** – [Home Assistant](plugins/HomeAssistant/README.de.md) ist das erste und wird
+mitgeliefert; weitere (Windows, Handy, Timer …) kommen dazu, ohne die App neu zu bauen.
 
 ![Panel mit Kacheln eines Beispiel-Zuhauses](docs/images/panel.png)
 
-| Pill | Bearbeiten | Einstellungen |
+| Pill | Bearbeiten | Einstellungen → Plugins |
 |---|---|---|
-| ![Pill](docs/images/pill.png) | ![Bearbeiten-Modus](docs/images/edit.png) | ![Einstellungen](docs/images/settings.png) |
+| ![Pill](docs/images/pill.png) | ![Bearbeiten-Modus](docs/images/edit.png) | ![Einstellungen, Seite Plugins](docs/images/settings.png) |
 
-## Funktionen
+## Was die Bar kann
 
 - **Pill und Panel am oberen Rand**: erscheint nach kurzem Verweilen, bleibt offen, solange die
   Maus darauf ist, oder lässt sich fixieren. Mehrere Monitore, bei Vollbild-Apps ausgeblendet.
-- **Kacheln** für Lichter (Helligkeit, Farbtemperatur), Schalter, Skripte und Szenen, Klima
-  (auch IR-Klima aus Schalter + Zahl + Auswahl), Medienplayer mit Cover und Steuerung,
-  Staubsauger, Sensoren und Auswahllisten – live aktualisiert.
-- **Bearbeiten-Modus** direkt im Panel: Kacheln per Suche hinzufügen, Größe ändern, verschieben
-  (auch in andere Tabs), Tabs pro Gerät oder für alle, Tabs nur daheim oder nur unterwegs.
-- **Statuszeile** mit kleinen Werten (z. B. Wetter, Temperatur) im Panel und in der Pill.
-- **Benachrichtigungen** aus Home Assistant: ue Bar meldet sich wie die Companion-App an, du
-  schickst also an `notify.mobile_app_ue_bar_<dein_gerät>`.
-- **Schnellsuche** mit globalem Tastenkürzel (Standard `Win + Alt + Leertaste`): alles finden und
-  schalten, `+ Milch` landet auf der Einkaufsliste.
-- **Assist**-Feld: den Sprachassistenten von Home Assistant per Text fragen.
-- **Now Playing** in der Pill.
-- **Plugins**: neue Kachel-Quellen als ZIP unter Einstellungen → Plugins hinzufügen. ue Bar fragt,
-  bevor es ein nicht mitgeliefertes Plugin lädt. Eigene schreiben mit dem
-  [Plugin-SDK](docs/WRITING-A-PLUGIN.md) (Englisch).
-- **Layout-Sync** über Home Assistant (pro HA-Benutzer), mit lokaler Kopie für unterwegs.
+- **Kacheln in Tabs**, live aktualisiert. **Bearbeiten-Modus** direkt im Panel: Kacheln per Suche
+  hinzufügen, Größe ändern, verschieben (auch in andere Tabs), Tabs pro Gerät oder für alle, Tabs
+  nur daheim oder nur unterwegs.
+- **Statuszeile** mit kleinen Werten im Panel und in der Pill, **Now Playing** in der Pill.
+- **Benachrichtigungen** im Panel, mit Verlauf.
+- **Schnellsuche** mit globalem Tastenkürzel (Standard `Win + Alt + Leertaste`).
 - **Deutsch und Englisch**, im laufenden Betrieb umschaltbar. Zahlen und Uhrzeiten nach der
   Windows-Region.
 - OLED-Schutz (Abdunkeln, Pixel-Shift), eingeklappt sparsam mit Ressourcen.
@@ -42,8 +33,8 @@ Plugin; weitere (Windows, Handy, MQTT …) kommen als Plugins dazu, ohne die App
 - Windows 10 (ab Version 1809) oder Windows 11, x64
 - .NET 10 Desktop Runtime – der Installer lädt sie bei Bedarf von Microsoft; die portable
   Version braucht sie nicht
-- Für das Home-Assistant-Plugin: eine vom PC erreichbare Home-Assistant-Instanz und ein
-  langlebiges Zugriffstoken
+- Was ein Plugin braucht, steht in seiner README (Home Assistant: eine vom PC erreichbare Instanz
+  und ein langlebiges Zugriffstoken)
 
 ## Installation
 
@@ -52,6 +43,8 @@ Herunterladen auf der Seite [Releases](../../releases):
 - `ueBar-Setup-<version>.exe` – Installer (Deutsch/Englisch, ohne Administratorrechte, nach
   `%LOCALAPPDATA%\Programs\ueBar`)
 - `ueBar-<version>-portable.exe` – eine einzelne Datei, nichts zu installieren
+- für Plugin-Autoren: `UeBar.Sdk.<version>.nupkg` (das SDK) und `ueBar-plugin-<id>-<version>.zip`
+  (Plugins, die nicht mitgeliefert werden, z. B. das Beispiel-Plugin)
 
 **Windows SmartScreen:** Die Dateien sind nicht signiert, deshalb zeigt Windows eventuell „Der
 Computer wurde durch Windows geschützt“. Klicke auf **Weitere Informationen → Trotzdem
@@ -59,33 +52,36 @@ ausführen**. Im Zweifel selbst aus dem Quellcode bauen (siehe unten).
 
 Einstellungen, Layout und Logs liegen in `%APPDATA%\ueBar`.
 
-## Erste Einrichtung (Home Assistant)
+## Erste Schritte
 
-1. In Home Assistant **Profil → Sicherheit → Langlebige Zugriffstoken** öffnen und ein Token
-   erstellen, z. B. „ue Bar – mein PC“. Pro Gerät ein eigenes Token.
-2. ue Bar starten. Der Willkommens-Assistent fragt nach der Adresse (lokal, z. B.
-   `http://homeassistant.local:8123`, und/oder extern, z. B. `https://ha.example.com`) und dem
-   Token und testet die Verbindung.
-3. Bereiche auswählen, die in die Bar sollen – ue Bar schlägt Tabs und Kacheln aus deinen
-   Home-Assistant-Bereichen vor. Alles lässt sich später mit dem Stift ändern.
+1. ue Bar starten. Beim ersten Start richtet ein Willkommens-Assistent das mitgelieferte Plugin
+   ein – bei Home Assistant: Adresse und Token, dann die Bereiche, die in die Bar sollen
+   ([Details](plugins/HomeAssistant/README.de.md#erste-einrichtung)).
+2. Maus an den oberen Bildschirmrand: Die Pill erscheint; bleibst du darauf, öffnet sich das
+   Panel. Mit der Nadel bleibt es offen.
+3. Der Stift startet den Bearbeiten-Modus, das Zahnrad (oder ein Doppelklick auf das
+   Tray-Symbol) öffnet die Einstellungen.
 
-Alle Einstellungen gibt es auch unter **Einstellungen → Plugins → Home Assistant** (Zahnrad im
-Panel oder Doppelklick auf das Tray-Symbol). Das Token wird mit Windows-DPAPI verschlüsselt
-gespeichert.
+## Plugins
 
-## Benachrichtigungen
+Jede Quelle von Kacheln ist ein Plugin: ein Ordner mit `plugin.json` und seinen DLLs, der beim
+Start geladen wird, jedes in einem eigenen Ladekontext. Ein kaputtes oder nicht passendes Plugin
+steht mit Grund unter **Einstellungen → Plugins** – die App läuft weiter, seine Kacheln zeigen
+einen Platzhalter. Mitgelieferte Plugins werden gegen eine beim Bau erzeugte Prüfsummenliste
+geprüft und laden ohne Nachfrage. Bei jedem anderen fragt ue Bar einmal (Name, Autor, Version,
+Quelle und eine deutliche Warnung) und wieder, wenn sich seine Dateien ändern. Hinzufügen als ZIP
+über **Einstellungen → Plugins → Plugin hinzufügen …**.
 
-Nach dem Verbinden meldet sich ue Bar bei Home Assistant wie die Companion-App an. Home Assistant
-bietet dann einen Benachrichtigungsdienst für dieses Gerät:
+| Plugin | Was es macht | Mitgeliefert |
+|---|---|---|
+| [Home Assistant](plugins/HomeAssistant/README.de.md) | Lichter, Klima, Medien, Staubsauger, Sensoren u. v. m. aus Home Assistant; Benachrichtigungen, Assist, Layout-Sync | ja |
+| [Test-Modul](plugins/Dummy/README.de.md) | Simulierte Geräte zum Entwickeln und Testen von ue Bar | nein – Debug-Builds und eigenes ZIP |
+| [Hallo](samples/HelloPlugin) | Beispiel-Plugin: eine Zähler-Kachel, Ausgangspunkt für eigene | nein – Beispiel im Quellcode |
 
-```yaml
-action: notify.mobile_app_ue_bar_mein_pc
-data:
-  title: Waschmaschine
-  message: Die Wäsche ist fertig
-```
+### Plugins von anderen
 
-Den genauen Dienstnamen zeigt **Einstellungen → Plugins → Home Assistant → Diagnose**.
+Noch keine. Selbst eins schreiben? Los geht’s mit [Plugin schreiben](docs/WRITING-A-PLUGIN.md)
+(Englisch) – Plugins liegen in einem eigenen Repository und brauchen nur das SDK-Paket.
 
 ## Aus dem Quellcode bauen
 
@@ -97,7 +93,8 @@ dotnet test
 dotnet run --project src/UeBar.App
 ```
 
-Installer und portable Exe (braucht [Inno Setup 6](https://jrsoftware.org/isinfo.php)):
+Installer, portable Exe, SDK-Paket und Plugin-ZIPs (braucht
+[Inno Setup 6](https://jrsoftware.org/isinfo.php)):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File build/publish.ps1
@@ -107,6 +104,10 @@ Die Ergebnisse landen in `dist/`. Zum Entwickeln die Umgebungsvariable `UEBAR_DA
 Testordner setzen, dann bleiben die echten Einstellungen unberührt. `ueBar.exe --settings` (oder
 `--settings=plugins`) öffnet die Einstellungen gleich nach dem Start; `UEBAR_CULTURE=en-US` setzt
 das Zahlen- und Datumsformat, ohne die Windows-Region zu ändern.
+
+Aufbau des Repositorys: `src/` App, Bar, Kern und SDK · `plugins/<Name>/` die offiziellen Plugins
+(`src/`, `tests/`, README) · `samples/` das Beispiel-Plugin · `docs/` Architektur und
+Plugin-Anleitung.
 
 Weiterlesen (Englisch): [Architektur](docs/ARCHITECTURE.md) · [Plugin schreiben](docs/WRITING-A-PLUGIN.md)
 · [Mitmachen](CONTRIBUTING.md) · [Änderungen](CHANGELOG.md)

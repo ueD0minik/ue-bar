@@ -39,7 +39,7 @@ if (-not $iscc) {
 
 if (-not $SkipTests) {
     Write-Host "Tests …" -ForegroundColor Cyan
-    dotnet test (Join-Path $app "UeBar.sln") -c Release --nologo -v q
+    dotnet test (Join-Path $app "UeBar.sln") -c Release --nologo -v q --logger "trx;LogFileName=results.trx"
     if ($LASTEXITCODE -ne 0) { throw "Tests failed" }
 }
 
@@ -83,7 +83,7 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet pack (SDK) failed" }
 $sdkPackage = Get-ChildItem $dist -Filter "UeBar.Sdk.*.nupkg" | Select-Object -First 1
 
 $pluginZips = @()
-foreach ($plugin in @("samples/HelloPlugin/HelloPlugin.csproj", "src/UeBar.Modules.Dummy/UeBar.Modules.Dummy.csproj")) {
+foreach ($plugin in @("samples/HelloPlugin/HelloPlugin.csproj", "plugins/Dummy/src/UeBar.Modules.Dummy.csproj")) {
     $packDir = Join-Path $stage ("pack-" + [IO.Path]::GetFileNameWithoutExtension($plugin))
     dotnet build (Join-Path $app $plugin) -c Release -t:PackPlugin "-p:PluginStageDir=$packDir" --nologo -v q
     if ($LASTEXITCODE -ne 0) { throw "PackPlugin failed for $plugin" }

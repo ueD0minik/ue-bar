@@ -144,7 +144,8 @@ internal sealed class TrayIcon : IDisposable
 
         _menu.Items.Add(new Forms.ToolStripSeparator());
         var exit = new Forms.ToolStripMenuItem(Loc.Get("Tray_Exit"));
-        exit.Click += (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty);
+        // Only after the click has been handled: the exit disposes this very menu (P2-1-Fix 1).
+        exit.Click += (_, _) => _dispatcher.BeginInvoke(() => ExitRequested?.Invoke(this, EventArgs.Empty));
         _menu.Items.Add(exit);
 
         _menu.ResumeLayout();

@@ -17,9 +17,27 @@ start-up. Home Assistant is just one plugin. The guiding rule:
 | `UeBar.Core` | the implementation: plugin loader, module registry, fault protection, module bus, layout, settings, logging, localization | Sdk |
 | `UeBar.Bar` | pure bar logic: state machine, geometry, monitor choice, hotkeys, notification queue, OLED protection | Core |
 | `UeBar.App` | the WPF app: bar window, panel, rendering of tiles, settings window, tray, Win32 interop | Core, Bar – **no plugin** |
-| `UeBar.Modules.HomeAssistant` | plugin `homeassistant`: Home Assistant over WebSocket – tiles, search, status line, notifications (mobile app), Assist, layout sync | Sdk only |
-| `UeBar.Modules.Dummy` | plugin `dummy`: test module with in-memory devices (debug builds only; a separate ZIP for developers) | Sdk only |
+| `UeBar.Modules.HomeAssistant` (`plugins/HomeAssistant/src`) | plugin `homeassistant`: Home Assistant over WebSocket – tiles, search, status line, notifications (mobile app), Assist, layout sync | Sdk only |
+| `UeBar.Modules.Dummy` (`plugins/Dummy/src`) | plugin `dummy`: test module with in-memory devices (debug builds only; a separate ZIP for developers) | Sdk only |
 | `samples/HelloPlugin` | sample plugin for plugin authors | Sdk only |
+
+### Repository layout
+
+```
+src/        UeBar.App, UeBar.Bar, UeBar.Core, UeBar.Sdk
+tests/      tests of the app, bar and core (+ test plugins for the loader)
+plugins/
+  HomeAssistant/   src/, tests/, README.md, README.de.md, images/
+  Dummy/           src/, README.md, README.de.md
+samples/HelloPlugin/
+docs/       ARCHITECTURE.md, WRITING-A-PLUGIN.md, images/ (the bar and the core only)
+```
+
+**Official plugins** – the ones that come with the installer or are maintained with ue Bar – live
+in this repository under `plugins/<Name>/`: they ship with the app, are built against the same SDK
+version and are tested together with it. Each has its own README (English and German) with
+everything specific to it. **Plugins by others** live in their own repositories and only need the
+SDK package.
 
 Plugins never reference each other or the app. The app only builds the bundled plugins first and
 copies them to `plugins\<id>\` next to it (`build/BundledPlugins.targets`).
@@ -60,6 +78,22 @@ Nothing about a plugin can stop the app: every problem becomes the state "Error"
 "Incompatible") with a reason, shown in Settings → Plugins and once in the tray. Plugins are never
 unloaded while the app runs: switching a loaded plugin off stops it right away; switching it on
 again, adding, updating or removing a loaded one takes effect after a restart ("Restart now").
+
+
+## Exit
+
+The app ends in a fixed order, each step timed and logged in one line ("Exit finished in … ms:
+tray …, bar …, plugins …, layout …, helpers …, single instance …"):
+
+1. tray icon and bar window (nothing new can be triggered),
+2. all plugins **at the same time**, each at most **2 s** (waiting for a start or restart that is
+   still running included) – a plugin that does not make it is left behind with its stop token
+   cancelled and a warning in the log,
+3. layout stores and background helpers (off the UI thread, with a time limit),
+4. WPF shutdown.
+
+An exit guard ends the process if it still runs 3 s after the request and logs the stage it hung
+in. Plugins get `StopAsync` and their stop token; they must not rely on more time than that.
 
 ## Interfaces in `UeBar.Sdk`
 

@@ -113,9 +113,10 @@ public sealed class PluginInstallerTests
     {
         var props = XDocument.Load(Path.Combine(SourceTree.AppRoot, "Directory.Build.props"));
         var appVersion = props.Descendants("Version").First().Value;
-        foreach (var project in new[] { "UeBar.Modules.HomeAssistant", "UeBar.Modules.Dummy" })
+        Assert.NotEmpty(SourceTree.PluginSources);
+        foreach (var folder in SourceTree.PluginSources)
         {
-            var manifest = PluginManifest.Load(Path.Combine(SourceTree.Src, project));
+            var manifest = PluginManifest.Load(folder);
             Assert.Equal(appVersion, manifest.Version);
             Assert.Equal(CoreApiVersion.Version, manifest.SdkVersion);
         }
@@ -125,9 +126,10 @@ public sealed class PluginInstallerTests
     public void Plugin_projects_reference_only_the_sdk_and_the_app_references_no_plugin()
     {
         var reference = new Regex(@"<ProjectReference\s+Include=""([^""]+)""");
-        foreach (var project in new[] { "UeBar.Modules.HomeAssistant", "UeBar.Modules.Dummy" })
+        foreach (var folder in SourceTree.PluginSources)
         {
-            var references = reference.Matches(File.ReadAllText(Path.Combine(SourceTree.Src, project, project + ".csproj"))).Select(m => Path.GetFileName(m.Groups[1].Value));
+            var project = Assert.Single(Directory.GetFiles(folder, "*.csproj"));
+            var references = reference.Matches(File.ReadAllText(project)).Select(m => Path.GetFileName(m.Groups[1].Value));
             Assert.Equal(["UeBar.Sdk.csproj"], references);
         }
 

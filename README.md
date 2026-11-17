@@ -3,37 +3,28 @@
 **English** · [Deutsch](README.de.md)
 
 A slide-out dashboard for the top edge of your Windows screen. Move the mouse to the top
-edge: a small pill appears, and with it your smart-home tiles, a status line, notifications and
-a quick search. Inspired by the "Now Bar" of Samsung One UI. Home Assistant is the first plugin;
-more (Windows, phone, MQTT …) can be added as plugins without rebuilding the app.
+edge: a small pill appears, and with it your tiles, a status line, notifications and a quick
+search. Inspired by the "Now Bar" of Samsung One UI. What the tiles show comes from
+**plugins** – [Home Assistant](plugins/HomeAssistant/README.md) is the first one and comes with
+ue Bar; more (Windows, phone, timers …) can be added without rebuilding the app.
 
 ![Panel with tiles of an example home](docs/images/panel.png)
 
-| Pill | Edit mode | Settings |
+| Pill | Edit mode | Settings → Plugins |
 |---|---|---|
-| ![Pill](docs/images/pill.png) | ![Edit mode](docs/images/edit.png) | ![Settings](docs/images/settings.png) |
+| ![Pill](docs/images/pill.png) | ![Edit mode](docs/images/edit.png) | ![Settings, Plugins page](docs/images/settings.png) |
 
-## Features
+## What the bar does
 
 - **Pill and panel at the top edge**: appears after a short dwell, stays open while the mouse is
   on it, or pin it to keep it visible. Works with several monitors and hides in fullscreen apps.
-- **Tiles** for lights (brightness, color temperature), switches, scripts and scenes, climate
-  (including IR climate from switch + number + select), media players with cover and controls,
-  vacuums, sensors and selects – updated live.
-- **Edit mode** right in the panel: add tiles by searching, resize, move (also to other tabs),
-  tabs per device or shared, tabs visible only at home or only away.
-- **Status line** with small values (e.g. weather, temperature) in the panel and the pill.
-- **Notifications** from Home Assistant: ue Bar registers like the companion app, so you send to
-  `notify.mobile_app_ue_bar_<your_device>`.
-- **Quick search** with a global hotkey (default `Win + Alt + Space`): find and switch anything,
-  `+ milk` adds to the shopping list.
-- **Assist** field: ask Home Assistant's voice assistant in text form.
-- **Now Playing** in the pill.
-- **Layout sync** through Home Assistant (per HA user), with a local copy for offline use.
+- **Tiles in tabs**, live updated. **Edit mode** right in the panel: add tiles by searching,
+  resize, move (also to other tabs), tabs per device or shared, tabs visible only at home or only
+  away.
+- **Status line** with small values in the panel and the pill, **Now Playing** in the pill.
+- **Notifications** in the panel, with a history.
+- **Quick search** with a global hotkey (default `Win + Alt + Space`).
 - **German and English**, switchable at runtime. Numbers and times follow your Windows region.
-- **Plugins**: add new tile sources as a ZIP under Settings → Plugins. ue Bar asks before it
-  loads a plugin that does not come with it. Write your own with the
-  [plugin SDK](docs/WRITING-A-PLUGIN.md).
 - OLED protection (dimming, pixel shift), light on resources when collapsed.
 
 ## Requirements
@@ -41,8 +32,8 @@ more (Windows, phone, MQTT …) can be added as plugins without rebuilding the a
 - Windows 10 (version 1809 or later) or Windows 11, x64
 - .NET 10 Desktop Runtime – the installer downloads it from Microsoft if it is missing; the
   portable version does not need it
-- For the Home Assistant plugin: a Home Assistant instance reachable from the PC and a
-  long-lived access token
+- What each plugin needs is in its README (Home Assistant: an instance reachable from the PC and
+  a long-lived access token)
 
 ## Installation
 
@@ -51,8 +42,8 @@ Download from the [Releases](../../releases) page:
 - `ueBar-Setup-<version>.exe` – installer (German/English, no admin rights needed, installs to
   `%LOCALAPPDATA%\Programs\ueBar`)
 - `ueBar-<version>-portable.exe` – a single file, nothing to install
-- for plugin authors: `UeBar.Sdk.<version>.nupkg` (the SDK) and `ueBar-plugin-hello-<version>.zip`
-  (the sample plugin, to try "Add plugin …")
+- for plugin authors: `UeBar.Sdk.<version>.nupkg` (the SDK) and `ueBar-plugin-<id>-<version>.zip`
+  (plugins that do not come with ue Bar, e.g. the sample plugin)
 
 **Windows SmartScreen:** the files are not code-signed, so Windows may show "Windows protected
 your PC". Click **More info → Run anyway**. If in doubt, build it yourself from the source code
@@ -60,32 +51,36 @@ your PC". Click **More info → Run anyway**. If in doubt, build it yourself fro
 
 Settings, layout and logs are stored in `%APPDATA%\ueBar`.
 
-## First setup (Home Assistant)
+## First steps
 
-1. In Home Assistant open your **profile → Security → Long-lived access tokens** and create a
-   token, e.g. named "ue Bar – my PC". Create a separate token per device.
-2. Start ue Bar. The welcome assistant asks for the address (local, e.g.
-   `http://homeassistant.local:8123`, and/or external, e.g. `https://ha.example.com`) and the
-   token, and tests the connection.
-3. Choose the areas you want in the bar – ue Bar suggests tabs and tiles from your Home
-   Assistant areas. Everything can be changed later with the pen icon.
+1. Start ue Bar. On the first start a welcome assistant sets up the plugin that comes with it –
+   for Home Assistant: address and token, then the areas you want in the bar
+   ([details](plugins/HomeAssistant/README.md#first-setup)).
+2. Move the mouse to the top edge of the screen: the pill appears; stay on it and the panel
+   opens. Click the pin to keep it open.
+3. The pen icon starts the edit mode, the gear icon (or a double-click on the tray icon) opens
+   the settings.
 
-All settings are also available under **Settings → Plugins → Home Assistant** (gear icon in the
-panel or double-click the tray icon). The token is stored encrypted with Windows DPAPI.
+## Plugins
 
-## Notifications
+Every source of tiles is a plugin: a folder with a `plugin.json` and its DLLs, loaded at
+start-up, each in its own load context. A plugin that is broken or does not fit this version of
+ue Bar is listed with the reason under **Settings → Plugins** – the app keeps running and its
+tiles show a placeholder. Plugins that come with ue Bar are checked against a checksum list
+written when ue Bar is built and load without asking. For every other plugin ue Bar asks once
+(name, author, version, source and a clear warning) and again whenever its files change. Add one
+as a ZIP with **Settings → Plugins → Add plugin …**.
 
-When connected, ue Bar registers with Home Assistant like the mobile companion app. Home
-Assistant then offers a notify service for this device:
+| Plugin | What it does | Comes with ue Bar |
+|---|---|---|
+| [Home Assistant](plugins/HomeAssistant/README.md) | Lights, climate, media, vacuums, sensors and more from Home Assistant; notifications, Assist, layout sync | yes |
+| [Test module](plugins/Dummy/README.md) | Simulated devices for developing and testing ue Bar | no – debug builds and a separate ZIP |
+| [Hello](samples/HelloPlugin) | Sample plugin: a counter tile, the starting point for your own | no – sample in the source |
 
-```yaml
-action: notify.mobile_app_ue_bar_my_pc
-data:
-  title: Washing machine
-  message: The laundry is done
-```
+### Plugins by others
 
-The exact service name is shown under **Settings → Plugins → Home Assistant → Diagnostics**.
+None yet. Want to write one? Start with [writing a plugin](docs/WRITING-A-PLUGIN.md) – plugins
+live in their own repository and only need the SDK package.
 
 ## Building from source
 
@@ -108,6 +103,9 @@ The results are written to `dist/`. For development, set the environment variabl
 `UEBAR_DATA_DIR` to a test folder so your real settings stay untouched. `ueBar.exe --settings`
 (or `--settings=plugins`) opens the settings right after the start; `UEBAR_CULTURE=en-US` sets
 the number and date format without changing the Windows region.
+
+Repository layout: `src/` the app, bar, core and SDK · `plugins/<Name>/` the official plugins
+(`src/`, `tests/`, README) · `samples/` the sample plugin · `docs/` architecture and plugin guide.
 
 Further reading: [architecture](docs/ARCHITECTURE.md) · [writing a plugin](docs/WRITING-A-PLUGIN.md)
 · [contributing](CONTRIBUTING.md) · [changelog](CHANGELOG.md)

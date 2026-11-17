@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Plugin "dummy" (test module): references only UeBar.Sdk. Bundled with debug builds only;
        for release builds it is a separate ZIP for developers. -->
-  <Import Project="..\UeBar.Sdk\build\UeBar.Sdk.props" />
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.props" />
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>UeBar.Modules.Dummy</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <!-- Private=false: the SDK always comes from the app, never from the plugin folder -->
-    <ProjectReference Include="..\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
+    <ProjectReference Include="..\..\..\src\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
   </ItemGroup>
-  <Import Project="..\UeBar.Sdk\build\UeBar.Sdk.targets" />
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.targets" />
 </Project>

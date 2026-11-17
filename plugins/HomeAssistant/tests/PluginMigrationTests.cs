@@ -46,7 +46,7 @@ public sealed class PluginMigrationTests
     /// <summary>Copies the built plugin folder like the app's build does, and returns the checksum list for it.</summary>
     private static BundledPluginList StageHomeAssistantPlugin(string bundled)
     {
-        var source = Path.Combine(AppRoot(), "src", "UeBar.Modules.HomeAssistant", "bin", Configuration, "net10.0");
+        var source = Path.Combine(AppRoot(), "plugins", "HomeAssistant", "src", "bin", Configuration, "net10.0");
         var target = Path.Combine(bundled, "homeassistant");
         foreach (var file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories).Where(f => !f.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase)))
         {

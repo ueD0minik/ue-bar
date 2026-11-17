@@ -115,7 +115,7 @@ internal sealed class HaConnection : IAsyncDisposable
     }
 
     /// <summary>Send a command and wait for the answer (with time limit). Never throws because of error answers.</summary>
-    public async Task<HaResult> SendCommandAsync(JsonObject command, TimeSpan timeout, CancellationToken cancellationToken)
+    public async Task<HaResult> SendCommandAsync(JsonObject command, TimeSpan timeout, CancellationToken cancellationToken, TimeProvider? time = null)
     {
         var id = Interlocked.Increment(ref _nextId);
         command["id"] = id;
@@ -124,7 +124,7 @@ internal sealed class HaConnection : IAsyncDisposable
         try
         {
             await SendAsync(command, cancellationToken).ConfigureAwait(false);
-            var message = await tcs.Task.WaitAsync(timeout, cancellationToken).ConfigureAwait(false);
+            var message = await tcs.Task.WaitAsync(timeout, time ?? TimeProvider.System, cancellationToken).ConfigureAwait(false);
             return ToResult(message);
         }
         catch (TimeoutException)
@@ -216,9 +216,10 @@ internal sealed class HaConnection : IAsyncDisposable
     }
 
     /// <summary>ping → pong within the time limit?</summary>
-    public async Task<bool> PingAsync(TimeSpan timeout, CancellationToken cancellationToken)
+    /// <summary>Ping; the pong time limit runs on <paramref name="time"/> (tests: a fake clock, P2-1-Fix 1).</summary>
+    public async Task<bool> PingAsync(TimeSpan timeout, CancellationToken cancellationToken, TimeProvider? time = null)
     {
-        var result = await SendCommandAsync(new JsonObject { ["type"] = "ping" }, timeout, cancellationToken).ConfigureAwait(false);
+        var result = await SendCommandAsync(new JsonObject { ["type"] = "ping" }, timeout, cancellationToken, time).ConfigureAwait(false);
         return result.Success;
     }
 

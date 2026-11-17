@@ -39,8 +39,8 @@
        (build/BundledPlugins.targets). Order = order of the modules. The test module is bundled with
        debug builds only. -->
   <ItemGroup>
-    <BundledPlugin Include="..\UeBar.Modules.HomeAssistant\UeBar.Modules.HomeAssistant.csproj" />
-    <BundledPlugin Include="..\UeBar.Modules.Dummy\UeBar.Modules.Dummy.csproj" Condition="'$(Configuration)' == 'Debug'" />
+    <BundledPlugin Include="..\..\plugins\HomeAssistant\src\UeBar.Modules.HomeAssistant.csproj" />
+    <BundledPlugin Include="..\..\plugins\Dummy\src\UeBar.Modules.Dummy.csproj" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
   <Import Project="..\..\build\BundledPlugins.targets" />
   <ItemGroup>

@@ -55,6 +55,12 @@ internal sealed record HaClientOptions
 
     public TimeSpan NetworkDebounce { get; init; } = TimeSpan.FromSeconds(3);
 
+    /// <summary>
+    /// Clock of the connection loop: ping interval, pong time limit, network debounce, local recheck,
+    /// reconnect delays (P2-1-Fix 1: tests use a fake clock instead of real waiting times).
+    /// </summary>
+    public TimeProvider Time { get; init; } = TimeProvider.System;
+
     /// <summary>Loads the registries for the search when connecting.</summary>
     public bool LoadRegistries { get; init; } = true;
 
@@ -654,11 +660,12 @@ internal sealed class HaClient
 
             Volatile.Write(ref _sessionReady, true);
 
-            var nextPing = DateTimeOffset.UtcNow + _options.PingInterval;
-            var nextLocalCheck = DateTimeOffset.UtcNow + _options.LocalRecheckInterval;
+            var clock = _options.Time;
+            var nextPing = clock.GetUtcNow() + _options.PingInterval;
+            var nextLocalCheck = clock.GetUtcNow() + _options.LocalRecheckInterval;
             while (!ct.IsCancellationRequested)
             {
-                var now = DateTimeOffset.UtcNow;
+                var now = clock.GetUtcNow();
                 var until = nextPing;
                 if (!isLocal && nextLocalCheck < until)
                 {
@@ -666,7 +673,7 @@ internal sealed class HaClient
                 }
 
                 var wait = until - now;
-                var tickStart = Stopwatch.GetTimestamp();
+                var tickStart = clock.GetTimestamp();
                 var woke = await WaitAnyAsync(wait > TimeSpan.Zero ? wait : TimeSpan.Zero, ct, connection.Completion, _subscriptionChanged, _settingsChanged, _networkChanged)
                     .ConfigureAwait(false);
 
@@ -709,22 +716,22 @@ internal sealed class HaClient
                 }
 
                 // Time reached: detect waking up from standby (waiting time far too long).
-                var slept = Stopwatch.GetElapsedTime(tickStart) > wait + TimeSpan.FromSeconds(15)
-                    || DateTimeOffset.UtcNow - until > TimeSpan.FromSeconds(15);
+                var slept = clock.GetElapsedTime(tickStart) > wait + TimeSpan.FromSeconds(15)
+                    || clock.GetUtcNow() - until > TimeSpan.FromSeconds(15);
 
-                if (DateTimeOffset.UtcNow >= nextPing || slept)
+                if (clock.GetUtcNow() >= nextPing || slept)
                 {
-                    nextPing = DateTimeOffset.UtcNow + _options.PingInterval;
-                    if (!await connection.PingAsync(_options.PongTimeout, ct).ConfigureAwait(false))
+                    nextPing = clock.GetUtcNow() + _options.PingInterval;
+                    if (!await connection.PingAsync(_options.PongTimeout, ct, clock).ConfigureAwait(false))
                     {
                         _log.Log(LogLevel.Warning, $"No pong within {_options.PongTimeout.TotalSeconds:0} s – connection considered dead");
                         return SessionEnd.Lost;
                     }
                 }
 
-                if (!isLocal && DateTimeOffset.UtcNow >= nextLocalCheck)
+                if (!isLocal && clock.GetUtcNow() >= nextLocalCheck)
                 {
-                    nextLocalCheck = DateTimeOffset.UtcNow + _options.LocalRecheckInterval;
+                    nextLocalCheck = clock.GetUtcNow() + _options.LocalRecheckInterval;
                     if (await LocalReachableAsync(ct).ConfigureAwait(false))
                     {
                         _log.Log(LogLevel.Info, "Local address reachable again – switching to local");
@@ -749,7 +756,7 @@ internal sealed class HaClient
         {
         }
 
-        if (connection.Completion.IsCompleted || !await connection.PingAsync(_options.PongTimeout, ct).ConfigureAwait(false))
+        if (connection.Completion.IsCompleted || !await connection.PingAsync(_options.PongTimeout, ct, _options.Time).ConfigureAwait(false))
         {
             _log.Log(LogLevel.Info, "Network change: connection no longer responds – reconnecting");
             return SessionEnd.Lost;
@@ -761,6 +768,7 @@ internal sealed class HaClient
             return SessionEnd.Reconnect;
         }
 
+        _log.Log(LogLevel.Debug, "Network change: connection still responds – staying connected");
         return null;
     }
 
@@ -984,10 +992,10 @@ internal sealed class HaClient
     }
 
     /// <summary>Waits for time, a task or one of the signals. Returns what woke it (or null = time).</summary>
-    private static async Task<object?> WaitAnyAsync(TimeSpan delay, CancellationToken ct, params object[] wakers)
+    private async Task<object?> WaitAnyAsync(TimeSpan delay, CancellationToken ct, params object[] wakers)
     {
         using var delayCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        var tasks = new List<(object Source, Task Task)> { (null!, Task.Delay(delay, delayCts.Token)) };
+        var tasks = new List<(object Source, Task Task)> { (null!, Task.Delay(delay, _options.Time, delayCts.Token)) };
         foreach (var waker in wakers)
         {
             tasks.Add((waker, waker switch

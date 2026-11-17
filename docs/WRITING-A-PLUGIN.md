@@ -11,6 +11,23 @@ Plugins need no WPF code: a tile describes its content as data and ue Bar render
 The complete sample is [`samples/HelloPlugin`](../samples/HelloPlugin): one tile that counts taps,
 a settings page, a suggested tab and two languages. Copy it as a starting point.
 
+**Where your plugin lives:** a plugin of your own goes into **its own repository** and references the
+SDK package. Only the official plugins (the ones ue Bar ships or maintains) live in the ue Bar
+repository, each in `plugins/<Name>/` with this layout:
+
+```
+plugins/<Name>/
+  src/           the plugin project (UeBar.Modules.<Name>.csproj + plugin.json)
+  tests/         its tests (if any)
+  README.md      what it does, setup, settings, screenshots – English
+  README.de.md   the same in German
+  images/        screenshots for the README
+```
+
+An official plugin is added to the plugin table in the main README and, if it ships with the
+installer, as a `<BundledPlugin>` in `UeBar.App.csproj` – nothing else in the app changes. Its ZIP
+in a release is called `ueBar-plugin-<id>-<version>.zip`.
+
 ## 1. Create the project
 
 ```powershell
@@ -264,6 +281,8 @@ These keep one plugin from taking down the others. They cannot all be enforced t
   through the stop token. Exceptions there are attributed to your plugin: it goes to "Error" and
   restarts automatically (at most 3 times in 5 minutes).
 - **Never block.** ue Bar calls plugins with time limits; a hanging call counts as an error.
+- **Stop quickly.** When ue Bar exits, every plugin gets at most 2 s for `StopAsync`; after that
+  the exit goes on without it. Cancel your work through the stop token instead of waiting for it.
 - **Thread-safe.** ue Bar calls you from the thread pool; it moves UI updates itself.
 - **Never log secrets** (tokens, passwords).
 - **No WPF.** If a tile really needs its own look, talk to us first (open an issue).

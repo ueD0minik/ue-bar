@@ -26,25 +26,38 @@ internal static class SourceTree
 
     public static string Src => Path.Combine(AppRoot, "src");
 
-    /// <summary>Resource folder per project (short name as in the code: Core, App, Bar, Ha, Dummy).</summary>
+    /// <summary>Official plugins (P2-1-Fix 1): <c>plugins/&lt;Name&gt;/src</c>, tests in <c>plugins/&lt;Name&gt;/tests</c>.</summary>
+    public static string Plugins => Path.Combine(AppRoot, "plugins");
+
+    /// <summary>Source folder of every official plugin (one per <c>plugins/&lt;Name&gt;/src</c>).</summary>
+    public static IReadOnlyList<string> PluginSources { get; } =
+        [.. Directory.GetDirectories(Path.Combine(FindAppRoot(), "plugins")).Select(d => Path.Combine(d, "src")).Where(Directory.Exists).Order(StringComparer.Ordinal)];
+
+    /// <summary>Project folder (relative to app/) per short name as in the code: Core, App, Bar, Ha, Dummy.</summary>
     public static IReadOnlyDictionary<string, string> Projects { get; } = new Dictionary<string, string>
     {
-        ["Core"] = "UeBar.Core",
-        ["App"] = "UeBar.App",
-        ["Bar"] = "UeBar.Bar",
-        ["Ha"] = "UeBar.Modules.HomeAssistant",
-        ["Dummy"] = "UeBar.Modules.Dummy",
+        ["Core"] = Path.Combine("src", "UeBar.Core"),
+        ["App"] = Path.Combine("src", "UeBar.App"),
+        ["Bar"] = Path.Combine("src", "UeBar.Bar"),
+        ["Ha"] = Path.Combine("plugins", "HomeAssistant", "src"),
+        ["Dummy"] = Path.Combine("plugins", "Dummy", "src"),
     };
 
     public static Dictionary<string, string> ReadResx(string project, string? language)
     {
-        var file = Path.Combine(Src, project, "Resources", language is null ? "Strings.resx" : $"Strings.{language}.resx");
+        var file = Path.Combine(AppRoot, project, "Resources", language is null ? "Strings.resx" : $"Strings.{language}.resx");
         return XDocument.Load(file).Root!.Elements("data")
             .ToDictionary(d => (string)d.Attribute("name")!, d => (string?)d.Element("value") ?? "");
     }
 
+    /// <summary>Short name of the project a source file belongs to (null: e.g. UeBar.Sdk).</summary>
+    public static string? ProjectOf(string file) =>
+        Projects.FirstOrDefault(p => file.StartsWith(Path.Combine(AppRoot, p.Value) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)).Key;
+
+    /// <summary>Product code: <c>src/</c> and the official plugins' <c>src/</c> (no tests, no build output).</summary>
     public static IEnumerable<string> SourceFiles(params string[] extensions) =>
-        Directory.EnumerateFiles(Src, "*.*", SearchOption.AllDirectories)
+        new[] { Src }.Concat(PluginSources)
+            .SelectMany(root => Directory.EnumerateFiles(root, "*.*", SearchOption.AllDirectories))
             .Where(f => extensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase))
             .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
                 && !f.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal));
@@ -106,7 +119,7 @@ public sealed class ResourceCompletenessTests
         {
             // Without comment lines (doc examples like {l:T Key}).
             var text = string.Join(Environment.NewLine, File.ReadAllLines(file).Where(l => !l.TrimStart().StartsWith("//", StringComparison.Ordinal)));
-            var project = SourceTree.Projects.FirstOrDefault(p => file.Contains(Path.DirectorySeparatorChar + p.Value + Path.DirectorySeparatorChar, StringComparison.Ordinal)).Key;
+            var project = SourceTree.ProjectOf(file);
             if (project is null)
             {
                 continue; // UeBar.Sdk: contracts only, no texts of its own
@@ -155,7 +168,7 @@ public sealed class ResourceCompletenessTests
     [Fact]
     public void Module_states_have_texts()
     {
-        var keys = SourceTree.ReadResx("UeBar.Core", null);
+        var keys = SourceTree.ReadResx(SourceTree.Projects["Core"], null);
         foreach (var state in Enum.GetValues<ModuleState>())
         {
             Assert.Contains("ModuleState_" + state, keys.Keys);

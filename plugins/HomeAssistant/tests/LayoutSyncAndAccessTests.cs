@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
+using Microsoft.Extensions.Time.Testing;
 using System.Text.Json.Nodes;
 using UeBar.Sdk;
 using UeBar.Core.Bus;
@@ -20,7 +21,7 @@ public class LayoutSyncAndAccessTests
     {
         private readonly string _dir = Path.Combine(Path.GetTempPath(), "uebar-m5b-" + Guid.NewGuid().ToString("N")[..8]);
 
-        public Env(FakeHaServer? server, string? localUrl = null)
+        public Env(FakeHaServer? server, string? localUrl = null, HaClientOptions? options = null)
         {
             Directory.CreateDirectory(_dir);
             Guard = new ModuleGuard(Log);
@@ -34,7 +35,7 @@ public class LayoutSyncAndAccessTests
             }
 
             Registry = new ModuleRegistry(Guard, bus, Log, State, _dir);
-            Module = new HomeAssistantModule(Fast.Options());
+            Module = new HomeAssistantModule(options ?? Fast.Options());
             Registry.Register(Module);
             Cache = new LocalFileLayoutStore(Path.Combine(_dir, "layout.json"), Backups, Log);
         }
@@ -176,14 +177,20 @@ public class LayoutSyncAndAccessTests
     [Fact]
     public async Task First_connect_uploads_the_local_layout_and_deleted_cache_comes_back_from_ha()
     {
+        // P2-1-Fix 1: fake clock for the connection loop – no ping with a 250 ms pong limit can drop the
+        // connection on a busy machine between upload and reload. Waiting only on signals.
+        var time = new FakeTimeProvider(DateTimeOffset.Parse("2026-11-17T12:00:00Z"));
         await using var server = new FakeHaServer();
-        await using var env = new Env(server);
+        await using var env = new Env(server, options: Fast.Options() with { Time = time });
         await env.Cache.SaveAsync(Layout("Home", DateTimeOffset.Now.AddDays(-3)), CancellationToken.None); // from M5a (import)
-        await env.Registry.StartAllAsync();
+        // Store first, then start: the sync is triggered by the connection coming up – created afterwards,
+        // a fast connection could already be there and the store would never hear of it.
         var store = env.CreateStore();
+        await env.Registry.StartAllAsync();
 
         // Migration: HA has nothing yet → upload the local one
-        Assert.True(await Wait.UntilAsync(() => TabNameIn(server.GetUserData(HaLayoutStore.Key)) == "Home"));
+        Assert.True(await Wait.UntilAsync(() => TabNameIn(server.GetUserData(HaLayoutStore.Key)) == "Home", 15000));
+        Assert.True(await Wait.UntilAsync(() => !store.IsPending && store.LastSync.IsCompleted, 15000));
         await store.LastSync;
         Assert.False(store.IsPending);
 

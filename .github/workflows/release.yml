@@ -35,6 +35,16 @@ jobs:
         shell: pwsh
         run: ./build/publish.ps1
 
+      # Test logs need a sign-in on GitHub – the results as an artifact make a red run readable.
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            tests/**/TestResults/*.trx
+            plugins/**/TestResults/*.trx
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:

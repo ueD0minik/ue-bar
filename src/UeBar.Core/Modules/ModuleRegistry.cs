@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
 using UeBar.Core.Localization;
@@ -90,6 +90,7 @@ public sealed class ModuleRegistry : IAsyncDisposable
     private readonly List<ModuleEntry> _modules = [];
     private readonly Dictionary<string, TileTypeRegistration> _tileTypes = new(StringComparer.OrdinalIgnoreCase);
     private readonly CancellationTokenSource _shutdown = new();
+    private int _shutdownStarted;
     private readonly Lock _lock = new();
     private LayoutDocument? _lastLayout;
 
@@ -569,10 +570,79 @@ public sealed class ModuleRegistry : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        await ShutdownAsync(_guard.Options.LifecycleTimeout).ConfigureAwait(false);
+        _shutdown.Dispose();
+    }
+
+    /// <summary>
+    /// Exit (P2-1-Fix 1): stops all modules at the same time, each at most <paramref name="perModule"/>
+    /// (waiting for a running start/stop included). A module that does not make it is left behind
+    /// with its token cancelled – the exit goes on. Logs how long each module took.
+    /// </summary>
+    public async Task<IReadOnlyList<ShutdownStepResult>> ShutdownAsync(TimeSpan perModule)
+    {
+        if (Interlocked.Exchange(ref _shutdownStarted, 1) != 0)
+        {
+            return [];
+        }
+
         _guard.ModuleFaulted -= OnModuleFaulted;
         await _shutdown.CancelAsync().ConfigureAwait(false);
-        await StopAllAsync().ConfigureAwait(false);
-        _shutdown.Dispose();
+        var results = await Task.WhenAll(Modules.Where(m => m.IsLoaded).Select(m => ShutdownModuleAsync(m, perModule))).ConfigureAwait(false);
+        return results;
+    }
+
+    private async Task<ShutdownStepResult> ShutdownModuleAsync(ModuleEntry entry, TimeSpan limit)
+    {
+        var start = _guard.Time.GetTimestamp();
+        var outcome = ShutdownStepOutcome.Done;
+        using var waitCts = new CancellationTokenSource(limit, _guard.Time);
+        var gated = false;
+        try
+        {
+            gated = await entry.Gate.WaitAsync(Timeout.InfiniteTimeSpan, waitCts.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+
+        try
+        {
+            if (!gated)
+            {
+                // A start or restart still holds the module – cut it off instead of waiting for it.
+                entry.Context?.Cancel();
+                outcome = ShutdownStepOutcome.TimedOut;
+                _log.Warn(entry.Id, $"Exit: still busy after {ShutdownSequence.Ms(limit)} – left behind");
+            }
+            else
+            {
+                entry.Generation++;
+                entry.RestartPending = false;
+                var remaining = limit - _guard.Time.GetElapsedTime(start);
+                if (!await StopCoreAsync(entry, remaining > TimeSpan.Zero ? remaining : TimeSpan.FromMilliseconds(1)).ConfigureAwait(false))
+                {
+                    outcome = ShutdownStepOutcome.TimedOut;
+                    _log.Warn(entry.Id, $"Exit: did not stop within {ShutdownSequence.Ms(limit)} – left behind");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            outcome = ShutdownStepOutcome.Failed;
+            _log.Warn(entry.Id, "Exit: stopping failed", ex);
+        }
+        finally
+        {
+            if (gated)
+            {
+                entry.Gate.Release();
+            }
+        }
+
+        var duration = _guard.Time.GetElapsedTime(start);
+        _log.Debug(entry.Id, $"Exit: stopped in {ShutdownSequence.Ms(duration)}");
+        return new ShutdownStepResult(entry.Id, duration, outcome);
     }
 
     // ------------------------------------------------------------------ internal
@@ -687,23 +757,26 @@ public sealed class ModuleRegistry : IAsyncDisposable
         // Faulted: the fault handler has already taken care of status and restart.
     }
 
-    private async Task StopCoreAsync(ModuleEntry entry)
+    /// <summary>Returns false if the module's StopAsync ran into the time limit.</summary>
+    private async Task<bool> StopCoreAsync(ModuleEntry entry, TimeSpan? limit = null)
     {
         if (!entry.IsLoaded)
         {
-            return;
+            return true;
         }
 
+        var stopped = true;
         var context = entry.Context;
         if (context is not null)
         {
             context.Cancel();
-            await _guard.RunAsync(
+            var result = await _guard.RunAsync(
                 entry.Id,
                 "Stop",
                 ct => entry.Module.StopAsync(ct),
-                _guard.Options.LifecycleTimeout,
+                limit ?? _guard.Options.LifecycleTimeout,
                 reportFaults: false).ConfigureAwait(false);
+            stopped = result.Outcome != GuardOutcome.TimedOut;
             context.Dispose();
             entry.Context = null;
         }
@@ -725,6 +798,8 @@ public sealed class ModuleRegistry : IAsyncDisposable
         {
             _log.Info(entry.Id, "Stopped");
         }
+
+        return stopped;
     }
 
     private void OnModuleStatus(ModuleEntry entry, ModuleStatus? status)

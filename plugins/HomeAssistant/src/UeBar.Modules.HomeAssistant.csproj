@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Plugin "homeassistant" (SPEC 8): references only UeBar.Sdk. The app loads it from
        plugins\homeassistant\ – there is no project reference from the app to this project. -->
-  <Import Project="..\UeBar.Sdk\build\UeBar.Sdk.props" />
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.props" />
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>UeBar.Modules.HomeAssistant</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <!-- Private=false: the SDK always comes from the app, never from the plugin folder -->
-    <ProjectReference Include="..\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
+    <ProjectReference Include="..\..\..\src\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="UeBar.Modules.HomeAssistant.Tests" />
   </ItemGroup>
-  <Import Project="..\UeBar.Sdk\build\UeBar.Sdk.targets" />
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.targets" />
 </Project>

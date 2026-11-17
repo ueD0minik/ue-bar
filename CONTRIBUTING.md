@@ -25,6 +25,9 @@ private before attaching it** (it never contains tokens, but it may contain enti
   - Every module is a plugin: a new project that references **only** `UeBar.Sdk`, with a
     `plugin.json` (see [docs/WRITING-A-PLUGIN.md](docs/WRITING-A-PLUGIN.md)). The app and the core
     do not change for it; if they have to, the interface is wrong – open an issue.
+  - Official plugins live in `plugins/<Name>/` (`src/`, `tests/`, `README.md` + `README.de.md`,
+    `images/`) and get a row in the plugin table of the main README. Plugins by others belong in
+    their own repositories.
   - Plugins never reference each other; they talk through the module bus.
   - Interfaces in `UeBar.Sdk` are only extended, never changed in a breaking way; each extension
     raises the minor version of `CoreApiVersion` and of the SDK package.
