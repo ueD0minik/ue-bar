@@ -17,6 +17,9 @@
     <StageBundledPlugins Condition="'$(StageBundledPlugins)' == ''">true</StageBundledPlugins>
     <_BundledPluginSymbols Condition="'$(Configuration)' == 'Debug'">true</_BundledPluginSymbols>
     <_BundledPluginSymbols Condition="'$(_BundledPluginSymbols)' == ''">false</_BundledPluginSymbols>
+    <!-- Not precompiled: the WinRT projection is 25 MB of IL – ReadyToRun would triple it for code
+         the Windows plugin hardly uses (a few dozen of its types). -->
+    <_BundledPluginNoReadyToRun>;Microsoft.Windows.SDK.NET.dll;WinRT.Runtime.dll;</_BundledPluginNoReadyToRun>
     <!-- What must not leak from "dotnet publish -r … -o …" into the plugin projects -->
     <_BundledPluginRemoveProperties>RuntimeIdentifier;SelfContained;PublishDir;PublishProfile;PublishSingleFile;PublishReadyToRun;PublishTrimmed;IncludeNativeLibrariesForSelfExtract;TargetFramework;OutDir;OutputPath;BundledPluginsZip;StageBundledPlugins;_CommandLineDefinedOutputPath</_BundledPluginRemoveProperties>
   </PropertyGroup>
@@ -25,7 +28,7 @@
        negotiation either: a plugin may target a newer Windows SDK than the app (e.g. the Windows
        plugin with net10.0-windows10.0.19041.0 for the WinRT projection). -->
   <ItemGroup Condition="'$(StageBundledPlugins)' == 'true'">
-    <ProjectReference Include="@(BundledPlugin)" ReferenceOutputAssembly="false" Private="false" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="@(BundledPlugin)" ReferenceOutputAssembly="false" Private="false" SkipGetTargetFrameworkProperties="true" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained" />
   </ItemGroup>
 
   <!-- Portable: the plugins travel inside the exe -->
@@ -73,7 +76,7 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <!-- Assemblies in the plugin's root folder (not the language files below it) are precompiled -->
-        <PostprocessAssembly Condition="'%(Extension)' == '.dll' and $([System.String]::Copy('%(RecursiveDir)').TrimEnd('\').Contains('\')) == 'false'">true</PostprocessAssembly>
+        <PostprocessAssembly Condition="'%(Extension)' == '.dll' and $([System.String]::Copy('%(RecursiveDir)').TrimEnd('\').Contains('\')) == 'false' and !$(_BundledPluginNoReadyToRun.Contains(';%(Filename)%(Extension);'))">true</PostprocessAssembly>
       </ResolvedFileToPublish>
     </ItemGroup>
   </Target>
