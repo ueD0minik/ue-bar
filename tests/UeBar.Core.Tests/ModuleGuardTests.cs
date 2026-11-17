@@ -68,17 +68,21 @@ public class ModuleGuardTests
     public async Task Timeout_also_protects_against_synchronously_blocking_module()
     {
         var guard = new ModuleGuard(new ListLogger());
+        using var release = new ManualResetEventSlim();
         var sw = Stopwatch.StartNew();
 
         // The module blocks synchronously (e.g. .Result in its code) – the caller (UI thread) must not hang.
+        // It blocks until the test releases it (at most 20 s), so a busy thread pool on a CI runner can
+        // only delay the time limit, not let the module finish first.
         var result = await guard.RunAsync("m1", "Blockiert", _ =>
         {
-            Thread.Sleep(2000);
+            release.Wait(TimeSpan.FromSeconds(20));
             return Task.CompletedTask;
         }, TimeSpan.FromMilliseconds(100));
+        release.Set();
 
         Assert.Equal(GuardOutcome.TimedOut, result.Outcome);
-        Assert.True(sw.Elapsed < TimeSpan.FromSeconds(1.5), $"dauerte {sw.Elapsed}");
+        Assert.True(sw.Elapsed < TimeSpan.FromSeconds(10), $"dauerte {sw.Elapsed}");
     }
 
     [Fact]
