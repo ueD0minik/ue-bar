@@ -15,6 +15,17 @@ permissive licenses that may be combined with GPL-3.0 code.
 | [Microsoft.Extensions.DependencyInjection.Abstractions](https://github.com/dotnet/runtime) | 8.0.2 | MIT | © Microsoft Corporation |
 | [Microsoft.Extensions.Logging.Abstractions](https://github.com/dotnet/runtime) | 8.0.3 | MIT | © Microsoft Corporation |
 
+### Windows plugin (`plugins\windows\`)
+
+| Component | Version | License | Copyright |
+|---|---|---|---|
+| Windows SDK projection for .NET (`Microsoft.Windows.SDK.NET.dll`, from the `net10.0-windows10.0.19041.0` target framework) | 10.0.19041.57 | MIT | © Microsoft Corporation |
+| [C#/WinRT runtime](https://github.com/microsoft/CsWinRT) (`WinRT.Runtime.dll`) | 2.2 | MIT | © Microsoft Corporation |
+| [System.Management](https://github.com/dotnet/runtime) (with System.CodeDom) | 10.0.0 | MIT | © .NET Foundation and contributors |
+
+The plugin uses Windows' own APIs (Core Audio, media sessions, radios, Bluetooth, power, WMI);
+nothing of Windows itself is shipped.
+
 The installer is framework-dependent: it downloads the .NET 10 Desktop Runtime from Microsoft
 if it is missing. The portable single executable contains the .NET runtime (self-contained).
 

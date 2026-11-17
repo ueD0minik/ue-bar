@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.3.0 – Windows plugin
+
+**Plugin interface (`CoreApiVersion`): 1.1** – extended, nothing broken: plugins built for 1.0 keep
+loading. SDK package `UeBar.Sdk 1.1.0`.
+
+### New
+- **Windows plugin** (`plugins/Windows`, plugin ID `windows`, comes with ue Bar and is on):
+  volume with mute and **output device** (headphones ↔ monitor ↔ speakers; virtual cables and
+  app channels of mixer tools only on request), **app volume** for the apps that play sound,
+  **media of all apps** Windows knows (Spotify, YouTube in the browser …) with cover, progress,
+  controls and source switching – also as **Now Playing** in the pill –, **Wi-Fi** and
+  **Bluetooth** on/off, **devices & batteries** (the battery levels Windows shows for Bluetooth
+  devices), **battery** with time left/until full, **CPU, memory, disk**, **brightness** of the
+  built-in display, **lock, sleep** (tap twice) and **screen off**. Everything searchable, a
+  suggested "Windows" tab, status line values, settings, module bus publications (`win.set_volume`,
+  `win.mute`, `win.media_play_pause`, `win.lock`, values `win.battery`, `win.cpu`,
+  `win.audio_device`, event `win.media_changed`). See [plugins/Windows](plugins/Windows/README.md).
+- **Settings → Layout → Add a plugin's suggestion:** adds the tabs a plugin suggests to the
+  existing layout (backed up first) – the rest of the layout stays as it is.
+- **Settings → Bar → Now Playing: order of the sources** – when several plugins report playback.
+  Default: playback on this PC first; what plays always comes before what is paused.
+- Contract 1.1: `IVisibilityAware` (what of a plugin is on screen – poll only while visible),
+  `IDeviceBatterySource` and `IDeviceBatteryCatalog` (device batteries across plugins),
+  `INowPlayingSource.NowPlayingPriority` (default member).
+- For developers: with its own `UEBAR_DATA_DIR` ue Bar runs as a separate instance (own lock);
+  `UEBAR_WINDOWS_DEMO=1` gives the Windows plugin demo data.
+
+### Changed
+- The settings sidebar entry of a plugin page has the plugin's icon and the normal indentation.
+- Bundled plugins are build-order references without target framework negotiation, so a plugin
+  may target a newer Windows SDK than the app.
+
 ## 1.2.1 – clean exit, repository layout
 
 **Plugin interface (`CoreApiVersion`): 1.0** – unchanged; SDK package `UeBar.Sdk 1.0.0`.

@@ -80,6 +80,58 @@ public static class LayoutSetup
         return result;
     }
 
+    /// <summary>
+    /// Modules whose whole suggestion can be added to an existing layout ("Add suggestion", P2-2):
+    /// running, with <see cref="ILayoutSuggestionProvider"/> and a suggestion with at least one tab.
+    /// </summary>
+    public static IReadOnlyList<ModuleEntry> AddableSuggestions(ModuleRegistry registry) =>
+    [
+        .. registry.Modules.Where(m => m.IsAvailable && m.Module is ILayoutSuggestionProvider
+            && registry.Invoke(m.Id, "Suggested layout", x => ((ILayoutSuggestionProvider)x).GetSuggestedLayout()).Value is { Tabs.Count: > 0 }),
+    ];
+
+    /// <summary>
+    /// Appends the tabs of a module's suggestion to <paramref name="current"/> (P2-2). Existing tabs,
+    /// tiles and the status line stay as they are; tab and tile IDs of the new tabs are made unique.
+    /// Returns null if the module has no suggestion.
+    /// </summary>
+    public static LayoutDocument? AppendSuggestion(ModuleRegistry registry, string moduleId, LayoutDocument current)
+    {
+        var suggestion = registry.Invoke(moduleId, "Suggested layout", m => (m as ILayoutSuggestionProvider)?.GetSuggestedLayout()).Value;
+        return suggestion is null ? null : Append(current, suggestion);
+    }
+
+    /// <summary>Appends the tabs of <paramref name="suggestion"/> to a copy of <paramref name="current"/> (public for tests).</summary>
+    public static LayoutDocument Append(LayoutDocument current, LayoutDocument suggestion)
+    {
+        var result = LayoutLayers.Clone(current);
+        var tabIds = new HashSet<string>(result.Tabs.Select(t => t.Id), StringComparer.Ordinal);
+        var tileIds = new HashSet<string>(result.AllTiles.Select(t => t.Id), StringComparer.Ordinal);
+        foreach (var tab in LayoutLayers.Clone(suggestion).Tabs)
+        {
+            tab.Id = Unique(string.IsNullOrWhiteSpace(tab.Id) ? "tab" : tab.Id, tabIds);
+            foreach (var tile in tab.Tiles)
+            {
+                tile.Id = Unique(string.IsNullOrWhiteSpace(tile.Id) ? "k" : tile.Id, tileIds);
+            }
+
+            result.Tabs.Add(tab);
+        }
+
+        return result;
+
+        static string Unique(string id, HashSet<string> taken)
+        {
+            var candidate = id;
+            for (var n = 2; !taken.Add(candidate); n++)
+            {
+                candidate = $"{id}-{n}";
+            }
+
+            return candidate;
+        }
+    }
+
     /// <summary>Make tab and tile IDs unique (modules know nothing about each other).</summary>
     private static void MakeIdsUnique(LayoutDocument layout)
     {

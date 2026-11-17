@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Plugin "windows" (P2-2): volume, media, radios, devices, system values of this PC.
+       References only UeBar.Sdk. Windows APIs through the WinRT projection of the target framework
+       (media sessions, radios, Bluetooth, power) and own Core Audio / Win32 declarations. -->
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <RootNamespace>UeBar.Modules.Windows</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Private=false: the SDK always comes from the app, never from the plugin folder -->
+    <ProjectReference Include="..\..\..\src\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- WMI for the brightness of the built-in display (WmiMonitorBrightness); MIT, from Microsoft -->
+    <PackageReference Include="System.Management" Version="10.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="UeBar.Modules.Windows.Tests" />
+  </ItemGroup>
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.targets" />
+</Project>

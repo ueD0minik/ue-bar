@@ -37,6 +37,13 @@ public interface INowPlayingSource
     event EventHandler? NowPlayingChanged;
 
     Task ExecuteNowPlayingAsync(NowPlayingCommand command, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Rank among several sources as long as the user has not set an order (contract 1.1): higher
+    /// comes first. Convention: playback on this computer 100, other devices 0 (default).
+    /// What is playing right now always wins over what is paused.
+    /// </summary>
+    int NowPlayingPriority => 0;
 }
 
 /// <summary>A quick command with a prefix (e.g. "+" = add to the shopping list).</summary>

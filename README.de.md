@@ -5,8 +5,9 @@
 Ein ausfahrbares Dashboard am oberen Bildschirmrand von Windows. Maus an den oberen Rand: Eine
 kleine Pill erscheint und mit ihr deine Kacheln, eine Statuszeile, Benachrichtigungen und eine
 Schnellsuche. Vorbild ist die „Now Bar“ von Samsung One UI. Was die Kacheln zeigen, kommt aus
-**Plugins** – [Home Assistant](plugins/HomeAssistant/README.de.md) ist das erste und wird
-mitgeliefert; weitere (Windows, Handy, Timer …) kommen dazu, ohne die App neu zu bauen.
+**Plugins** – [Home Assistant](plugins/HomeAssistant/README.de.md) und [Windows](plugins/Windows/README.de.md)
+(Lautstärke, Medien, WLAN, Bluetooth, Akkus, Systemwerte dieses PCs) werden mitgeliefert; weitere
+(Handy, Timer …) kommen dazu, ohne die App neu zu bauen.
 
 ![Panel mit Kacheln eines Beispiel-Zuhauses](docs/images/panel.png)
 
@@ -34,7 +35,7 @@ mitgeliefert; weitere (Windows, Handy, Timer …) kommen dazu, ohne die App neu 
 - .NET 10 Desktop Runtime – der Installer lädt sie bei Bedarf von Microsoft; die portable
   Version braucht sie nicht
 - Was ein Plugin braucht, steht in seiner README (Home Assistant: eine vom PC erreichbare Instanz
-  und ein langlebiges Zugriffstoken)
+  und ein langlebiges Zugriffstoken; Windows: nichts, ab Windows 10 2004)
 
 ## Installation
 
@@ -75,6 +76,7 @@ Quelle und eine deutliche Warnung) und wieder, wenn sich seine Dateien ändern. 
 | Plugin | Was es macht | Mitgeliefert |
 |---|---|---|
 | [Home Assistant](plugins/HomeAssistant/README.de.md) | Lichter, Klima, Medien, Staubsauger, Sensoren u. v. m. aus Home Assistant; Benachrichtigungen, Assist, Layout-Sync | ja |
+| [Windows](plugins/Windows/README.de.md) | Dieser PC: Lautstärke und Ausgabegerät, App-Lautstärke, Medien aller Apps (auch als Now Playing), WLAN, Bluetooth, Geräte-Akkus, Akku, CPU, Arbeitsspeicher, Datenträger, Helligkeit, Sperren/Energiesparen | ja |
 | [Test-Modul](plugins/Dummy/README.de.md) | Simulierte Geräte zum Entwickeln und Testen von ue Bar | nein – Debug-Builds und eigenes ZIP |
 | [Hallo](samples/HelloPlugin) | Beispiel-Plugin: eine Zähler-Kachel, Ausgangspunkt für eigene | nein – Beispiel im Quellcode |
 
@@ -103,7 +105,9 @@ powershell -ExecutionPolicy Bypass -File build/publish.ps1
 Die Ergebnisse landen in `dist/`. Zum Entwickeln die Umgebungsvariable `UEBAR_DATA_DIR` auf einen
 Testordner setzen, dann bleiben die echten Einstellungen unberührt. `ueBar.exe --settings` (oder
 `--settings=plugins`) öffnet die Einstellungen gleich nach dem Start; `UEBAR_CULTURE=en-US` setzt
-das Zahlen- und Datumsformat, ohne die Windows-Region zu ändern.
+das Zahlen- und Datumsformat, ohne die Windows-Region zu ändern. Mit eigenem `UEBAR_DATA_DIR`
+läuft die ue Bar als eigene Instanz neben der normalen; `UEBAR_WINDOWS_DEMO=1` gibt dem
+Windows-Plugin Demo-Daten (für Screenshots).
 
 Aufbau des Repositorys: `src/` App, Bar, Kern und SDK · `plugins/<Name>/` die offiziellen Plugins
 (`src/`, `tests/`, README) · `samples/` das Beispiel-Plugin · `docs/` Architektur und

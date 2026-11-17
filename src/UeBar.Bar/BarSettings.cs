@@ -62,6 +62,12 @@ public sealed class BarSettings
     /// </summary>
     public double? AssistConversationMinutes { get; set; }
 
+    /// <summary>
+    /// Now Playing with several sources (P2-2): module IDs in the preferred order. Modules not
+    /// listed follow by their own priority (playback on this computer first). Empty = default.
+    /// </summary>
+    public List<string> NowPlayingOrder { get; set; } = [];
+
     /// <summary>OLED protection (SPEC 5.5): pinned and no interaction for this many minutes → dim. 0 = off.</summary>
     public int OledDimMinutes { get; set; } = 5;
 
@@ -87,6 +93,7 @@ public sealed class BarSettings
     {
         var copy = (BarSettings)MemberwiseClone();
         copy.PinnedPositions = new Dictionary<string, PixelPoint>(PinnedPositions);
+        copy.NowPlayingOrder = [.. NowPlayingOrder];
         return copy;
     }
 }

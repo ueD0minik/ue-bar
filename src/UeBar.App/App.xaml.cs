@@ -280,6 +280,7 @@ public partial class App : Application
                 ResetBar = () => tray.ResetBar?.Invoke() ?? Task.CompletedTask,
                 ClearNotificationHistory = extras.ClearHistory,
                 NotificationHistoryCount = () => extras.HistoryCount,
+                NowPlaying = extras.NowPlaying,
                 GeneralChanged = (before, after) => _ = ApplyGeneralAsync(before, after, viewModel, bar, registry, log),
                 ShowSetupAgain = () =>
                 {

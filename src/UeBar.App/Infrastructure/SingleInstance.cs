@@ -29,8 +29,18 @@ internal sealed class SingleInstance : IDisposable
 {
     public static readonly TimeSpan HandshakeTimeout = TimeSpan.FromSeconds(2);
 
-    private static readonly string Suffix = $"{Environment.UserName}-{Process.GetCurrentProcess().SessionId}";
-    private static readonly string MutexName = $@"Local\ueBar-SingleInstance";
+    /// <summary>
+    /// For developers (P2-2): with its own data folder (UEBAR_DATA_DIR) ue Bar is a separate instance
+    /// with its own lock – e.g. for screenshots with demo data while the normal ue Bar keeps running.
+    /// Without the variable Debug and Release still share one lock (M2-Fix 1).
+    /// </summary>
+    private static readonly string DataDirSuffix =
+        UeBar.Core.AppPaths.IsCustom
+            ? "-" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(UeBar.Core.AppPaths.Default.Root.ToUpperInvariant())))[..12]
+            : "";
+
+    private static readonly string Suffix = $"{Environment.UserName}-{Process.GetCurrentProcess().SessionId}{DataDirSuffix}";
+    private static readonly string MutexName = $@"Local\ueBar-SingleInstance{DataDirSuffix}";
     private static readonly string PipeName = $"ueBar-ping-{Suffix}";
 
     private readonly Mutex _mutex;

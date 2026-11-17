@@ -70,6 +70,9 @@ public sealed class ModuleEntry
 
     internal ModuleStatus? LastModuleStatus { get; set; }
 
+    /// <summary>Visibility last passed to the module (<see cref="IVisibilityAware"/>), as a comparison key.</summary>
+    internal string? LastVisibilityKey { get; set; }
+
     internal SemaphoreSlim Gate { get; } = new(1, 1);
 }
 
@@ -93,6 +96,7 @@ public sealed class ModuleRegistry : IAsyncDisposable
     private int _shutdownStarted;
     private readonly Lock _lock = new();
     private LayoutDocument? _lastLayout;
+    private VisibilitySnapshot _lastVisibility = new(false, [], []);
 
     public ModuleRegistry(
         ModuleGuard guard,
@@ -108,7 +112,11 @@ public sealed class ModuleRegistry : IAsyncDisposable
         _dataRoot = dataRoot ?? AppPaths.Default.Root;
         _guard.ModuleFaulted += OnModuleFaulted;
         _bus.IsModuleAvailable = id => Find(id)?.IsAvailable == true;
+        Batteries = new DeviceBatteryHub(this);
     }
+
+    /// <summary>Device batteries across the modules (P2-2), offered on every module context.</summary>
+    internal DeviceBatteryHub Batteries { get; }
 
     /// <summary>Effective status of a module changed (may come from any thread).</summary>
     public event EventHandler<ModuleEntry>? ModuleStatusChanged;
@@ -480,6 +488,20 @@ public sealed class ModuleRegistry : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// What is on screen (P2-2): panel open, the tiles of the current tab, the visible status values.
+    /// Every module with <see cref="IVisibilityAware"/> gets its part – only when it changed for that
+    /// module. Remembered and passed again on every (re)start.
+    /// </summary>
+    public async Task NotifyVisibilityAsync(bool panelOpen, IReadOnlyList<TileConfig> visibleTiles, IReadOnlyList<StatusItemConfig> visibleStatus, CancellationToken cancellationToken = default)
+    {
+        _lastVisibility = new VisibilitySnapshot(panelOpen, [.. visibleTiles], [.. visibleStatus]);
+        foreach (var entry in Modules.Where(m => m.IsEnabled && m.Module is IVisibilityAware))
+        {
+            await PassVisibilityAsync(entry, force: false, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
     /// <summary>Synchronous call into a module (only for quick things like diagnostic queries), inside the fault protection.</summary>
     public GuardResult<T> Invoke<T>(string moduleId, string operation, Func<IModule, T> call)
     {
@@ -690,8 +712,13 @@ public sealed class ModuleRegistry : IAsyncDisposable
             await PassLayoutAsync(entry, cancellationToken).ConfigureAwait(false);
         }
 
+        if (entry.Module is IVisibilityAware)
+        {
+            await PassVisibilityAsync(entry, force: true, cancellationToken).ConfigureAwait(false);
+        }
+
         entry.Context?.Dispose();
-        var context = new ModuleContext(entry.Id, _bus.For(entry.Id), _log.ForModule(entry.Id), _guard, _dataRoot, _state as IModuleSecretStore, () => DeviceName?.Invoke() ?? "", UiCulture);
+        var context = new ModuleContext(entry.Id, _bus.For(entry.Id), _log.ForModule(entry.Id), _guard, _dataRoot, _state as IModuleSecretStore, () => DeviceName?.Invoke() ?? "", UiCulture, Batteries);
         entry.Context = context;
 
         var started = await _guard.RunAsync(
@@ -741,6 +768,39 @@ public sealed class ModuleRegistry : IAsyncDisposable
             return Task.CompletedTask;
         }, cancellationToken: cancellationToken);
     }
+
+    private Task PassVisibilityAsync(ModuleEntry entry, bool force, CancellationToken cancellationToken)
+    {
+        if (entry.Module is not IVisibilityAware aware)
+        {
+            return Task.CompletedTask;
+        }
+
+        var snapshot = _lastVisibility;
+        var tiles = snapshot.Tiles.Where(t => string.Equals(t.Module, entry.Id, StringComparison.OrdinalIgnoreCase)).ToList();
+        var status = snapshot.Status.Where(s => string.Equals(s.Module, entry.Id, StringComparison.OrdinalIgnoreCase)).ToList();
+        var info = tiles.Count == 0 && status.Count == 0 && !snapshot.PanelOpen
+            ? ModuleVisibility.Hidden
+            : new ModuleVisibility(snapshot.PanelOpen, tiles, status);
+        var key = $"{info.IsPanelOpen}|{string.Join(";", tiles.Select(t => $"{t.Id}:{t.Type}:{t.Size}:{string.Join(",", t.Entities.OrderBy(e => e.Key, StringComparer.Ordinal).Select(e => e.Key + "=" + e.Value))}"))}|{string.Join(";", status.Select(s => s.Entity))}";
+        lock (_lock)
+        {
+            if (!force && entry.LastVisibilityKey == key)
+            {
+                return Task.CompletedTask;
+            }
+
+            entry.LastVisibilityKey = key;
+        }
+
+        return _guard.RunAsync(entry.Id, "Pass visibility", _ =>
+        {
+            aware.OnVisibilityChanged(info);
+            return Task.CompletedTask;
+        }, cancellationToken: cancellationToken);
+    }
+
+    private sealed record VisibilitySnapshot(bool PanelOpen, IReadOnlyList<TileConfig> Tiles, IReadOnlyList<StatusItemConfig> Status);
 
     private void HandleStartProblem(ModuleEntry entry, GuardResult result, int generation)
     {

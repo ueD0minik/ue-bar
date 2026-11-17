@@ -102,12 +102,62 @@ public sealed class NowPlayingService
         }
     }
 
+    /// <summary>
+    /// Order of the sources set by the user (module IDs, first = preferred, P2-2). Modules that are
+    /// not listed follow by their <see cref="INowPlayingSource.NowPlayingPriority"/>.
+    /// </summary>
+    public Func<IReadOnlyList<string>>? SourceOrder { get; set; }
+
     /// <summary>Best playback from several sources (public for tests).</summary>
-    public static NowPlayingEntry? Choose(IEnumerable<NowPlayingEntry> candidates) =>
+    public static NowPlayingEntry? Choose(IEnumerable<NowPlayingEntry> candidates) => Choose(candidates, [], _ => 0);
+
+    /// <summary>
+    /// Best playback (P2-2): what is playing wins; then the user's order, then the module's priority
+    /// (higher first), then what played last.
+    /// </summary>
+    public static NowPlayingEntry? Choose(IEnumerable<NowPlayingEntry> candidates, IReadOnlyList<string> order, Func<string, int> priority) =>
         candidates
             .OrderByDescending(c => c.Info.IsPlaying)
+            .ThenBy(c => RankOf(order, c.ModuleId))
+            .ThenByDescending(c => priority(c.ModuleId))
             .ThenByDescending(c => c.Info.LastActive)
             .FirstOrDefault();
+
+    /// <summary>
+    /// All modules that can report playback, in the effective order (settings page): the user's
+    /// order first, then by priority, then by registration.
+    /// </summary>
+    public IReadOnlyList<ModuleEntry> OrderedSources()
+    {
+        var order = SourceOrder?.Invoke() ?? [];
+        return
+        [
+            .. _registry.Modules.Where(m => m.Module is INowPlayingSource)
+                .Select((m, index) => (Module: m, Index: index, Rank: RankOf(order, m.Id), Priority: Priority(m)))
+                .OrderBy(x => x.Rank)
+                .ThenByDescending(x => x.Priority)
+                .ThenBy(x => x.Index)
+                .Select(x => x.Module),
+        ];
+    }
+
+    private static int RankOf(IReadOnlyList<string> order, string moduleId)
+    {
+        for (var i = 0; i < order.Count; i++)
+        {
+            if (string.Equals(order[i], moduleId, StringComparison.OrdinalIgnoreCase))
+            {
+                return i;
+            }
+        }
+
+        return int.MaxValue;
+    }
+
+    private int Priority(ModuleEntry entry) =>
+        entry.IsLoaded
+            ? _registry.Invoke(entry.Id, "Playback priority", m => ((INowPlayingSource)m).NowPlayingPriority).Value
+            : 0;
 
     public void Refresh()
     {
@@ -127,7 +177,8 @@ public sealed class NowPlayingService
             }
         }
 
-        var best = Choose(candidates);
+        var priorities = candidates.ToDictionary(c => c.ModuleId, c => Priority(_registry.Find(c.ModuleId)!), StringComparer.OrdinalIgnoreCase);
+        var best = Choose(candidates, SourceOrder?.Invoke() ?? [], id => priorities.GetValueOrDefault(id));
         bool changed;
         lock (_lock)
         {

@@ -27,6 +27,9 @@ internal sealed class ExtrasController
     private readonly DispatcherTimer _queueTimer;
     private readonly Func<Core.Settings.SettingsService> _settings;
 
+    /// <summary>Playback across the modules (settings page: order of the sources).</summary>
+    public NowPlayingService NowPlaying => _nowPlaying;
+
     public ExtrasController(
         BarViewModel viewModel,
         BarController bar,
@@ -44,6 +47,7 @@ internal sealed class ExtrasController
         _dispatcher = dispatcher;
         _log = log;
         _nowPlaying = nowPlaying;
+        _nowPlaying.SourceOrder = () => _bar.Settings.NowPlayingOrder;
         _settings = settings;
         _queueTimer = new DispatcherTimer(DispatcherPriority.Normal, dispatcher);
         _queueTimer.Tick += (_, _) => AdvanceQueue();

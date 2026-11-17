@@ -5,8 +5,9 @@
 A slide-out dashboard for the top edge of your Windows screen. Move the mouse to the top
 edge: a small pill appears, and with it your tiles, a status line, notifications and a quick
 search. Inspired by the "Now Bar" of Samsung One UI. What the tiles show comes from
-**plugins** – [Home Assistant](plugins/HomeAssistant/README.md) is the first one and comes with
-ue Bar; more (Windows, phone, timers …) can be added without rebuilding the app.
+**plugins** – [Home Assistant](plugins/HomeAssistant/README.md) and [Windows](plugins/Windows/README.md)
+(volume, media, Wi-Fi, Bluetooth, batteries, system values of this PC) come with ue Bar; more
+(phone, timers …) can be added without rebuilding the app.
 
 ![Panel with tiles of an example home](docs/images/panel.png)
 
@@ -33,7 +34,7 @@ ue Bar; more (Windows, phone, timers …) can be added without rebuilding the ap
 - .NET 10 Desktop Runtime – the installer downloads it from Microsoft if it is missing; the
   portable version does not need it
 - What each plugin needs is in its README (Home Assistant: an instance reachable from the PC and
-  a long-lived access token)
+  a long-lived access token; Windows: nothing, Windows 10 2004 or later)
 
 ## Installation
 
@@ -74,6 +75,7 @@ as a ZIP with **Settings → Plugins → Add plugin …**.
 | Plugin | What it does | Comes with ue Bar |
 |---|---|---|
 | [Home Assistant](plugins/HomeAssistant/README.md) | Lights, climate, media, vacuums, sensors and more from Home Assistant; notifications, Assist, layout sync | yes |
+| [Windows](plugins/Windows/README.md) | This PC: volume and output device, app volume, media of all apps (also as Now Playing), Wi-Fi, Bluetooth, device batteries, battery, CPU, memory, disk, brightness, lock/sleep | yes |
 | [Test module](plugins/Dummy/README.md) | Simulated devices for developing and testing ue Bar | no – debug builds and a separate ZIP |
 | [Hello](samples/HelloPlugin) | Sample plugin: a counter tile, the starting point for your own | no – sample in the source |
 
@@ -102,7 +104,9 @@ powershell -ExecutionPolicy Bypass -File build/publish.ps1
 The results are written to `dist/`. For development, set the environment variable
 `UEBAR_DATA_DIR` to a test folder so your real settings stay untouched. `ueBar.exe --settings`
 (or `--settings=plugins`) opens the settings right after the start; `UEBAR_CULTURE=en-US` sets
-the number and date format without changing the Windows region.
+the number and date format without changing the Windows region. With its own `UEBAR_DATA_DIR`
+ue Bar runs as a separate instance next to your normal one; `UEBAR_WINDOWS_DEMO=1` gives the
+Windows plugin demo data (for screenshots).
 
 Repository layout: `src/` the app, bar, core and SDK · `plugins/<Name>/` the official plugins
 (`src/`, `tests/`, README) · `samples/` the sample plugin · `docs/` architecture and plugin guide.

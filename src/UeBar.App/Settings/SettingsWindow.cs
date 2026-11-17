@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UeBar.App.Bar;
+using UeBar.App.Bar.Converters;
 using UeBar.App.Bar.Edit;
 using UeBar.Bar;
 using UeBar.App.Localization;
@@ -57,6 +58,9 @@ internal sealed class SettingsHost
     public required Action ClearNotificationHistory { get; init; }
 
     public required Func<int> NotificationHistoryCount { get; init; }
+
+    /// <summary>Now Playing across the modules: order of the sources (P2-2).</summary>
+    public required NowPlayingService NowPlaying { get; init; }
 
     /// <summary>Device name/accent/columns/language changed → the app applies it.</summary>
     public required Action<GeneralSettings, GeneralSettings> GeneralChanged { get; init; }
@@ -183,7 +187,7 @@ internal sealed partial class SettingsWindow : Window
         Nav("plugins", Loc.Get("Settings_Plugins"), "");
         foreach (var module in _host.Registry.Modules.Where(m => m.IsLoaded))
         {
-            Nav("module:" + module.Id, module.DisplayName, null, indent: true);
+            Nav("module:" + module.Id, module.DisplayName, IconGlyphs.Get(module.Icon));
         }
 
         Nav("info", Loc.Get("Settings_Info"), "");
@@ -432,6 +436,76 @@ internal sealed partial class SettingsWindow : Window
             SwitchRow(Loc.Get("Bar_SoftwareRendering"), Loc.Get("Bar_SoftwareRendering_Hint"), s.SoftwareRendering,
                 v => _host.Bar.Update(b => b.SoftwareRendering = v)),
             Row(Loc.Get("Bar_Unpin"), Loc.Get("Bar_Unpin_Hint"), Button(Loc.Get("Panel_Unpin"), () => _host.Bar.Unpin()))));
+
+        page.Children.Add(NowPlayingOrderCard());
+    }
+
+    /// <summary>
+    /// Now Playing with several sources (P2-2): order of the modules, moved with up/down. What is
+    /// playing always wins over what is paused; the order decides between sources that both play.
+    /// </summary>
+    private Border NowPlayingOrderCard()
+    {
+        var list = new StackPanel { Margin = new Thickness(0, 6, 0, 0) };
+        var card = Card(Row(Loc.Get("NowPlaying_Order"), Loc.Get("NowPlaying_Order_Hint"), list, controlBelow: true));
+
+        void Fill()
+        {
+            list.Children.Clear();
+            var sources = _host.NowPlaying.OrderedSources();
+            if (sources.Count == 0)
+            {
+                list.Children.Add(Hint(Loc.Get("NowPlaying_NoSources")));
+                return;
+            }
+
+            for (var i = 0; i < sources.Count; i++)
+            {
+                var index = i;
+                var row = new DockPanel { Margin = new Thickness(0, 2, 0, 2), LastChildFill = true };
+                var up = SmallIconButton("", Loc.Get("NowPlaying_Up"), i > 0, () => Move(index, -1));
+                var down = SmallIconButton("", Loc.Get("NowPlaying_Down"), i < sources.Count - 1, () => Move(index, +1));
+                down.Margin = new Thickness(4, 0, 0, 0);
+                DockPanel.SetDock(down, Dock.Right);
+                DockPanel.SetDock(up, Dock.Right);
+                row.Children.Add(down);
+                row.Children.Add(up);
+                var name = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+                name.Children.Add(new TextBlock { Style = StyleOf("IconText"), FontSize = 14, Text = IconGlyphs.Get(sources[i].Icon), Width = 22, Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center });
+                name.Children.Add(new TextBlock { Text = $"{i + 1}. {sources[i].DisplayName}", FontSize = 14, VerticalAlignment = VerticalAlignment.Center });
+                row.Children.Add(name);
+                list.Children.Add(row);
+            }
+
+            void Move(int from, int delta)
+            {
+                var ids = sources.Select(s => s.Id).ToList();
+                var to = Math.Clamp(from + delta, 0, ids.Count - 1);
+                (ids[from], ids[to]) = (ids[to], ids[from]);
+                _host.Bar.Update(b => b.NowPlayingOrder = ids);
+                _host.NowPlaying.Refresh();
+                Fill();
+            }
+        }
+
+        Fill();
+        return card;
+
+        static Button SmallIconButton(string glyph, string tooltip, bool enabled, Action click)
+        {
+            var button = new Button
+            {
+                Style = StyleOf("BarButton"),
+                Content = new TextBlock { Style = StyleOf("IconText"), FontSize = 12, Text = glyph },
+                Width = 34,
+                Height = 30,
+                ToolTip = tooltip,
+                IsEnabled = enabled,
+                Background = Res("TabInactiveBrush"),
+            };
+            button.Click += (_, _) => click();
+            return button;
+        }
     }
 
     private static string DefaultHotkeyText => Hotkey.TryParse(HotkeyRecording.DefaultHotkey)?.DisplayText ?? HotkeyRecording.DefaultHotkey;
@@ -740,6 +814,39 @@ internal sealed partial class SettingsWindow : Window
                 Buttons(Button(Loc.Get("Tray_Export"), () => _host.Layout.Export(), icon: ""), Button(Loc.Get("Tray_Import"), () => _host.Layout.Import(), icon: "")), controlBelow: true),
             Row(Loc.Get("Layout_SetupAgain"), Loc.Get("Layout_SetupAgain_Hint"),
                 Button(Loc.Get("Layout_Show"), () => _host.ShowSetupAgain()), controlBelow: false)));
+
+        // P2-2: add the tabs a plugin suggests without replacing the layout.
+        var addable = LayoutSetup.AddableSuggestions(_host.Registry);
+        if (addable.Count > 0)
+        {
+            var chosen = addable[0].Id;
+            var result = Hint("");
+            var row = new StackPanel { Orientation = Orientation.Horizontal };
+            row.Children.Add(Combo(addable.Select(m => (m.DisplayName, m.Id)), chosen, v => chosen = v, width: 220));
+            async Task AddAsync()
+            {
+                var name = addable.FirstOrDefault(m => m.Id == chosen)?.DisplayName ?? chosen;
+                try
+                {
+                    var added = await _host.Layout.AddSuggestionAsync(chosen);
+                    result.Text = added > 0 ? Loc.F("Layout_AddSuggestion_Done", name) : Loc.Get("Layout_AddSuggestion_Nothing");
+                }
+                catch (Exception ex)
+                {
+                    _host.Log.Error(chosen, "Adding the suggestion failed", ex);
+                    result.Text = Loc.F("Layout_SaveFailed", ex.Message);
+                }
+            }
+
+            var add = Button(Loc.Get("Layout_AddSuggestion_Button"), () => _ = AddAsync(), icon: "");
+            add.Margin = new Thickness(10, 0, 0, 0);
+            row.Children.Add(add);
+            var content = new StackPanel();
+            content.Children.Add(row);
+            result.Margin = new Thickness(2, 6, 0, 0);
+            content.Children.Add(result);
+            page.Children.Add(Card(Row(Loc.Get("Layout_AddSuggestion"), Loc.Get("Layout_AddSuggestion_Hint"), content, controlBelow: true)));
+        }
     }
 
     // ------------------------------------------------------------------ Module pages (the list of plugins: SettingsWindow.Plugins.cs)

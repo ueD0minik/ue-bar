@@ -111,8 +111,15 @@ in. Plugins get `StopAsync` and their stop token; they must not rely on more tim
 | `IModuleBus` | communication between modules, only with permission |
 
 Further capabilities are separate optional interfaces (`IModuleDiagnostics`,
-`IQuickCommandProvider`, `INowPlayingSource`, `IImageSource`, `IUiLanguageInfo` on the context
-…). Modules implement only what they need; the core checks with `is`/`as`.
+`IQuickCommandProvider`, `INowPlayingSource`, `IImageSource`, `IVisibilityAware`,
+`IDeviceBatterySource`, `IUiLanguageInfo` and `IDeviceBatteryCatalog` on the context …). Modules
+implement only what they need; the core checks with `is`/`as`.
+
+Two of them keep collapsed ue Bar cheap: `IVisibilityAware` tells a module what of it is on screen
+(the tiles of the open tab, the status line), so it can poll only while something is visible; the
+app passes on only changes. `IDeviceBatterySource`/`IDeviceBatteryCatalog` let one plugin show the
+device batteries another plugin knows (e.g. a vendor plugin for a wireless dongle) – the core
+collects them, the plugins never see each other.
 
 ## Tiles are data
 

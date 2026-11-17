@@ -961,4 +961,34 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Modules_PluginHint" xml:space="preserve">
     <value>Entwickler-Plugin zum Ausprobieren.</value>
   </data>
+  <data name="NowPlaying_Order" xml:space="preserve">
+    <value>Now Playing: Reihenfolge der Quellen</value>
+  </data>
+  <data name="NowPlaying_Order_Hint" xml:space="preserve">
+    <value>Spielen mehrere Quellen gleichzeitig, zeigt die Pill die erste. Was gerade spielt, kommt immer vor Pausiertem.</value>
+  </data>
+  <data name="NowPlaying_NoSources" xml:space="preserve">
+    <value>Gerade meldet kein Plugin eine Wiedergabe.</value>
+  </data>
+  <data name="NowPlaying_Up" xml:space="preserve">
+    <value>Nach oben</value>
+  </data>
+  <data name="NowPlaying_Down" xml:space="preserve">
+    <value>Nach unten</value>
+  </data>
+  <data name="Layout_AddSuggestion" xml:space="preserve">
+    <value>Vorschlag eines Plugins hinzufügen</value>
+  </data>
+  <data name="Layout_AddSuggestion_Hint" xml:space="preserve">
+    <value>Fügt die Tabs hinzu, die das Plugin vorschlägt – dein Layout bleibt, wie es ist.</value>
+  </data>
+  <data name="Layout_AddSuggestion_Button" xml:space="preserve">
+    <value>Tabs hinzufügen</value>
+  </data>
+  <data name="Layout_AddSuggestion_Done" xml:space="preserve">
+    <value>Tabs von „{0}“ hinzugefügt.</value>
+  </data>
+  <data name="Layout_AddSuggestion_Nothing" xml:space="preserve">
+    <value>Nichts hinzugefügt (das Plugin hat gerade keinen Vorschlag, oder das Layout wird bearbeitet).</value>
+  </data>
 </root>

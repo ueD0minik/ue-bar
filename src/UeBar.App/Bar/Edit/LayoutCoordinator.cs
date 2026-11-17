@@ -82,6 +82,29 @@ internal sealed class LayoutCoordinator
         UpdateSetup();
     }
 
+    /// <summary>
+    /// Settings → Layout → "Add suggestion" (P2-2): appends the tabs a plugin suggests to the base
+    /// layout (backed up first, like an import). Returns the number of added tabs (0 = nothing done).
+    /// </summary>
+    public async Task<int> AddSuggestionAsync(string moduleId)
+    {
+        if (_session is not null)
+        {
+            return 0;
+        }
+
+        var current = _manager.Base;
+        if (LayoutSetup.AppendSuggestion(_registry, moduleId, current) is not { } merged || merged.Tabs.Count == current.Tabs.Count)
+        {
+            return 0;
+        }
+
+        await _manager.ImportAsync(merged);
+        _log.Info(moduleId, $"Suggestion added: {merged.Tabs.Count - current.Tabs.Count} tabs");
+        await ReloadAsync();
+        return merged.Tabs.Count - current.Tabs.Count;
+    }
+
     /// <summary>Show the first start as long as there is no base layout (M5b).</summary>
     public void UpdateSetup()
     {

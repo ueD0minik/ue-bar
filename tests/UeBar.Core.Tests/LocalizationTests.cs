@@ -33,7 +33,7 @@ internal static class SourceTree
     public static IReadOnlyList<string> PluginSources { get; } =
         [.. Directory.GetDirectories(Path.Combine(FindAppRoot(), "plugins")).Select(d => Path.Combine(d, "src")).Where(Directory.Exists).Order(StringComparer.Ordinal)];
 
-    /// <summary>Project folder (relative to app/) per short name as in the code: Core, App, Bar, Ha, Dummy.</summary>
+    /// <summary>Project folder (relative to app/) per short name as in the code: Core, App, Bar, Ha, Dummy, Win.</summary>
     public static IReadOnlyDictionary<string, string> Projects { get; } = new Dictionary<string, string>
     {
         ["Core"] = Path.Combine("src", "UeBar.Core"),
@@ -41,6 +41,7 @@ internal static class SourceTree
         ["Bar"] = Path.Combine("src", "UeBar.Bar"),
         ["Ha"] = Path.Combine("plugins", "HomeAssistant", "src"),
         ["Dummy"] = Path.Combine("plugins", "Dummy", "src"),
+        ["Win"] = Path.Combine("plugins", "Windows", "src"),
     };
 
     public static Dictionary<string, string> ReadResx(string project, string? language)
@@ -108,8 +109,8 @@ public sealed class ResourceCompletenessTests
     public void Every_key_used_in_the_code_exists()
     {
         var keys = SourceTree.Projects.ToDictionary(p => p.Key, p => SourceTree.ReadResx(p.Value, null).Keys.ToHashSet());
-        var catalogs = new Dictionary<string, string> { ["Loc"] = "App", ["CoreText"] = "Core", ["BarText"] = "Bar", ["HaText"] = "Ha", ["DummyText"] = "Dummy" };
-        var call = new Regex(@"\b(Loc|CoreText|BarText|HaText|DummyText)\.(?:Get\(|F\(|T\[|T\.Format\()""([A-Za-z0-9_]+)""");
+        var catalogs = new Dictionary<string, string> { ["Loc"] = "App", ["CoreText"] = "Core", ["BarText"] = "Bar", ["HaText"] = "Ha", ["DummyText"] = "Dummy", ["WinText"] = "Win" };
+        var call = new Regex(@"\b(Loc|CoreText|BarText|HaText|DummyText|WinText)\.(?:Get\(|F\(|T\[|T\.Format\()""([A-Za-z0-9_]+)""");
         var xaml = new Regex(@"\{l:T ([A-Za-z0-9_]+)\}");
         var literalKey = new Regex(@"""([A-Z][a-z][A-Za-z]*_[A-Za-z0-9_]+)""");
         var missing = new List<string>();

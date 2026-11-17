@@ -9,7 +9,7 @@ using UeBar.Core.Logging;
 namespace UeBar.Core.Modules;
 
 /// <summary>Context of a running module. Each start gets a new context with its own token.</summary>
-internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo, IUiLanguageInfo, IDisposable
+internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo, IUiLanguageInfo, IDeviceBatteryCatalog, IDisposable
 {
     private readonly ModuleGuard _guard;
     private readonly string _dataRoot;
@@ -19,9 +19,11 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
     private int _disposed;
 
     private readonly Func<string>? _deviceName;
+    private readonly DeviceBatteryHub? _batteries;
 
-    public ModuleContext(string moduleId, IModuleBus bus, IModuleLogger log, ModuleGuard guard, string dataRoot, Settings.IModuleSecretStore? secrets = null, Func<string>? deviceName = null, UiCultureSource? culture = null)
+    public ModuleContext(string moduleId, IModuleBus bus, IModuleLogger log, ModuleGuard guard, string dataRoot, Settings.IModuleSecretStore? secrets = null, Func<string>? deviceName = null, UiCultureSource? culture = null, DeviceBatteryHub? batteries = null)
     {
+        _batteries = batteries;
         _secrets = secrets;
         _deviceName = deviceName;
         _culture = culture ?? UiCultureSource.Shared;
@@ -32,6 +34,10 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
         _dataRoot = dataRoot;
         Stopping = _cts.Token;
         _culture.Changed += OnCultureChanged;
+        if (_batteries is not null)
+        {
+            _batteries.Changed += OnBatteriesChanged;
+        }
     }
 
     public string ModuleId { get; }
@@ -59,6 +65,11 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
     public CultureInfo UiCulture => _culture.Current;
 
     public event EventHandler<CultureInfo>? UiCultureChanged;
+
+    /// <summary>Device batteries of the other modules (P2-2).</summary>
+    public event EventHandler? DeviceBatteriesChanged;
+
+    public IReadOnlyList<DeviceBatteryInfo> GetDeviceBatteries() => _batteries?.Get(ModuleId) ?? [];
 
     public string? GetSecret(string key) => _secrets?.GetModuleSecret(ModuleId, key);
 
@@ -102,6 +113,17 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
         _guard.Invoke(ModuleId, "Language changed", () => handler(this, culture));
     }
 
+    private void OnBatteriesChanged(object? sender, string sourceModuleId)
+    {
+        if (string.Equals(sourceModuleId, ModuleId, StringComparison.OrdinalIgnoreCase)
+            || Volatile.Read(ref _disposed) != 0 || Stopping.IsCancellationRequested || DeviceBatteriesChanged is not { } handler)
+        {
+            return;
+        }
+
+        _guard.Invoke(ModuleId, "Device batteries changed", () => handler(this, EventArgs.Empty));
+    }
+
     public void Cancel()
     {
         if (Volatile.Read(ref _disposed) == 0)
@@ -122,6 +144,11 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
         if (Interlocked.Exchange(ref _disposed, 1) == 0)
         {
             _culture.Changed -= OnCultureChanged;
+            if (_batteries is not null)
+            {
+                _batteries.Changed -= OnBatteriesChanged;
+            }
+
             try
             {
                 _cts.Cancel();

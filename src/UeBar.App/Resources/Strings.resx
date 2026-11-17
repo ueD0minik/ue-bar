@@ -961,4 +961,34 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Modules_PluginHint" xml:space="preserve">
     <value>Developer plugin for trying things out.</value>
   </data>
+  <data name="NowPlaying_Order" xml:space="preserve">
+    <value>Now Playing: order of the sources</value>
+  </data>
+  <data name="NowPlaying_Order_Hint" xml:space="preserve">
+    <value>When several sources play at the same time, the pill shows the first one. What is playing always comes before what is paused.</value>
+  </data>
+  <data name="NowPlaying_NoSources" xml:space="preserve">
+    <value>No plugin reports playback right now.</value>
+  </data>
+  <data name="NowPlaying_Up" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="NowPlaying_Down" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="Layout_AddSuggestion" xml:space="preserve">
+    <value>Add a plugin's suggestion</value>
+  </data>
+  <data name="Layout_AddSuggestion_Hint" xml:space="preserve">
+    <value>Adds the tabs the plugin suggests – your layout stays as it is.</value>
+  </data>
+  <data name="Layout_AddSuggestion_Button" xml:space="preserve">
+    <value>Add tabs</value>
+  </data>
+  <data name="Layout_AddSuggestion_Done" xml:space="preserve">
+    <value>Tabs from “{0}” added.</value>
+  </data>
+  <data name="Layout_AddSuggestion_Nothing" xml:space="preserve">
+    <value>Nothing added (the plugin has no suggestion right now, or the layout is being edited).</value>
+  </data>
 </root>

@@ -40,6 +40,7 @@
        debug builds only. -->
   <ItemGroup>
     <BundledPlugin Include="..\..\plugins\HomeAssistant\src\UeBar.Modules.HomeAssistant.csproj" />
+    <BundledPlugin Include="..\..\plugins\Windows\src\UeBar.Modules.Windows.csproj" />
     <BundledPlugin Include="..\..\plugins\Dummy\src\UeBar.Modules.Dummy.csproj" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
   <Import Project="..\..\build\BundledPlugins.targets" />

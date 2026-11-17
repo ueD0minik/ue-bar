@@ -21,9 +21,11 @@
     <_BundledPluginRemoveProperties>RuntimeIdentifier;SelfContained;PublishDir;PublishProfile;PublishSingleFile;PublishReadyToRun;PublishTrimmed;IncludeNativeLibrariesForSelfExtract;TargetFramework;OutDir;OutputPath;BundledPluginsZip;StageBundledPlugins;_CommandLineDefinedOutputPath</_BundledPluginRemoveProperties>
   </PropertyGroup>
 
-  <!-- Build order only: no reference, nothing copied into the app's own folder -->
+  <!-- Build order only: no reference, nothing copied into the app's own folder. No target framework
+       negotiation either: a plugin may target a newer Windows SDK than the app (e.g. the Windows
+       plugin with net10.0-windows10.0.19041.0 for the WinRT projection). -->
   <ItemGroup Condition="'$(StageBundledPlugins)' == 'true'">
-    <ProjectReference Include="@(BundledPlugin)" ReferenceOutputAssembly="false" Private="false" />
+    <ProjectReference Include="@(BundledPlugin)" ReferenceOutputAssembly="false" Private="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
 
   <!-- Portable: the plugins travel inside the exe -->

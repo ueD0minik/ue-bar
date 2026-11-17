@@ -33,10 +33,13 @@ in a release is called `ueBar-plugin-<id>-<version>.zip`.
 ```powershell
 dotnet new classlib -n MyPlugin -f net10.0
 cd MyPlugin
-dotnet add package UeBar.Sdk --version 1.0.0
+dotnet add package UeBar.Sdk --version 1.1.0
 ```
 
-- Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF.
+- Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF. A plugin that needs
+  Windows Runtime APIs may target a Windows SDK version instead, e.g.
+  `net10.0-windows10.0.19041.0` (like the Windows plugin) – the WinRT projection then travels in
+  the plugin folder.
 - The SDK package is not on nuget.org (yet). Download `UeBar.Sdk.<version>.nupkg` from the
   [releases](https://github.com/ueD0minik/ue-bar/releases) and add its folder as a package source:
   `dotnet nuget add source C:\path\to\folder --name uebar-local`.
@@ -63,7 +66,7 @@ Next to the `.csproj`:
   "author": "Your Name",
   "license": "GPL-3.0-or-later",
   "homepage": "https://example.org/myplugin",
-  "sdkVersion": "1.0",
+  "sdkVersion": "1.1",
   "entryAssembly": "MyPlugin.dll"
 }
 ```
@@ -196,8 +199,10 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 | `INotificationSource` | notifications shown as a pill and in the history |
 | `IAssistProvider` / `IAssistConversationProvider` | answers text questions (the Assist field) |
 | `IQuickCommandProvider` | quick commands with a prefix, e.g. `+ milk` |
-| `INowPlayingSource` | what is playing right now |
+| `INowPlayingSource` | what is playing right now (`NowPlayingPriority`: rank among several sources, 1.1) |
 | `ILayoutAware` | the plugin's tiles in the current layout (to subscribe only what is shown) |
+| `IVisibilityAware` | what of the plugin is on screen right now – pause polling while nothing is visible (1.1) |
+| `IDeviceBatterySource` | battery levels of devices (headphones, mice …) for other plugins to show (1.1) |
 | `ILayoutStoreProvider` | a place to sync the layout (e.g. a server) |
 | `ILayoutSuggestionProvider` / `ILayoutSuggestionOptions` | a suggested layout for the first start |
 | `ITileSlotAssistant` | slot suggestions in edit mode |
@@ -207,7 +212,8 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 
 On the module context ue Bar offers more: `context as IHostInfo` (device name),
 `context as IModuleSecrets` (small encrypted secrets), `context as IUiLanguageInfo` (UI language
-and its change event).
+and its change event), `context as IDeviceBatteryCatalog` (device batteries reported by other
+plugins, 1.1).
 
 ## 6. Texts in two languages
 

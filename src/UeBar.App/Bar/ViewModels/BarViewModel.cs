@@ -69,7 +69,11 @@ internal sealed class TabViewModel : ObservableObject, IDisposable
         }
 
         GridHeight = Math.Max(GridMetrics.Span(rows), isEditing ? GridMetrics.Cell : 0);
+        TileConfigs = configs;
     }
+
+    /// <summary>Configurations of the tiles shown in this tab (for <see cref="IVisibilityAware"/>, P2-2).</summary>
+    public IReadOnlyList<TileConfig> TileConfigs { get; }
 
     public string Id { get; }
 
@@ -399,6 +403,7 @@ internal sealed class BarViewModel : ObservableObject
                 }
 
                 ContentSizeChanged?.Invoke(this, EventArgs.Empty);
+                PublishVisibility();
             }
         }
     }
@@ -421,6 +426,7 @@ internal sealed class BarViewModel : ObservableObject
             if (SetProperty(ref field, value))
             {
                 Media.MediaClock.PanelVisible = value;
+                PublishVisibility();
             }
         }
     }
@@ -462,6 +468,7 @@ internal sealed class BarViewModel : ObservableObject
             {
                 OnPropertyChanged(nameof(ShowTabs));
                 ContentSizeChanged?.Invoke(this, EventArgs.Empty);
+                PublishVisibility();
             }
         }
     }
@@ -564,9 +571,14 @@ internal sealed class BarViewModel : ObservableObject
         get;
         set
         {
-            if (SetProperty(ref field, value) && Media.ModuleImageLoader.Current is { } loader)
+            if (SetProperty(ref field, value))
             {
-                loader.PanelVisible = value;
+                if (Media.ModuleImageLoader.Current is { } loader)
+                {
+                    loader.PanelVisible = value;
+                }
+
+                PublishVisibility();
             }
         }
     }
@@ -686,6 +698,20 @@ internal sealed class BarViewModel : ObservableObject
 
             OnPropertyChanged(nameof(PillStatus));
             UpdatePill();
+            PublishVisibility();
         });
+    }
+
+    /// <summary>
+    /// Tells the modules what of them is on screen (P2-2, <see cref="IVisibilityAware"/>): the tiles of
+    /// the current tab while the panel is open, the status values while the bar is visible (the pill
+    /// shows the first one). The registry passes only changes on.
+    /// </summary>
+    private void PublishVisibility()
+    {
+        var open = IsPanelVisible;
+        IReadOnlyList<TileConfig> tiles = open && ShowTabs ? SelectedTab?.TileConfigs ?? [] : [];
+        IReadOnlyList<StatusItemConfig> status = IsBarVisible ? [.. _tiles.Layout.Status.Take(5)] : [];
+        _ = _registry.NotifyVisibilityAsync(open, tiles, status);
     }
 }
