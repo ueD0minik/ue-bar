@@ -511,6 +511,19 @@ internal sealed class BarViewModel : ObservableObject
 
     public bool HasNowPlaying => NowPlaying is not null;
 
+    /// <summary>Activity for the pill (P2-3), e.g. a running timer – shown before Now Playing.</summary>
+    public PillActivityViewModel? Activity
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                UpdatePill();
+            }
+        }
+    }
+
     public RelayCommand<string> NowPlayingCommand => field ??= new RelayCommand<string>(c =>
         NowPlayingRequested?.Invoke(this, c switch { "next" => UeBar.Sdk.NowPlayingCommand.Next, "previous" => UeBar.Sdk.NowPlayingCommand.Previous, _ => UeBar.Sdk.NowPlayingCommand.PlayPause }));
 
@@ -528,7 +541,10 @@ internal sealed class BarViewModel : ObservableObject
 
     private void UpdatePill()
     {
-        PillContent = Notification is not null ? PillContent.Notification : NowPlaying is not null ? PillContent.NowPlaying : PillContent.Status;
+        PillContent = Notification is not null ? PillContent.Notification
+            : Activity is not null ? PillContent.Activity
+            : NowPlaying is not null ? PillContent.NowPlaying
+            : PillContent.Status;
         PillChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -712,6 +728,6 @@ internal sealed class BarViewModel : ObservableObject
         var open = IsPanelVisible;
         IReadOnlyList<TileConfig> tiles = open && ShowTabs ? SelectedTab?.TileConfigs ?? [] : [];
         IReadOnlyList<StatusItemConfig> status = IsBarVisible ? [.. _tiles.Layout.Status.Take(5)] : [];
-        _ = _registry.NotifyVisibilityAsync(open, tiles, status);
+        _ = _registry.NotifyVisibilityAsync(open, tiles, status, barVisible: IsBarVisible);
     }
 }

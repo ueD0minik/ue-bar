@@ -8,10 +8,10 @@
     "en": "Fake tiles whose values live in memory only. For developers: tries out the bar and the fault protection without Home Assistant.",
     "de": "Fake-Kacheln, deren Werte nur im Speicher leben. Für Entwickler: probiert die Bar und den Fehlerschutz ohne Home Assistant aus."
   },
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": "Dominik Poschinger",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/ueD0minik/ue-bar",
-  "sdkVersion": "1.1",
+  "sdkVersion": "1.2",
   "entryAssembly": "UeBar.Modules.Dummy.dll"
 }

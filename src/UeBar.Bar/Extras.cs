@@ -314,7 +314,14 @@ public static class HotkeyBinder
 }
 
 /// <summary>A notification for the bar (independent of the module).</summary>
-public sealed record BarNotification(string Title, string Message, string? Icon, TimeSpan Duration, DateTimeOffset Timestamp, string? Source = null);
+public sealed record BarNotification(string Title, string Message, string? Icon, TimeSpan Duration, DateTimeOffset Timestamp, string? Source = null)
+{
+    /// <summary>ID the module gave it (comes back with a button press, P2-3).</summary>
+    public string? Id { get; init; }
+
+    /// <summary>Buttons (ID, label) – shown in the panel while it is the current notification.</summary>
+    public IReadOnlyList<(string Id, string Label)> Actions { get; init; } = [];
+}
 
 /// <summary>
 /// Order of notifications (M6): each one lands in the history (the last <see cref="HistoryLimit"/>).

@@ -47,7 +47,14 @@ public interface INowPlayingSource
 }
 
 /// <summary>A quick command with a prefix (e.g. "+" = add to the shopping list).</summary>
-public sealed record QuickCommandInfo(string Prefix, string Description, string? Icon = null);
+public sealed record QuickCommandInfo(string Prefix, string Description, string? Icon = null)
+{
+    /// <summary>
+    /// The command also works without text after the prefix (e.g. "pomo", contract 1.2). A prefix that
+    /// ends with a letter or digit always needs a space or the end of the text after it ("t 10", not "toaster").
+    /// </summary>
+    public bool ArgumentOptional { get; init; }
+}
 
 public sealed record QuickCommandResult(bool Success, string Message);
 

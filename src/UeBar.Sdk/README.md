@@ -8,7 +8,7 @@ with a `plugin.json`. It describes its tiles as data (`TileModel` with building 
 `TapAction`, `SliderElement`, `ValueDisplayElement`); ue Bar renders them. No WPF needed.
 
 ```xml
-<PackageReference Include="UeBar.Sdk" Version="1.1.0" />
+<PackageReference Include="UeBar.Sdk" Version="1.2.0" />
 ```
 
 ```

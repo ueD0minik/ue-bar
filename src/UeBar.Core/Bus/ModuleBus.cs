@@ -43,6 +43,20 @@ public sealed class ModuleBus
 
     public IModuleBus For(string moduleId) => new ScopedBus(this, moduleId);
 
+    /// <summary>Everything published right now, of all modules (P2-3: the settings page "May use").</summary>
+    public IReadOnlyList<BusPublication> GetAllPublications()
+    {
+        lock (_lock)
+        {
+            return
+            [
+                .. _actions.Select(kv => new BusPublication(kv.Key, kv.Value.Owner, BusAccess.Actions, kv.Value.Description)),
+                .. _events.Select(kv => new BusPublication(kv.Key, kv.Value.Owner, BusAccess.Events, kv.Value.Description)),
+                .. _values.Select(kv => new BusPublication(kv.Key, kv.Value.Owner, BusAccess.Values, kv.Value.Description)),
+            ];
+        }
+    }
+
     /// <summary>Removes all publications and subscriptions of a module (when it stops).</summary>
     public void RemoveModule(string moduleId)
     {
@@ -314,7 +328,7 @@ public sealed class ModuleBus
 
     private void RequestPermission(string consumer, string provider, BusAccess access, string? reason)
     {
-        _log.Info(consumer, $"Bus: Freigabe angefragt {consumer} → {provider} ({access}){(reason is null ? "" : $": {reason}")}");
+        _log.Info(consumer, $"Bus: permission requested {consumer} → {provider} ({access}){(reason is null ? "" : $": {reason}")}");
         _policy.RecordRequest(new BusPermissionRequest(consumer, provider, access, reason));
     }
 

@@ -66,6 +66,33 @@ public sealed record UeNotification(
 
     /// <summary>Origin (module ID); set by the core on receipt (M6).</summary>
     public string? Source { get; init; }
+
+    /// <summary>
+    /// ID chosen by the module (contract 1.2) – comes back with a button press
+    /// (<see cref="INotificationActionHandler"/>).
+    /// </summary>
+    public string? Id { get; init; }
+
+    /// <summary>Buttons on the notification (e.g. "+5 min", contract 1.2). Shown while the panel is open.</summary>
+    public IReadOnlyList<NotificationAction>? Actions { get; init; }
+
+    /// <summary>Show even while Windows "Do not disturb" is on (e.g. a timer, contract 1.2).</summary>
+    public bool IgnoreDoNotDisturb { get; init; }
+
+    /// <summary>Show even over fullscreen apps (contract 1.2).</summary>
+    public bool ShowInFullscreen { get; init; }
+
+    /// <summary>
+    /// Sound when it is shown (contract 1.2): <see cref="DefaultSound"/> = a Windows alarm sound,
+    /// otherwise the path of a sound file (.wav, .mp3); null = silent.
+    /// </summary>
+    public string? Sound { get; init; }
+
+    /// <summary>Volume of <see cref="Sound"/>, 0–1.</summary>
+    public double SoundVolume { get; init; } = 1;
+
+    /// <summary>Value for <see cref="Sound"/>: the Windows alarm sound.</summary>
+    public const string DefaultSound = "default";
 }
 
 /// <summary>Delivers notifications to the core; the core shows them.</summary>

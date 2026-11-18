@@ -33,7 +33,7 @@ in a release is called `ueBar-plugin-<id>-<version>.zip`.
 ```powershell
 dotnet new classlib -n MyPlugin -f net10.0
 cd MyPlugin
-dotnet add package UeBar.Sdk --version 1.1.0
+dotnet add package UeBar.Sdk --version 1.2.0
 ```
 
 - Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF. A plugin that needs
@@ -66,7 +66,7 @@ Next to the `.csproj`:
   "author": "Your Name",
   "license": "GPL-3.0-or-later",
   "homepage": "https://example.org/myplugin",
-  "sdkVersion": "1.1",
+  "sdkVersion": "1.2",
   "entryAssembly": "MyPlugin.dll"
 }
 ```
@@ -198,11 +198,14 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 | `IModuleDiagnostics` | diagnostic lines on the plugin's settings page |
 | `INotificationSource` | notifications shown as a pill and in the history |
 | `IAssistProvider` / `IAssistConversationProvider` | answers text questions (the Assist field) |
-| `IQuickCommandProvider` | quick commands with a prefix, e.g. `+ milk` |
+| `IQuickCommandProvider` | quick commands with a prefix, e.g. `+ milk`; a word prefix like `t` needs a space after it, `ArgumentOptional` allows the prefix alone (1.2) |
 | `INowPlayingSource` | what is playing right now (`NowPlayingPriority`: rank among several sources, 1.1) |
 | `ILayoutAware` | the plugin's tiles in the current layout (to subscribe only what is shown) |
 | `IVisibilityAware` | what of the plugin is on screen right now – pause polling while nothing is visible (1.1) |
 | `IDeviceBatterySource` | battery levels of devices (headphones, mice …) for other plugins to show (1.1) |
+| `IPillActivitySource` | something going on (e.g. a timer) the pill shows when it comes out (1.2) |
+| `INotificationActionHandler` | buttons on your notifications (`UeNotification.Actions`, e.g. "+5 min"); notifications can also bring a sound and show during "Do not disturb"/fullscreen (1.2) |
+| `IModuleSettingsActions` | buttons on your settings page (`SettingFieldKind.Button`, 1.2) |
 | `ILayoutStoreProvider` | a place to sync the layout (e.g. a server) |
 | `ILayoutSuggestionProvider` / `ILayoutSuggestionOptions` | a suggested layout for the first start |
 | `ITileSlotAssistant` | slot suggestions in edit mode |

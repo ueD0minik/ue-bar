@@ -110,22 +110,22 @@ public sealed class AppVolumeTests
     {
         await using var env = await new WinEnv().StartAsync();
         var tile = await env.TileAsync("win.app_mixer", WinIds.Apps);
-        Assert.Empty(tile.Elements.OfType<SliderElement>());
+        Assert.Empty(tile.ElementsOf<SliderElement>());
         Assert.Equal("Keine App spielt Ton", tile.StateText);
 
         env.Audio.SetApps(new AppAudio("spotify", "Spotify", 0.5, false, true), new AppAudio("chrome", "Google Chrome", 1, false, true), new AppAudio("discord", "Discord", 1, false, false));
 
-        Assert.True(await env.UntilAsync(() => tile.Elements.OfType<SliderElement>().Count() == 2));
-        Assert.Equal(["app:chrome", "app:spotify"], tile.Elements.OfType<SliderElement>().Select(s => s.Id).Order());
+        Assert.True(await env.UntilAsync(() => tile.ElementsOf<SliderElement>().Count() == 2));
+        Assert.Equal(["app:chrome", "app:spotify"], tile.ElementsOf<SliderElement>().Select(s => s.Id).Order());
         Assert.Equal("2 Apps spielen Ton", tile.StateText);
         Assert.Equal(2, tile.FindElement<ButtonRowElement>("mutes")!.Buttons.Count);
 
         env.Audio.SetApps(new AppAudio("spotify", "Spotify", 0.5, false, true));
-        Assert.True(await env.UntilAsync(() => tile.Elements.OfType<SliderElement>().Count() == 1));
+        Assert.True(await env.UntilAsync(() => tile.ElementsOf<SliderElement>().Count() == 1));
         Assert.Equal("Spotify", tile.StateText);
 
         env.Audio.SetApps();
-        Assert.True(await env.UntilAsync(() => tile.Elements.Count == 0));
+        Assert.True(await env.UntilAsync(() => tile.ElementsOf<TileElement>().Count == 0));
     }
 
     [Fact]
@@ -150,11 +150,11 @@ public sealed class AppVolumeTests
         await using var env = await new WinEnv().StartAsync();
         env.Audio.SetApps([.. Enumerable.Range(1, 5).Select(i => new AppAudio($"app{i}", $"App {i}", 1, false, true))]);
         var tile = await env.TileAsync("win.app_mixer", WinIds.Apps);
-        Assert.True(await env.UntilAsync(() => tile.Elements.OfType<SliderElement>().Count() == 3));
+        Assert.True(await env.UntilAsync(() => tile.ElementsOf<SliderElement>().Count() == 3));
 
         await env.Module.ApplySettingsAsync(new ModuleSettingValues(new Dictionary<string, string> { [WindowsSettings.AppVolumeKey] = "false" }), default);
 
-        Assert.True(await env.UntilAsync(() => !tile.Elements.OfType<SliderElement>().Any()));
+        Assert.True(await env.UntilAsync(() => !tile.ElementsOf<SliderElement>().Any()));
         Assert.Equal("In den Einstellungen ausgeschaltet", tile.StateText);
     }
 
@@ -537,6 +537,23 @@ public sealed class RadioAndDeviceTests
     }
 
     [Fact]
+    public async Task Hidden_network_name_says_why_and_the_settings_offer_location_access()
+    {
+        await using var env = await new WinEnv().StartAsync();
+        Assert.DoesNotContain(env.Module.SettingFields, f => f.Kind == SettingFieldKind.Button);
+
+        env.Radio.State = env.Radio.State with { WifiNetwork = null };
+        await env.Module.RefreshAsync(Area.Radio, default);
+        var tile = await env.TileAsync("win.wifi", WinIds.Wifi, TileSize.Wide);
+
+        Assert.Equal("Verbunden (Name: Standortzugriff nötig)", tile.StateText);
+        var button = Assert.Single(env.Module.SettingFields, f => f.Kind == SettingFieldKind.Button);
+        Assert.Equal("Standortzugriff öffnen", button.ButtonText);
+        Assert.NotNull(await env.Module.RunSettingsActionAsync(button.Key, default));
+        Assert.Contains("ms-settings:privacy-location", env.Shell.Calls);
+    }
+
+    [Fact]
     public async Task Refused_or_airplane_mode_says_why()
     {
         await using var env = await new WinEnv().StartAsync();
@@ -574,17 +591,27 @@ public sealed class RadioAndDeviceTests
         env.Registry.Register(vendor);
         Assert.True(await env.Registry.StartModuleAsync(vendor.Id));
         await env.StartAsync();
-        var tile = await env.TileAsync("win.devices", WinIds.Devices);
+        var config = WinEnv.Config("win.devices", WinIds.Devices);
+        var tile = await env.Registry.CreateTileAsync(config);
+        await env.Registry.NotifyVisibilityAsync(true, [config], []); // the list is on screen: it is kept up to date
 
-        Assert.True(await env.UntilAsync(() => tile.Elements.OfType<ValueDisplayElement>().Count() == 2));
-        var rows = tile.Elements.OfType<ValueDisplayElement>().ToList();
+        // While visible the plugin re-reads every polling round – the clock moves on, so a read that
+        // failed (e.g. a time limit on a busy machine) is retried.
+        bool Rows(int count)
+        {
+            env.Time.Advance(TimeSpan.FromSeconds(2));
+            return tile.ElementsOf<ValueDisplayElement>().Count() == count;
+        }
+
+        Assert.True(await env.UntilAsync(() => Rows(2)), string.Join(" | ", env.Log.Lines));
+        var rows = tile.ElementsOf<ValueDisplayElement>().ToList();
         Assert.Equal(["Headset", "Earbuds"], rows.Select(r => r.Label)); // lowest battery first
         Assert.Equal(["35", "70"], rows.Select(r => r.Value));
         Assert.Equal("2 verbunden", tile.StateText);
 
         // The vendor plugin reports a new level: the tile follows.
         vendor.Set(20);
-        Assert.True(await env.UntilAsync(() => tile.Elements.OfType<ValueDisplayElement>().First().Value == "20"));
+        Assert.True(await env.UntilAsync(() => Rows(2) && tile.ElementsOf<ValueDisplayElement>().First().Value == "20"), string.Join(" | ", env.Log.Lines));
 
         // The plugin's own Bluetooth batteries are offered to the others.
         var own = Assert.Single(env.Module.DeviceBatteries);

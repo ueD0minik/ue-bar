@@ -309,4 +309,22 @@
   <data name="Win_MediaSources" xml:space="preserve">
     <value>{0} · {1} Quellen</value>
   </data>
+  <data name="Win_ConnectedNoName" xml:space="preserve">
+    <value>Verbunden (Name: Standortzugriff nötig)</value>
+  </data>
+  <data name="Win_NameNeedsLocation" xml:space="preserve">
+    <value>Name: Standortzugriff nötig</value>
+  </data>
+  <data name="Win_LocationHint" xml:space="preserve">
+    <value>WLAN-Name nicht lesbar</value>
+  </data>
+  <data name="Win_LocationHint_Detail" xml:space="preserve">
+    <value>Seit Windows 11 24H2 bekommen Apps den Namen des WLANs nur mit Standortzugriff. Für Desktop-Apps einschalten, dann zeigt die Kachel den Namen.</value>
+  </data>
+  <data name="Win_LocationButton" xml:space="preserve">
+    <value>Standortzugriff öffnen</value>
+  </data>
+  <data name="Win_LocationOpened" xml:space="preserve">
+    <value>Windows-Einstellungen geöffnet – Standortzugriff für Desktop-Apps einschalten.</value>
+  </data>
 </root>

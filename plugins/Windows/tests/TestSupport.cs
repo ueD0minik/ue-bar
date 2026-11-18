@@ -351,6 +351,31 @@ internal sealed class FakeShell : IShellPlatform
     }
 }
 
+// ====================================================================== tiles
+
+internal static class TileRead
+{
+    /// <summary>
+    /// The tile's elements of one kind. The plugin changes them on its own thread (like the app, the
+    /// test reads a snapshot and tries again when it caught the list half way through a change).
+    /// </summary>
+    public static List<T> ElementsOf<T>(this TileModel tile)
+        where T : TileElement
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                return [.. tile.Elements.OfType<T>()];
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or IndexOutOfRangeException or ArgumentException && attempt < 100)
+            {
+                Thread.Sleep(1);
+            }
+        }
+    }
+}
+
 // ====================================================================== environment
 
 /// <summary>

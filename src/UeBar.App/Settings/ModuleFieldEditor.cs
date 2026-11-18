@@ -94,6 +94,24 @@ internal sealed class ModuleFieldEditor
         var value = current.GetString(field.Key) ?? field.DefaultValue;
         switch (field.Kind)
         {
+            case SettingFieldKind.Button:
+            {
+                // P2-3: a button the module runs (e.g. "Open location access"); stores nothing.
+                var result = Hint("");
+                async Task RunAsync()
+                {
+                    var run = await _registry.InvokeAsync(_module.Id, $"Settings button {field.Key}", (m, ct) =>
+                        m is IModuleSettingsActions actions ? actions.RunSettingsActionAsync(field.Key, ct) : Task.FromResult<string?>(null));
+                    result.Text = run.Succeeded ? run.Value ?? "" : Loc.Get("Modules_NotResponding");
+                }
+
+                var content = new StackPanel();
+                content.Children.Add(Button(field.ButtonText ?? field.Label, () => _ = RunAsync()));
+                result.Margin = new Thickness(2, 6, 0, 0);
+                content.Children.Add(result);
+                return Row(field.Label, field.Description, content, controlBelow: true);
+            }
+
             case SettingFieldKind.Toggle:
                 return SwitchRow(field.Label, field.Description, bool.TryParse(value, out var b) && b, v => Changed(field, v ? "true" : "false"));
 

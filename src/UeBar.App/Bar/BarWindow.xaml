@@ -77,6 +77,26 @@
                                    Text="{Binding NowPlaying.PlayPauseGlyph}" />
                     </StackPanel>
 
+                    <!-- Activity (P2-3), e.g. a running timer: icon + title + remaining time -->
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PillContent}" Value="{x:Static vm:PillContent.Activity}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Style="{StaticResource IconText}" FontSize="15" Foreground="{DynamicResource AccentBrush}"
+                                   Text="{Binding Activity.Icon, Converter={StaticResource IconGlyph}}" />
+                        <TextBlock Margin="8,0,0,0" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" MaxWidth="200"
+                                   TextTrimming="CharacterEllipsis" Text="{Binding Activity.Title}" />
+                        <TextBlock Margin="8,0,0,0" FontSize="13" VerticalAlignment="Center" Typography.NumeralAlignment="Tabular"
+                                   Text="{Binding Activity.Text}" />
+                    </StackPanel>
+
                     <!-- Notification: icon + title + text -->
                     <StackPanel Orientation="Horizontal">
                         <StackPanel.Style>

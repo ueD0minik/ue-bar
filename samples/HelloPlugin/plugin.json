@@ -12,6 +12,6 @@
   "author": "Dominik Poschinger",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/ueD0minik/ue-bar/tree/main/samples/HelloPlugin",
-  "sdkVersion": "1.1",
+  "sdkVersion": "1.2",
   "entryAssembly": "HelloPlugin.dll"
 }

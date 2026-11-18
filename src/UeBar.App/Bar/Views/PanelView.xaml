@@ -206,10 +206,32 @@
                 <TextBlock Style="{StaticResource IconText}" FontSize="16" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,2,10,0"
                            Text="{Binding Notification.Icon, Converter={StaticResource IconGlyph}}" />
                 <StackPanel Grid.Column="1">
-                    <TextBlock Text="{Binding Notification.Title}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Notification.Title}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,28,0" />
                     <TextBlock Style="{StaticResource SubText}" FontSize="12" Text="{Binding Notification.Message}" TextWrapping="Wrap"
                                Visibility="{Binding Notification.HasMessage, Converter={StaticResource BoolToVisibility}, FallbackValue=Collapsed}" />
+                    <!-- Buttons of the notification (P2-3), e.g. "+5 min" -->
+                    <ItemsControl ItemsSource="{Binding Notification.Actions}" Margin="0,6,0,0"
+                                  Visibility="{Binding Notification.HasActions, Converter={StaticResource BoolToVisibility}, FallbackValue=Collapsed}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource BarButton}" Height="28" Padding="12,0" Margin="0,0,6,0" Command="{Binding Command}"
+                                        Background="{DynamicResource AccentBrush}">
+                                    <TextBlock Text="{Binding Label}" FontSize="12" />
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
+                <Button Grid.Column="1" Width="24" Height="24" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Style="{StaticResource BarButton}" Command="{Binding Notification.DismissCommand}" ToolTip="{l:T Notify_Dismiss}"
+                        Visibility="{Binding Notification.CanDismiss, Converter={StaticResource BoolToVisibility}, FallbackValue=Collapsed}">
+                    <TextBlock Style="{StaticResource IconText}" FontSize="10" Text="&#xE711;" />
+                </Button>
             </Grid>
         </Border>
 

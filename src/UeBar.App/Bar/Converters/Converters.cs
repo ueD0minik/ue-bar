@@ -55,11 +55,13 @@ public sealed class UiMirror : ObservableCollection<object>
         object[] snapshot;
         try
         {
-            snapshot = [.. _source.Cast<object>()];
+            snapshot = [.. _source.Cast<object?>().OfType<object>()];
         }
-        catch (InvalidOperationException)
+        catch (Exception ex) when (ex is InvalidOperationException or IndexOutOfRangeException or ArgumentException)
         {
-            // The source was just changed on another thread – try again right away.
+            // The source was just changed on another thread – try again right away. Depending on the
+            // moment the list reports the change (InvalidOperation) or is caught half way through
+            // growing (IndexOutOfRange; P2-3).
             Application.Current?.Dispatcher.BeginInvoke(Resync);
             return;
         }

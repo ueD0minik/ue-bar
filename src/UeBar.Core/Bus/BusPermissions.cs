@@ -42,7 +42,10 @@ public sealed class GrantListPermissionPolicy : IBusPermissionPolicy
     {
     }
 
-    /// <summary>Open requests (no UI yet).</summary>
+    /// <summary>A request came in or was settled (P2-3: the settings show a hint with "Allow"). From any thread.</summary>
+    public event EventHandler? RequestsChanged;
+
+    /// <summary>Open requests (shown in Settings → Plugins → the consumer's page).</summary>
     public IReadOnlyList<BusPermissionRequest> PendingRequests
     {
         get
@@ -76,12 +79,38 @@ public sealed class GrantListPermissionPolicy : IBusPermissionPolicy
 
     public void RecordRequest(BusPermissionRequest request)
     {
+        bool added;
         lock (_lock)
         {
-            if (!_requests.Contains(request))
+            added = !_requests.Any(r => SameRequest(r, request.ConsumerModuleId, request.ProviderModuleId) && (r.Access & request.Access) == request.Access);
+            if (added)
             {
                 _requests.Add(request);
             }
         }
+
+        if (added)
+        {
+            RequestsChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
+
+    /// <summary>Drops the requests of a pair (answered: allowed or declined).</summary>
+    public void SettleRequests(string consumerModuleId, string providerModuleId)
+    {
+        int removed;
+        lock (_lock)
+        {
+            removed = _requests.RemoveAll(r => SameRequest(r, consumerModuleId, providerModuleId));
+        }
+
+        if (removed > 0)
+        {
+            RequestsChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private static bool SameRequest(BusPermissionRequest request, string consumer, string provider) =>
+        string.Equals(request.ConsumerModuleId, consumer, StringComparison.OrdinalIgnoreCase)
+        && string.Equals(request.ProviderModuleId, provider, StringComparison.OrdinalIgnoreCase);
 }

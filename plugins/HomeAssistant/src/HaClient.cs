@@ -439,6 +439,17 @@ internal sealed class HaClient
 
     private bool _sessionReady;
 
+    /// <summary>The session loop runs (connected, everything loaded) – for tests that need a defined state.</summary>
+    internal bool IsSessionReady => Volatile.Read(ref _sessionReady);
+
+    /// <summary>
+    /// A network change is being debounced right now (the debounce wait is armed) – for tests that drive the
+    /// clock: they move it only once the client really waits for it.
+    /// </summary>
+    internal bool IsDebouncingNetworkChange => Volatile.Read(ref _debouncing);
+
+    private bool _debouncing;
+
     /// <summary>State of a (not subscribed) entity on demand (REST /api/states/&lt;id&gt;).</summary>
     public async Task<HaEntityState?> FetchStateAsync(string entityId, CancellationToken ct)
     {
@@ -752,8 +763,16 @@ internal sealed class HaClient
     private async Task<SessionEnd?> HandleNetworkChangeAsync(HaConnection connection, bool isLocal, CancellationToken ct)
     {
         // Combine further events within the debounce time.
-        while (await WaitAnyAsync(_options.NetworkDebounce, ct, _networkChanged).ConfigureAwait(false) == _networkChanged)
+        _log.Log(LogLevel.Debug, $"Network change: waiting {Seconds(_options.NetworkDebounce)} for more");
+        try
         {
+            while (await WaitAnyAsync(_options.NetworkDebounce, ct, _networkChanged, onArmed: () => Volatile.Write(ref _debouncing, true)).ConfigureAwait(false) == _networkChanged)
+            {
+            }
+        }
+        finally
+        {
+            Volatile.Write(ref _debouncing, false);
         }
 
         if (connection.Completion.IsCompleted || !await connection.PingAsync(_options.PongTimeout, ct, _options.Time).ConfigureAwait(false))
@@ -992,10 +1011,16 @@ internal sealed class HaClient
     }
 
     /// <summary>Waits for time, a task or one of the signals. Returns what woke it (or null = time).</summary>
-    private async Task<object?> WaitAnyAsync(TimeSpan delay, CancellationToken ct, params object[] wakers)
+    private Task<object?> WaitAnyAsync(TimeSpan delay, CancellationToken ct, params object[] wakers) => WaitAnyAsync(delay, ct, wakers, null);
+
+    private Task<object?> WaitAnyAsync(TimeSpan delay, CancellationToken ct, object waker, Action onArmed) => WaitAnyAsync(delay, ct, [waker], onArmed);
+
+    /// <param name="onArmed">Called once the time wait is registered with the clock.</param>
+    private async Task<object?> WaitAnyAsync(TimeSpan delay, CancellationToken ct, object[] wakers, Action? onArmed)
     {
         using var delayCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         var tasks = new List<(object Source, Task Task)> { (null!, Task.Delay(delay, _options.Time, delayCts.Token)) };
+        onArmed?.Invoke();
         foreach (var waker in wakers)
         {
             tasks.Add((waker, waker switch

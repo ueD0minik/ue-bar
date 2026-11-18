@@ -53,8 +53,13 @@ internal abstract class WinTileType(WindowsModule module) : ITileType
         var tile = new TileModel { Title = DisplayName, Icon = Icon };
         Build(tile, entity);
         tile.Handler = new DelegateInteractionHandler((t, i, ct) => HandleAsync(t, entity, i, ct));
-        Module.Track(tile, this, config, entity);
-        Refresh(tile, config, entity, Module.State);
+        lock (Module.ViewLock)
+        {
+            // Tracked first, so no change is missed – the lock keeps the worker off it meanwhile.
+            Module.Track(tile, this, config, entity);
+            Refresh(tile, config, entity, Module.State);
+        }
+
         return tile;
     }
 
@@ -536,10 +541,16 @@ internal sealed class WifiTileType(WindowsModule module) : WinTileType(module)
         tile.IsUnavailable = r.Wifi == RadioSwitch.Unavailable;
         tile.StateText = r.Wifi != RadioSwitch.On ? WinFormat.Radio(r.Wifi)
             : !r.WifiConnected ? T["Win_NotConnected"]
-            : r.WifiNetwork ?? T["Win_Connected"];
+            : r.WifiNetwork ?? T["Win_ConnectedNoName"];
         if (tile.FindElement<ValueDisplayElement>("network") is { } value)
         {
             value.Value = r.Wifi == RadioSwitch.On && r.WifiConnected ? r.WifiNetwork ?? T["Win_Connected"] : WinFormat.Radio(r.Wifi);
+            if (r.NetworkNameHidden)
+            {
+                value.Label = T["Win_NameNeedsLocation"];
+                return;
+            }
+
             value.Label = r.WifiConnected ? WinFormat.Bars(r.WifiBars) : null;
         }
     }

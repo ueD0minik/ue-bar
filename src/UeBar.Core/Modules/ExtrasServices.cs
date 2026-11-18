@@ -253,13 +253,22 @@ public sealed class QuickCommandService(ModuleRegistry registry, IUeLogger log)
         var trimmed = text?.Trim() ?? "";
         foreach (var (moduleId, command) in commands.Where(c => !string.IsNullOrWhiteSpace(c.Command.Prefix)).OrderByDescending(c => c.Command.Prefix.Length))
         {
-            if (trimmed.StartsWith(command.Prefix, StringComparison.OrdinalIgnoreCase))
+            var prefix = command.Prefix.Trim();
+            if (!trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
-                var argument = trimmed[command.Prefix.Length..].Trim();
-                if (argument.Length > 0)
-                {
-                    return new QuickCommandMatch(moduleId, command, argument);
-                }
+                continue;
+            }
+
+            // A word prefix ("t", "pomo") needs a space or the end after it: "toaster" is no timer (P2-3).
+            if (char.IsLetterOrDigit(prefix[^1]) && trimmed.Length > prefix.Length && !char.IsWhiteSpace(trimmed[prefix.Length]))
+            {
+                continue;
+            }
+
+            var argument = trimmed[prefix.Length..].Trim();
+            if (argument.Length > 0 || command.ArgumentOptional)
+            {
+                return new QuickCommandMatch(moduleId, command, argument);
             }
         }
 

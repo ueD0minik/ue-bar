@@ -5,9 +5,9 @@
 Ein ausfahrbares Dashboard am oberen Bildschirmrand von Windows. Maus an den oberen Rand: Eine
 kleine Pill erscheint und mit ihr deine Kacheln, eine Statuszeile, Benachrichtigungen und eine
 Schnellsuche. Vorbild ist die „Now Bar“ von Samsung One UI. Was die Kacheln zeigen, kommt aus
-**Plugins** – [Home Assistant](plugins/HomeAssistant/README.de.md) und [Windows](plugins/Windows/README.de.md)
-(Lautstärke, Medien, WLAN, Bluetooth, Akkus, Systemwerte dieses PCs) werden mitgeliefert; weitere
-(Handy, Timer …) kommen dazu, ohne die App neu zu bauen.
+**Plugins** – [Home Assistant](plugins/HomeAssistant/README.de.md), [Windows](plugins/Windows/README.de.md)
+(Lautstärke, Medien, WLAN, Bluetooth, Akkus, Systemwerte dieses PCs) und [Timer](plugins/Timer/README.de.md)
+(Timer, Stoppuhr, Pomodoro) werden mitgeliefert; weitere kommen dazu, ohne die App neu zu bauen.
 
 ![Panel mit Kacheln eines Beispiel-Zuhauses](docs/images/panel.png)
 
@@ -77,6 +77,7 @@ Quelle und eine deutliche Warnung) und wieder, wenn sich seine Dateien ändern. 
 |---|---|---|
 | [Home Assistant](plugins/HomeAssistant/README.de.md) | Lichter, Klima, Medien, Staubsauger, Sensoren u. v. m. aus Home Assistant; Benachrichtigungen, Assist, Layout-Sync | ja |
 | [Windows](plugins/Windows/README.de.md) | Dieser PC: Lautstärke und Ausgabegerät, App-Lautstärke, Medien aller Apps (auch als Now Playing), WLAN, Bluetooth, Geräte-Akkus, Akku, CPU, Arbeitsspeicher, Datenträger, Helligkeit, Sperren/Energiesparen | ja |
+| [Timer](plugins/Timer/README.de.md) | Timer mit Voreinstellungen und Namen, Stoppuhr, Pomodoro (kann Aktionen anderer Plugins auslösen); `t 10` in der Schnellsuche, Restzeit in der Pill | ja |
 | [Test-Modul](plugins/Dummy/README.de.md) | Simulierte Geräte zum Entwickeln und Testen von ue Bar | nein – Debug-Builds und eigenes ZIP |
 | [Hallo](samples/HelloPlugin) | Beispiel-Plugin: eine Zähler-Kachel, Ausgangspunkt für eigene | nein – Beispiel im Quellcode |
 

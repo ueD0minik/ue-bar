@@ -96,7 +96,7 @@ public sealed class ModuleRegistry : IAsyncDisposable
     private int _shutdownStarted;
     private readonly Lock _lock = new();
     private LayoutDocument? _lastLayout;
-    private VisibilitySnapshot _lastVisibility = new(false, [], []);
+    private VisibilitySnapshot _lastVisibility = new(false, [], [], false);
 
     public ModuleRegistry(
         ModuleGuard guard,
@@ -493,9 +493,9 @@ public sealed class ModuleRegistry : IAsyncDisposable
     /// Every module with <see cref="IVisibilityAware"/> gets its part – only when it changed for that
     /// module. Remembered and passed again on every (re)start.
     /// </summary>
-    public async Task NotifyVisibilityAsync(bool panelOpen, IReadOnlyList<TileConfig> visibleTiles, IReadOnlyList<StatusItemConfig> visibleStatus, CancellationToken cancellationToken = default)
+    public async Task NotifyVisibilityAsync(bool panelOpen, IReadOnlyList<TileConfig> visibleTiles, IReadOnlyList<StatusItemConfig> visibleStatus, CancellationToken cancellationToken = default, bool? barVisible = null)
     {
-        _lastVisibility = new VisibilitySnapshot(panelOpen, [.. visibleTiles], [.. visibleStatus]);
+        _lastVisibility = new VisibilitySnapshot(panelOpen, [.. visibleTiles], [.. visibleStatus], barVisible ?? (panelOpen || visibleStatus.Count > 0));
         foreach (var entry in Modules.Where(m => m.IsEnabled && m.Module is IVisibilityAware))
         {
             await PassVisibilityAsync(entry, force: false, cancellationToken).ConfigureAwait(false);
@@ -779,10 +779,10 @@ public sealed class ModuleRegistry : IAsyncDisposable
         var snapshot = _lastVisibility;
         var tiles = snapshot.Tiles.Where(t => string.Equals(t.Module, entry.Id, StringComparison.OrdinalIgnoreCase)).ToList();
         var status = snapshot.Status.Where(s => string.Equals(s.Module, entry.Id, StringComparison.OrdinalIgnoreCase)).ToList();
-        var info = tiles.Count == 0 && status.Count == 0 && !snapshot.PanelOpen
+        var info = tiles.Count == 0 && status.Count == 0 && !snapshot.PanelOpen && !snapshot.BarVisible
             ? ModuleVisibility.Hidden
-            : new ModuleVisibility(snapshot.PanelOpen, tiles, status);
-        var key = $"{info.IsPanelOpen}|{string.Join(";", tiles.Select(t => $"{t.Id}:{t.Type}:{t.Size}:{string.Join(",", t.Entities.OrderBy(e => e.Key, StringComparer.Ordinal).Select(e => e.Key + "=" + e.Value))}"))}|{string.Join(";", status.Select(s => s.Entity))}";
+            : new ModuleVisibility(snapshot.PanelOpen, tiles, status) { IsBarVisible = snapshot.BarVisible };
+        var key = $"{info.IsPanelOpen}|{info.IsBarVisible}|{string.Join(";", tiles.Select(t => $"{t.Id}:{t.Type}:{t.Size}:{string.Join(",", t.Entities.OrderBy(e => e.Key, StringComparer.Ordinal).Select(e => e.Key + "=" + e.Value))}"))}|{string.Join(";", status.Select(s => s.Entity))}";
         lock (_lock)
         {
             if (!force && entry.LastVisibilityKey == key)
@@ -800,7 +800,7 @@ public sealed class ModuleRegistry : IAsyncDisposable
         }, cancellationToken: cancellationToken);
     }
 
-    private sealed record VisibilitySnapshot(bool PanelOpen, IReadOnlyList<TileConfig> Tiles, IReadOnlyList<StatusItemConfig> Status);
+    private sealed record VisibilitySnapshot(bool PanelOpen, IReadOnlyList<TileConfig> Tiles, IReadOnlyList<StatusItemConfig> Status, bool BarVisible);
 
     private void HandleStartProblem(ModuleEntry entry, GuardResult result, int generation)
     {

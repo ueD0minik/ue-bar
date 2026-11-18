@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="Timer_ModuleName" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+  <data name="Timer_TabName" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+  <data name="Timer_SlotMain" xml:space="preserve">
+    <value>Was</value>
+  </data>
+  <data name="Timer_Default" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+  <data name="Timer_NewTimer" xml:space="preserve">
+    <value>Neuer Timer</value>
+  </data>
+  <data name="Timer_NewTimerHint" xml:space="preserve">
+    <value>Voreinstellungen oder eigene Dauer</value>
+  </data>
+  <data name="Timer_Running" xml:space="preserve">
+    <value>Laufende Timer</value>
+  </data>
+  <data name="Timer_NoneRunning" xml:space="preserve">
+    <value>Kein Timer läuft</value>
+  </data>
+  <data name="Timer_CountRunning" xml:space="preserve">
+    <value>{0} laufen</value>
+  </data>
+  <data name="Timer_TapToStart" xml:space="preserve">
+    <value>Tippen: {0}</value>
+  </data>
+  <data name="Timer_StartFirstPreset" xml:space="preserve">
+    <value>Erste Voreinstellung starten</value>
+  </data>
+  <data name="Timer_Presets" xml:space="preserve">
+    <value>Starten</value>
+  </data>
+  <data name="Timer_OwnDuration" xml:space="preserve">
+    <value>Eigene</value>
+  </data>
+  <data name="Timer_StartMinutes" xml:space="preserve">
+    <value>{0} min starten</value>
+  </data>
+  <data name="Timer_Paused" xml:space="preserve">
+    <value>Pausiert</value>
+  </data>
+  <data name="Timer_EndsAt" xml:space="preserve">
+    <value>bis {0}</value>
+  </data>
+  <data name="Timer_PauseResume" xml:space="preserve">
+    <value>Pausieren/fortsetzen</value>
+  </data>
+  <data name="Timer_PlusOne" xml:space="preserve">
+    <value>+1 min</value>
+  </data>
+  <data name="Timer_Stop" xml:space="preserve">
+    <value>Stoppen und entfernen</value>
+  </data>
+  <data name="Timer_PlusFive" xml:space="preserve">
+    <value>+5 min</value>
+  </data>
+  <data name="Timer_FinishedAfter" xml:space="preserve">
+    <value>{0} sind um</value>
+  </data>
+  <data name="Timer_FinishedAt" xml:space="preserve">
+    <value>Abgelaufen um {0}</value>
+  </data>
+  <data name="Timer_NextStatus" xml:space="preserve">
+    <value>Nächster Timer</value>
+  </data>
+  <data name="Timer_Stopwatch" xml:space="preserve">
+    <value>Stoppuhr</value>
+  </data>
+  <data name="Timer_StopwatchReady" xml:space="preserve">
+    <value>Bereit</value>
+  </data>
+  <data name="Timer_StartPause" xml:space="preserve">
+    <value>Start/Pause</value>
+  </data>
+  <data name="Timer_LapButton" xml:space="preserve">
+    <value>Runde</value>
+  </data>
+  <data name="Timer_Reset" xml:space="preserve">
+    <value>Zurücksetzen</value>
+  </data>
+  <data name="Timer_Lap" xml:space="preserve">
+    <value>R{0} {1}</value>
+  </data>
+  <data name="Timer_Laps" xml:space="preserve">
+    <value>{0} Runden</value>
+  </data>
+  <data name="Timer_Seconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="Timer_Minutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="Timer_MinutesSeconds" xml:space="preserve">
+    <value>{0} min {1} s</value>
+  </data>
+  <data name="Timer_Hours" xml:space="preserve">
+    <value>{0} h</value>
+  </data>
+  <data name="Timer_HoursMinutes" xml:space="preserve">
+    <value>{0} h {1} min</value>
+  </data>
+  <data name="Timer_QuickCommand" xml:space="preserve">
+    <value>Timer starten: t 10, t 1:30, t 25 Lernen</value>
+  </data>
+  <data name="Timer_QuickCommandUsage" xml:space="preserve">
+    <value>Timer: t 10 (Minuten), t 1:30 (Stunden:Minuten), t 90s, t 25 Lernen (mit Namen)</value>
+  </data>
+  <data name="Timer_Started" xml:space="preserve">
+    <value>Timer gestartet: {0}</value>
+  </data>
+  <data name="Timer_StartedNamed" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Timer_NoAction" xml:space="preserve">
+    <value>Keine Aktion</value>
+  </data>
+  <data name="Timer_PermissionReason" xml:space="preserve">
+    <value>Pomodoro möchte {0} ausführen</value>
+  </data>
+  <data name="Timer_SoundDefault" xml:space="preserve">
+    <value>Windows-Alarm</value>
+  </data>
+  <data name="Timer_SoundFile" xml:space="preserve">
+    <value>Eigene Tondatei</value>
+  </data>
+  <data name="Timer_SoundNone" xml:space="preserve">
+    <value>Kein Ton</value>
+  </data>
+  <data name="Timer_SettingPresets" xml:space="preserve">
+    <value>Voreinstellungen (Minuten)</value>
+  </data>
+  <data name="Timer_SettingPresets_Hint" xml:space="preserve">
+    <value>Durch Komma getrennt, bis zu sechs – auch 1:30 oder 90s.</value>
+  </data>
+  <data name="Timer_SettingWork" xml:space="preserve">
+    <value>Pomodoro: Arbeiten (Minuten)</value>
+  </data>
+  <data name="Timer_SettingShortBreak" xml:space="preserve">
+    <value>Pomodoro: kurze Pause (Minuten)</value>
+  </data>
+  <data name="Timer_SettingLongBreak" xml:space="preserve">
+    <value>Pomodoro: lange Pause (Minuten)</value>
+  </data>
+  <data name="Timer_SettingMinutes_Hint" xml:space="preserve">
+    <value>Dezimalzahlen gehen (0,5 = 30 s) – praktisch zum Ausprobieren.</value>
+  </data>
+  <data name="Timer_SettingRounds" xml:space="preserve">
+    <value>Pomodoro: Runden bis zur langen Pause</value>
+  </data>
+  <data name="Timer_SettingSound" xml:space="preserve">
+    <value>Ton</value>
+  </data>
+  <data name="Timer_SettingSoundFile" xml:space="preserve">
+    <value>Tondatei</value>
+  </data>
+  <data name="Timer_SettingSoundFile_Hint" xml:space="preserve">
+    <value>Voller Pfad zu einer .wav- oder .mp3-Datei (bei „Eigene Tondatei“).</value>
+  </data>
+  <data name="Timer_SettingVolume" xml:space="preserve">
+    <value>Lautstärke (0–100)</value>
+  </data>
+  <data name="Timer_SettingVolume_Hint" xml:space="preserve">
+    <value>Nur für den Ton – die Windows-Lautstärke gilt zusätzlich.</value>
+  </data>
+  <data name="Timer_SettingDnd" xml:space="preserve">
+    <value>Auch bei „Nicht stören“</value>
+  </data>
+  <data name="Timer_SettingDnd_Hint" xml:space="preserve">
+    <value>Ein abgelaufener Timer erscheint auch, wenn „Nicht stören“ von Windows an ist.</value>
+  </data>
+  <data name="Timer_SettingFullscreen" xml:space="preserve">
+    <value>Auch im Vollbild</value>
+  </data>
+  <data name="Timer_SettingFullscreen_Hint" xml:space="preserve">
+    <value>Ein abgelaufener Timer erscheint auch über Vollbild-Apps.</value>
+  </data>
+  <data name="Timer_SettingWorkAction" xml:space="preserve">
+    <value>Pomodoro: Aktion beim Arbeitsbeginn</value>
+  </data>
+  <data name="Timer_SettingBreakAction" xml:space="preserve">
+    <value>Pomodoro: Aktion beim Pausenbeginn</value>
+  </data>
+  <data name="Timer_SettingAction_Hint" xml:space="preserve">
+    <value>Eine Aktion eines anderen Plugins. Hier erscheinen nur die, die der Timer nutzen darf – freigeben weiter unten unter „Darf nutzen“.</value>
+  </data>
+  <data name="Timer_SettingWorkArguments" xml:space="preserve">
+    <value>Argumente für die Arbeits-Aktion (JSON)</value>
+  </data>
+  <data name="Timer_SettingBreakArguments" xml:space="preserve">
+    <value>Argumente für die Pausen-Aktion (JSON)</value>
+  </data>
+  <data name="Timer_SettingArguments_Hint" xml:space="preserve">
+    <value>Was die Aktion braucht – siehe Beschreibung der Aktion. Leer = keine.</value>
+  </data>
+  <data name="Pomodoro_Name" xml:space="preserve">
+    <value>Pomodoro</value>
+  </data>
+  <data name="Pomodoro_Idle" xml:space="preserve">
+    <value>Nicht gestartet</value>
+  </data>
+  <data name="Pomodoro_Work" xml:space="preserve">
+    <value>Arbeiten</value>
+  </data>
+  <data name="Pomodoro_ShortBreak" xml:space="preserve">
+    <value>Kurze Pause</value>
+  </data>
+  <data name="Pomodoro_LongBreak" xml:space="preserve">
+    <value>Lange Pause</value>
+  </data>
+  <data name="Pomodoro_BackToWork" xml:space="preserve">
+    <value>Weiter geht's</value>
+  </data>
+  <data name="Pomodoro_WorkFor" xml:space="preserve">
+    <value>{0} arbeiten · Runde {1} von {2}</value>
+  </data>
+  <data name="Pomodoro_BreakFor" xml:space="preserve">
+    <value>{0} Pause</value>
+  </data>
+  <data name="Pomodoro_EndedAt" xml:space="preserve">
+    <value>Phase endete um {0}.</value>
+  </data>
+  <data name="Pomodoro_PhaseRound" xml:space="preserve">
+    <value>{0} · Runde {1} von {2}</value>
+  </data>
+  <data name="Pomodoro_DoneToday" xml:space="preserve">
+    <value>Heute erledigt: {0}</value>
+  </data>
+  <data name="Pomodoro_Skip" xml:space="preserve">
+    <value>Phase überspringen</value>
+  </data>
+  <data name="Pomodoro_StopButton" xml:space="preserve">
+    <value>Beenden</value>
+  </data>
+  <data name="Pomodoro_QuickCommand" xml:space="preserve">
+    <value>Pomodoro: pomo startet, pomo stop beendet</value>
+  </data>
+  <data name="Pomodoro_Started" xml:space="preserve">
+    <value>Pomodoro gestartet: {0} arbeiten</value>
+  </data>
+  <data name="Pomodoro_Stopped" xml:space="preserve">
+    <value>Pomodoro beendet</value>
+  </data>
+</root>

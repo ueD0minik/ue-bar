@@ -31,6 +31,7 @@ internal sealed partial class SettingsWindow
         void Fill()
         {
             body.Children.Clear();
+            AddBusRequests(body);
             var plugins = _host.Plugins;
             if (plugins.RestartNeeded)
             {

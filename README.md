@@ -5,9 +5,9 @@
 A slide-out dashboard for the top edge of your Windows screen. Move the mouse to the top
 edge: a small pill appears, and with it your tiles, a status line, notifications and a quick
 search. Inspired by the "Now Bar" of Samsung One UI. What the tiles show comes from
-**plugins** – [Home Assistant](plugins/HomeAssistant/README.md) and [Windows](plugins/Windows/README.md)
-(volume, media, Wi-Fi, Bluetooth, batteries, system values of this PC) come with ue Bar; more
-(phone, timers …) can be added without rebuilding the app.
+**plugins** – [Home Assistant](plugins/HomeAssistant/README.md), [Windows](plugins/Windows/README.md)
+(volume, media, Wi-Fi, Bluetooth, batteries, system values of this PC) and [Timer](plugins/Timer/README.md)
+(timers, stopwatch, Pomodoro) come with ue Bar; more can be added without rebuilding the app.
 
 ![Panel with tiles of an example home](docs/images/panel.png)
 
@@ -76,6 +76,7 @@ as a ZIP with **Settings → Plugins → Add plugin …**.
 |---|---|---|
 | [Home Assistant](plugins/HomeAssistant/README.md) | Lights, climate, media, vacuums, sensors and more from Home Assistant; notifications, Assist, layout sync | yes |
 | [Windows](plugins/Windows/README.md) | This PC: volume and output device, app volume, media of all apps (also as Now Playing), Wi-Fi, Bluetooth, device batteries, battery, CPU, memory, disk, brightness, lock/sleep | yes |
+| [Timer](plugins/Timer/README.md) | Timers with presets and names, stopwatch, Pomodoro (can start actions of other plugins); `t 10` in the quick search, time left in the pill | yes |
 | [Test module](plugins/Dummy/README.md) | Simulated devices for developing and testing ue Bar | no – debug builds and a separate ZIP |
 | [Hello](samples/HelloPlugin) | Sample plugin: a counter tile, the starting point for your own | no – sample in the source |
 

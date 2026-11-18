@@ -17,6 +17,13 @@ public enum SettingFieldKind
 
     /// <summary>Multiple choice (M7): value = chosen <see cref="SettingChoice.Value"/>s separated by commas.</summary>
     MultiChoice,
+
+    /// <summary>
+    /// A button (contract 1.2): <see cref="SettingField.Label"/> and <see cref="SettingField.Description"/>
+    /// as the row, <see cref="SettingField.ButtonText"/> on the button; pressing it calls
+    /// <see cref="IModuleSettingsActions.RunSettingsActionAsync"/> with the key. Stores nothing.
+    /// </summary>
+    Button,
 }
 
 public sealed record SettingChoice(string Value, string Label);
@@ -39,6 +46,9 @@ public sealed record SettingField(
 
     /// <summary>Belongs in the welcome assistant at first start (M7).</summary>
     public bool Essential { get; init; }
+
+    /// <summary>Text on the button of a <see cref="SettingFieldKind.Button"/> field (contract 1.2).</summary>
+    public string? ButtonText { get; init; }
 }
 
 /// <summary>Current values of the module settings (secrets already decrypted, in memory only).</summary>

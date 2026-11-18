@@ -62,7 +62,7 @@ public sealed class PluginLoadTests
             Assert.True(plugin.State == PluginState.Loaded, $"{plugin.State}: {plugin.Problem}");
             Assert.Equal(WindowsModule.ModuleId, plugin.Module!.Id);
             Assert.Equal("Windows", plugin.Manifest!.DisplayName(CultureInfo.GetCultureInfo("de-DE")));
-            Assert.Equal(new Version(1, 1), plugin.Manifest.SdkVersion);
+            Assert.Equal(CoreApiVersion.Version, plugin.Manifest.SdkVersion);
             Assert.Contains(plugin.Module.TileTypes, t => t.Id == "win.volume");
             Assert.Equal("Lautstärke", plugin.Module.TileTypes.First(t => t.Id == "win.volume").DisplayName); // texts from its own satellite assembly
         }

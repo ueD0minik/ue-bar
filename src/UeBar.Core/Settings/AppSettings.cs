@@ -187,6 +187,37 @@ public sealed class SettingsService : IModuleStateStore, IModuleSecretStore, IMo
         }
     }
 
+    /// <summary>What <paramref name="consumer"/> may use of <paramref name="provider"/> (P2-3).</summary>
+    public BusAccess GetBusGrant(string consumer, string provider)
+    {
+        lock (_lock)
+        {
+            return Current.BusGrants
+                .Where(g => string.Equals(g.Consumer, consumer, StringComparison.OrdinalIgnoreCase) && string.Equals(g.Provider, provider, StringComparison.OrdinalIgnoreCase))
+                .Aggregate(BusAccess.None, (all, g) => all | g.Access);
+        }
+    }
+
+    /// <summary>
+    /// Sets the permission of a pair and direction (P2-3, settings page "May use"), saves and settles
+    /// open requests of the pair. <see cref="BusAccess.None"/> removes it.
+    /// </summary>
+    public void SetBusGrant(string consumer, string provider, BusAccess access)
+    {
+        lock (_lock)
+        {
+            Current.BusGrants.RemoveAll(g => string.Equals(g.Consumer, consumer, StringComparison.OrdinalIgnoreCase) && string.Equals(g.Provider, provider, StringComparison.OrdinalIgnoreCase));
+            if (access != BusAccess.None)
+            {
+                Current.BusGrants.Add(new BusGrant { Consumer = consumer, Provider = provider, Access = access });
+            }
+        }
+
+        Save();
+        _log.Info(consumer, $"Bus permission {consumer} → {provider}: {(access == BusAccess.None ? "none" : access.ToString())}");
+        BusPolicy.SettleRequests(consumer, provider);
+    }
+
     public void Save()
     {
         lock (_lock)

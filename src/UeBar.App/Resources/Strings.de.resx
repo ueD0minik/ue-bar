@@ -991,4 +991,34 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Layout_AddSuggestion_Nothing" xml:space="preserve">
     <value>Nichts hinzugefügt (das Plugin hat gerade keinen Vorschlag, oder das Layout wird bearbeitet).</value>
   </data>
+  <data name="Notify_Dismiss" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Bus_MayUse" xml:space="preserve">
+    <value>Darf nutzen</value>
+  </data>
+  <data name="Bus_MayUse_Hint" xml:space="preserve">
+    <value>Was {0} von den anderen Plugins verwenden darf. Standard: nichts – Plugins sehen sich nicht.</value>
+  </data>
+  <data name="Bus_NothingPublished" xml:space="preserve">
+    <value>Die anderen Plugins veröffentlichen gerade nichts.</value>
+  </data>
+  <data name="Bus_Actions" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="Bus_Events" xml:space="preserve">
+    <value>Ereignisse</value>
+  </data>
+  <data name="Bus_Values" xml:space="preserve">
+    <value>Werte</value>
+  </data>
+  <data name="Bus_Request" xml:space="preserve">
+    <value>{0} möchte {1} von {2} nutzen</value>
+  </data>
+  <data name="Bus_Allow" xml:space="preserve">
+    <value>Erlauben</value>
+  </data>
+  <data name="Bus_Decline" xml:space="preserve">
+    <value>Ablehnen</value>
+  </data>
 </root>

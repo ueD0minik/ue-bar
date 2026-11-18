@@ -23,6 +23,7 @@ internal sealed class ExtrasController
     private readonly Dispatcher _dispatcher;
     private readonly IUeLogger _log;
     private readonly NowPlayingService _nowPlaying;
+    private readonly ModuleRegistry _registry;
     private readonly NotificationQueue _queue = new();
     private readonly DispatcherTimer _queueTimer;
     private readonly Func<Core.Settings.SettingsService> _settings;
@@ -36,6 +37,7 @@ internal sealed class ExtrasController
         ModuleRegistry registry,
         NotificationHub notifications,
         NowPlayingService nowPlaying,
+        PillActivityService activities,
         AssistService assist,
         QuickCommandService quickCommands,
         Func<Core.Settings.SettingsService> settings,
@@ -46,6 +48,7 @@ internal sealed class ExtrasController
         _bar = bar;
         _dispatcher = dispatcher;
         _log = log;
+        _registry = registry;
         _nowPlaying = nowPlaying;
         _nowPlaying.SourceOrder = () => _bar.Settings.NowPlayingOrder;
         _settings = settings;
@@ -54,6 +57,8 @@ internal sealed class ExtrasController
 
         notifications.Received += (_, n) => _dispatcher.BeginInvoke(() => OnNotification(n));
         nowPlaying.Changed += (_, _) => _dispatcher.BeginInvoke(UpdateNowPlaying);
+        activities.Changed += (_, _) => _dispatcher.BeginInvoke(() =>
+            _viewModel.Activity = activities.Current is { } activity ? new PillActivityViewModel(activity) : null);
         _viewModel.NowPlayingRequested += (_, command) => _ = _nowPlaying.ExecuteAsync(command);
         _viewModel.HistoryCleared += (_, _) =>
         {
@@ -179,8 +184,8 @@ internal sealed class ExtrasController
     {
         var settings = _bar.Settings;
         var duration = notification.Duration ?? TimeSpan.FromSeconds(Math.Clamp(settings.NotificationSeconds, 2, 60));
-        var suppress = !_bar.CanAnnounce(out var reason);
-        if (!suppress && settings.RespectDoNotDisturb && ExtrasInterop.IsDoNotDisturbActive())
+        var suppress = !_bar.CanAnnounce(out var reason, allowFullscreen: notification.ShowInFullscreen);
+        if (!suppress && settings.RespectDoNotDisturb && !notification.IgnoreDoNotDisturb && ExtrasInterop.IsDoNotDisturbActive())
         {
             suppress = true;
             reason = "do not disturb";
@@ -190,11 +195,70 @@ internal sealed class ExtrasController
         {
             _log.Info(notification.Source, $"Notification only in the history ({reason})");
         }
+        else if (notification.Sound is { Length: > 0 } sound)
+        {
+            // P2-3: a sound only goes with a notification that is shown (never for a suppressed one).
+            Infrastructure.NotificationSound.Play(sound, notification.SoundVolume, _log);
+        }
 
-        _queue.Enqueue(new BarNotification(notification.Title, notification.Message, notification.Icon, duration, notification.Timestamp, notification.Source), suppress);
+        _queue.Enqueue(new BarNotification(notification.Title, notification.Message, notification.Icon, duration, notification.Timestamp, notification.Source)
+        {
+            Id = notification.Id,
+            Actions = [.. (notification.Actions ?? []).Where(a => a is not null).Select(a => (a.Id, a.Label))],
+        }, suppress);
         _viewModel.SetHistory(_queue.History);
         AdvanceQueue();
     }
+
+    /// <summary>"×" on the banner: the notification goes away (it stays in the history).</summary>
+    private void DismissNotification(BarNotification notification)
+    {
+        if (!ReferenceEquals(_queue.Current, notification))
+        {
+            return;
+        }
+
+        _queue.Dismiss();
+        _bar.EndAnnounce();
+        _log.Info(notification.Source, "Notification dismissed");
+        AdvanceQueue();
+        if (_queue.Current is null)
+        {
+            _viewModel.Notification = null;
+        }
+    }
+
+    /// <summary>A button on the banner (e.g. "+5 min"): the module handles it, the notification goes away.</summary>
+    private void RunNotificationAction(BarNotification notification, string actionId)
+    {
+        DismissNotification(notification);
+        if (notification.Source is not { } moduleId || notification.Id is not { } id)
+        {
+            return;
+        }
+
+        _ = RunAsync();
+
+        async Task RunAsync()
+        {
+            var result = await _registry.InvokeAsync(moduleId, $"Notification action {actionId}", async (m, ct) =>
+            {
+                if (m is INotificationActionHandler handler)
+                {
+                    await handler.HandleNotificationActionAsync(id, actionId, ct).ConfigureAwait(false);
+                }
+
+                return true;
+            }).ConfigureAwait(false);
+            if (!result.Succeeded)
+            {
+                _log.Warn(moduleId, $"Notification action {actionId} failed ({result.Outcome})");
+            }
+        }
+    }
+
+    private NotificationViewModel Show(BarNotification notification) =>
+        new(notification, DismissNotification, RunNotificationAction);
 
     /// <summary>Short confirmation (quick command, default action) as a pill – does not go into the history.</summary>
     private void ShowConfirmation(QuickCommandResult result)
@@ -216,7 +280,7 @@ internal sealed class ExtrasController
 
             if (_viewModel.Notification?.Source == item)
             {
-                _viewModel.Notification = _queue.Current is { } current ? new NotificationViewModel(current) : null;
+                _viewModel.Notification = _queue.Current is { } current ? Show(current) : null;
                 _log.Info(null, $"Confirmation pill off (bar {_bar.StateText})");
             }
         };
@@ -232,7 +296,7 @@ internal sealed class ExtrasController
         if (_queue.Advance(now))
         {
             var current = _queue.Current;
-            _viewModel.Notification = current is null ? null : new NotificationViewModel(current);
+            _viewModel.Notification = current is null ? null : Show(current);
             if (current is not null)
             {
                 _bar.Announce(current.Duration);

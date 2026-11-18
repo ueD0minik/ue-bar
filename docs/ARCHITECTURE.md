@@ -170,6 +170,19 @@ Modules work together only through the bus in the core:
 - Everything on the bus runs through the fault protection; if a module fails, the others get a
   clean error result instead of an exception.
 
+**Permissions in the settings** (since 1.3.1): Settings → Plugins → *a plugin* → **May use** lists
+the other plugins with what they publish right now (actions, events, values) and one switch per
+provider and kind – what this plugin may use of them. Everything is off by default. A plugin can
+ask for a permission (`IModuleBus.RequestPermission`); the request appears as a hint with
+**Allow**/**Decline** on the plugin's page and on the Plugins page. The decision is stored in
+`settings.json` (`busGrants`) and checked on every call and delivery, so switching it off takes
+effect at once. The page is generic: it knows no plugin by name.
+
+First user: the Timer plugin's Pomodoro runs a chosen action of another plugin (e.g. a Home
+Assistant script) when work or a break starts – only while it is permitted.
+
+![May use](../plugins/Timer/images/permissions.png)
+
 ## Layout
 
 - **Base layout** (tabs, tiles, status line): stored by a module that offers a layout store

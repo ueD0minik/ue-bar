@@ -61,7 +61,8 @@ public sealed partial class WindowsModule :
     IModuleSettings,
     IVisibilityAware,
     IDeviceBatterySource,
-    IModuleDiagnostics
+    IModuleDiagnostics,
+    IModuleSettingsActions
 {
     public const string ModuleId = "windows";
 
@@ -76,6 +77,13 @@ public sealed partial class WindowsModule :
     private readonly SemaphoreSlim _wake = new(0, 1);
     private readonly SemaphoreSlim _pollWake = new(0, 1);
     private readonly SemaphoreSlim _refreshGate = new(1, 1);
+
+    /// <summary>
+    /// Serializes changes to the tiles: a new tile is refreshed on the core's thread while the worker
+    /// may already refresh it as a tracked tile – two threads adding to the same element list break it
+    /// for good (P2-3). Held only while tiles are changed; the app picks the changes up asynchronously.
+    /// </summary>
+    internal readonly Lock ViewLock = new();
     private readonly Dictionary<string, DateTimeOffset> _lastPlaying = new(StringComparer.Ordinal);
     private readonly List<Tracked> _tiles = [];
     private readonly Dictionary<Area, int> _signals = [];
@@ -278,13 +286,45 @@ public sealed partial class WindowsModule :
 
     // ------------------------------------------------------------------ settings
 
-    public IReadOnlyList<SettingField> SettingFields =>
-    [
-        new(WindowsSettings.PollKey, T["Win_SettingPoll"], SettingFieldKind.Number, "2", T["Win_SettingPoll_Hint"], Min: WindowsSettings.MinPollSeconds, Max: 60),
-        new(WindowsSettings.AppVolumeKey, T["Win_SettingAppVolume"], SettingFieldKind.Toggle, "true", T["Win_SettingAppVolume_Hint"]),
-        new(WindowsSettings.VirtualOutputsKey, T["Win_SettingVirtual"], SettingFieldKind.Toggle, "false", T["Win_SettingVirtual_Hint"]),
-        new(WindowsSettings.IgnoredKey, T["Win_SettingIgnored"], SettingFieldKind.Text, WindowsSettings.DefaultIgnored, T["Win_SettingIgnored_Hint"]) { Placeholder = "Teams, Discord" },
-    ];
+    /// <summary>Key of the button "Open location access" (only while the Wi-Fi name is hidden).</summary>
+    internal const string LocationButtonKey = "openLocationAccess";
+
+    public IReadOnlyList<SettingField> SettingFields
+    {
+        get
+        {
+            List<SettingField> fields =
+            [
+                new(WindowsSettings.PollKey, T["Win_SettingPoll"], SettingFieldKind.Number, "2", T["Win_SettingPoll_Hint"], Min: WindowsSettings.MinPollSeconds, Max: 60),
+                new(WindowsSettings.AppVolumeKey, T["Win_SettingAppVolume"], SettingFieldKind.Toggle, "true", T["Win_SettingAppVolume_Hint"]),
+                new(WindowsSettings.VirtualOutputsKey, T["Win_SettingVirtual"], SettingFieldKind.Toggle, "false", T["Win_SettingVirtual_Hint"]),
+                new(WindowsSettings.IgnoredKey, T["Win_SettingIgnored"], SettingFieldKind.Text, WindowsSettings.DefaultIgnored, T["Win_SettingIgnored_Hint"]) { Placeholder = "Teams, Discord" },
+            ];
+
+            // Hint with a button only when the network name cannot be read (P2-3).
+            if (State.Radio.NetworkNameHidden)
+            {
+                fields.Insert(0, new SettingField(LocationButtonKey, T["Win_LocationHint"], SettingFieldKind.Button, null, T["Win_LocationHint_Detail"])
+                {
+                    ButtonText = T["Win_LocationButton"],
+                });
+            }
+
+            return fields;
+        }
+    }
+
+    public Task<string?> RunSettingsActionAsync(string key, CancellationToken cancellationToken)
+    {
+        if (key == LocationButtonKey)
+        {
+            Platform.Shell.OpenSettings("ms-settings:privacy-location");
+            Signal(Area.Radio); // the name may be readable after coming back
+            return Task.FromResult<string?>(T["Win_LocationOpened"]);
+        }
+
+        return Task.FromResult<string?>(null);
+    }
 
     public Task ApplySettingsAsync(ModuleSettingValues values, CancellationToken cancellationToken)
     {
@@ -399,6 +439,9 @@ public sealed partial class WindowsModule :
         if (visible.Any(WinIds.NeedsDevices))
         {
             await RefreshDevicesAsync(cancellationToken).ConfigureAwait(false);
+
+            // Also the batteries other plugins report: a read that failed (e.g. time limit) is not lost.
+            areas |= Area.Devices;
         }
 
         await RefreshAsync(areas, cancellationToken).ConfigureAwait(false);
@@ -706,16 +749,20 @@ public sealed partial class WindowsModule :
             }
         }
 
-        var state = State;
-        foreach (var (tile, type, config, entity) in tiles)
+        WinState state;
+        lock (ViewLock)
         {
-            try
+            state = State;
+            foreach (var (tile, type, config, entity) in tiles)
             {
-                type.Refresh(tile, config, entity, state);
-            }
-            catch (Exception ex)
-            {
-                Log?.Warn($"Updating tile {config.Id} failed", ex);
+                try
+                {
+                    type.Refresh(tile, config, entity, state);
+                }
+                catch (Exception ex)
+                {
+                    Log?.Warn($"Updating tile {config.Id} failed", ex);
+                }
             }
         }
 
@@ -866,7 +913,7 @@ public sealed partial class WindowsModule :
             $"Audio: {s.Audio.Outputs.Count} outputs, default \"{s.Audio.Default?.Name ?? "-"}\", {s.Apps.Count} apps ({s.PlayingApps.Count} playing)",
             $"Media: {s.Media.Count} sessions{(s.SelectedMedia is { } m ? $", showing {m.AppName}" : "")}",
             $"Wi-Fi {s.Radio.Wifi}, Bluetooth {s.Radio.Bluetooth}, {s.Bluetooth.Count} Bluetooth devices, {s.ExternalBatteries.Count} batteries from other plugins",
-            $"Battery: {(s.Power.HasBattery ? $"{s.Power.Percent} %" : "none")}, brightness: {(s.Brightness is { } b ? $"{b} %" : "no built-in display")}",
+            $"Battery: {(s.Power.HasBattery ? $"{s.Power.Percent} %" : "none")}, brightness: {(s.Brightness is { } b ? $"{b} %" : s.BrightnessRead ? "no built-in display" : "not read yet (read while visible)")}",
             $"Polling: {(IsPolling ? $"on, every {s.Settings.PollInterval.TotalSeconds:0} s" : "paused (nothing visible)")}, {PollCount} rounds",
             $"Events: {SignalCounts()}",
         ];

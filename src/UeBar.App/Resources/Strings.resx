@@ -991,4 +991,34 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Layout_AddSuggestion_Nothing" xml:space="preserve">
     <value>Nothing added (the plugin has no suggestion right now, or the layout is being edited).</value>
   </data>
+  <data name="Notify_Dismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+  <data name="Bus_MayUse" xml:space="preserve">
+    <value>May use</value>
+  </data>
+  <data name="Bus_MayUse_Hint" xml:space="preserve">
+    <value>What {0} may use of the other plugins. Default: nothing – plugins do not see each other.</value>
+  </data>
+  <data name="Bus_NothingPublished" xml:space="preserve">
+    <value>The other plugins publish nothing right now.</value>
+  </data>
+  <data name="Bus_Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Bus_Events" xml:space="preserve">
+    <value>Events</value>
+  </data>
+  <data name="Bus_Values" xml:space="preserve">
+    <value>Values</value>
+  </data>
+  <data name="Bus_Request" xml:space="preserve">
+    <value>{0} wants to use {1} of {2}</value>
+  </data>
+  <data name="Bus_Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="Bus_Decline" xml:space="preserve">
+    <value>Decline</value>
+  </data>
 </root>

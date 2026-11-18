@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Plugin "timer" (P2-3): timers, stopwatch, Pomodoro. References only UeBar.Sdk; all time through
+       TimeProvider (testable). -->
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>UeBar.Modules.Timer</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Private=false: the SDK always comes from the app, never from the plugin folder -->
+    <ProjectReference Include="..\..\..\src\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="UeBar.Modules.Timer.Tests" />
+  </ItemGroup>
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.targets" />
+</Project>

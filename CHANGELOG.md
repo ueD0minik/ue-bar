@@ -1,5 +1,66 @@
 # Changelog
 
+## 1.3.1 – Timer plugin, bus permissions
+
+**Plugin interface (`CoreApiVersion`): 1.2** – extended, nothing broken: plugins for 1.0 and 1.1
+keep loading. SDK package `UeBar.Sdk 1.2.0`. From now on new plugins, features and fixes count up
+the last digit of the app version.
+
+### New
+- **Timer plugin** (`plugins/Timer`, plugin ID `timer`, comes with ue Bar and is on): several named
+  timers with presets (5/10/15/25/45 min, changeable) and an own duration, a stopwatch with laps,
+  Pomodoro (25/5/15, long break after 4 rounds, "done today"). Quick commands `t 10`, `t 1:30`,
+  `t 25 Learning`, `pomo`/`pomo stop`. The pill shows the time left of the next timer; a status
+  line value. A timer that runs out: notification with sound (Windows alarm or own file, volume),
+  60 s or until closed, **+5 min** button, also during "Do not disturb" and over fullscreen apps
+  (both settings, default on). Timers survive a restart and standby (absolute times; ones that ran
+  out meanwhile are reported with their time). Module bus: actions `timer.start`,
+  `pomodoro.start`, `pomodoro.stop`, events `timer.finished`, `pomodoro.phase_changed`. See
+  [plugins/Timer](plugins/Timer/README.md).
+- **Module bus permissions in the settings:** Settings → Plugins → *a plugin* → **May use** – per
+  other plugin and kind (actions, events, values), default off; requests of plugins appear with
+  **Allow**/**Decline**. First collaboration: Pomodoro can run a permitted action of another plugin
+  (e.g. a Home Assistant script) when work or a break starts.
+- Contract 1.2: `UeNotification` with `Id`, `Actions`, `Sound`/`SoundVolume`, `IgnoreDoNotDisturb`,
+  `ShowInFullscreen` and `INotificationActionHandler`; `IPillActivitySource`/`PillActivity`;
+  `ModuleVisibility.IsBarVisible`; `QuickCommandInfo.ArgumentOptional`; `SettingFieldKind.Button`
+  with `IModuleSettingsActions`.
+- Notification banner in the open panel: buttons of the notification and **×** to close it.
+- Windows plugin: when the Wi-Fi name is hidden (Windows 11 24H2 needs location access), the tile
+  says so and the plugin's settings offer **Open location access**.
+
+### Changed
+- Quick commands with a word prefix need a space after it ("t 10" is a timer, "toaster" a search).
+- Settings sidebar: plugin pages indented again under "Plugins" (with their icon).
+- Windows plugin: the device list re-reads the batteries of other plugins while it is visible.
+
+### Fixed
+- `Network_change_with_healthy_connection_does_not_reconnect` is deterministic. Cause: on a busy
+  machine the first connection attempt could miss its real-time local limit, and the reconnect pause
+  then ran on the test's fake clock, which nobody moved. The test now lets the clock move until the
+  session runs, afterwards only while the client waits for the debounce, and checks that no
+  *additional* connection is made. The layout-sync test had the same trap.
+- Timer worker: time that passed between computing and registering a wait is no longer lost.
+- `Nothing_reachable_shows_disconnected_with_next_attempt_and_retries` (and the reconnect test) read
+  the state and the text in two steps – the client could already be trying again in between. The
+  test helper now records every status change; state and text come from the same one.
+- Saving the layout could fail with "file in use" when someone held `layout.json` open for a moment
+  (the layout watcher reading it back, a virus scanner): Windows does not replace an open file. The
+  save now retries briefly (up to ~1.3 s) instead of losing the change. Loading does the same while
+  a save replaces the file, and the file watcher looks again instead of missing the change. Found
+  through rare failures of the layout-sync conflict test.
+- Tiles whose elements a plugin changes on its own thread (app volume, device list, running timers):
+  the app's snapshot of the elements only retried when the list reported the change, not when it was
+  caught half way through growing (`IndexOutOfRangeException`) – a rare crash of the redraw. The
+  tests read the elements the same safe way.
+- Windows and Timer plugins: a new tile was refreshed on the core's thread while the worker could
+  already refresh it – two threads adding to one element list left it broken for good. Tile changes
+  are now serialized.
+- HA tests no longer ping every 250 ms in real time by default: on a busy machine the pong came too
+  late, the client dropped a healthy connection and a command running meanwhile failed
+  (`Command_results_are_detached_not_copied_and_errors_still_arrive`). Only the tests about missing
+  pongs use short times.
+
 ## 1.3.0 – Windows plugin
 
 **Plugin interface (`CoreApiVersion`): 1.1** – extended, nothing broken: plugins built for 1.0 keep

@@ -221,10 +221,11 @@ internal sealed class TileViewModel : ObservableObject, IDisposable
         TileElement[] snapshot;
         try
         {
-            snapshot = [.. Model.Elements.Where(el => el is not TapAction)];
+            snapshot = [.. Model.Elements.Where(el => el is not null and not TapAction)];
         }
-        catch (InvalidOperationException)
+        catch (Exception ex) when (ex is InvalidOperationException or IndexOutOfRangeException or ArgumentException)
         {
+            // Changed on the module's thread meanwhile (see UiMirror) – the next change event follows.
             Dispatch(ResyncElements);
             return;
         }

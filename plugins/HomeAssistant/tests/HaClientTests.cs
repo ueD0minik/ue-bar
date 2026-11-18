@@ -70,9 +70,11 @@ public class HaClientTests
     {
         await using var run = new RunningClient(Settings(BlackholeServer.ClosedPortUrl(), BlackholeServer.ClosedPortUrl()));
 
-        Assert.True(await run.WaitForAsync(HaConnectionState.Disconnected));
-        Assert.StartsWith("Getrennt – nächster Versuch in", run.Client.Status.Text);
-        Assert.True(await Wait.UntilAsync(() => run.Client.ConnectAttempts >= 6)); // 3 rounds × 2 URLs
+        // State and text from the same status change: the client may already be trying again (P2-3).
+        var disconnected = await run.WaitForStatusAsync(HaConnectionState.Disconnected);
+        Assert.NotNull(disconnected);
+        Assert.StartsWith("Getrennt – nächster Versuch in", disconnected.Text);
+        Assert.True(await Wait.UntilAsync(() => run.Client.ConnectAttempts >= 6, 15000)); // 3 rounds × 2 URLs
     }
 
     [Fact]
@@ -153,11 +155,13 @@ public class HaClientTests
         await using var run = new RunningClient(Settings(server.BaseUrl, null));
         Assert.True(await run.WaitForAsync(HaConnectionState.ConnectedLocal));
 
+        run.ClearStatuses();
         server.AcceptConnections = false;
         server.DropAll(); // HA restarts
 
-        Assert.True(await run.WaitForAsync(HaConnectionState.Disconnected));
-        Assert.StartsWith("Getrennt", run.Client.Status.Text);
+        var disconnected = await run.WaitForStatusAsync(HaConnectionState.Disconnected);
+        Assert.NotNull(disconnected);
+        Assert.StartsWith("Getrennt", disconnected.Text);
         await Task.Delay(300);
         server.AcceptConnections = true;
 
@@ -169,7 +173,8 @@ public class HaClientTests
     public async Task Missing_pong_is_detected_and_triggers_reconnect()
     {
         await using var server = new FakeHaServer();
-        await using var run = new RunningClient(Settings(server.BaseUrl, null));
+        var options = Fast.Options() with { PingInterval = TimeSpan.FromMilliseconds(250), PongTimeout = TimeSpan.FromMilliseconds(250) };
+        await using var run = new RunningClient(Settings(server.BaseUrl, null), options: options);
         Assert.True(await run.WaitForAsync(HaConnectionState.ConnectedLocal));
 
         server.RespondToPing = false;
@@ -245,34 +250,57 @@ public class HaClientTests
     [Fact]
     public async Task Network_change_with_healthy_connection_does_not_reconnect()
     {
-        // P2-1-Fix 1: fake clock instead of real waiting – ping interval and pong limit cannot run out
-        // on their own on a busy machine; only the debounce is moved on until the client has decided.
+        // P2-3: deterministic. Root cause of the failures: on a busy machine the very first connection
+        // attempt can miss its (real-time) local limit; the client then waits out its reconnect pause
+        // on the *fake* clock – which nobody moved, so it never connected. Before, the test also drove
+        // the fake clock in a real-time loop no matter what the client was doing.
+        // Now: (1) until the session runs, the clock may move (it only shortens reconnect pauses);
+        // (2) after the network events it moves only while the client waits for exactly the debounce
+        // (nothing else on the fake clock is due – the next ping is an hour away); (3) the test checks
+        // that the network change adds no connection. Real time only bounds the test.
         var time = new FakeTimeProvider(DateTimeOffset.Parse("2026-11-17T12:00:00Z"));
         var options = Fast.Options() with { Time = time, PingInterval = TimeSpan.FromHours(1), PongTimeout = TimeSpan.FromHours(1) };
         await using var server = new FakeHaServer();
         await using var run = new RunningClient(Settings(server.BaseUrl, null), options: options);
-        Assert.True(await run.WaitForAsync(HaConnectionState.ConnectedLocal));
+        Assert.True(await Wait.UntilAsync(() =>
+        {
+            if (!run.Client.IsSessionReady)
+            {
+                time.Advance(TimeSpan.FromMilliseconds(250)); // a reconnect pause runs out
+            }
+
+            return run.Client.IsSessionReady && run.Client.Status.State == HaConnectionState.ConnectedLocal;
+        }, 30000));
+        var connections = server.Connections;
 
         for (var i = 0; i < 5; i++)
         {
             run.Client.NotifyNetworkChanged(); // several events shortly one after another
         }
 
-        Assert.True(await Wait.UntilAsync(() =>
+        bool StillResponds() => run.Log.Lines.Any(l => l.Contains("connection still responds", StringComparison.Ordinal));
+        var ok = await Wait.UntilAsync(() =>
         {
-            time.Advance(options.NetworkDebounce);
-            return run.Log.Lines.Any(l => l.Contains("connection still responds", StringComparison.Ordinal));
-        }));
-        Assert.Equal(1, server.Connections);
+            if (run.Client.IsDebouncingNetworkChange)
+            {
+                time.Advance(options.NetworkDebounce);
+            }
+
+            return StillResponds();
+        }, 30000);
+        var diag = $"debouncing={run.Client.IsDebouncingNetworkChange} connections={server.Connections} state={run.Client.Status.State} :: " + string.Join(" || ", run.Log.Lines);
+        Assert.True(ok, diag);
+        Assert.True(connections == server.Connections, diag); // no new connection
         Assert.Equal(HaConnectionState.ConnectedLocal, run.Client.Status.State);
-        Assert.Single(run.Log.Lines, l => l.Contains("Network change:", StringComparison.Ordinal)); // the five events count as one
+        Assert.Single(run.Log.Lines, l => l.Contains("Network change: waiting", StringComparison.Ordinal)); // the five events count as one
+        Assert.DoesNotContain(run.Log.Lines, l => l.Contains("no longer responds", StringComparison.Ordinal));
     }
 
     [Fact]
     public async Task Network_change_with_dead_connection_reconnects_immediately()
     {
         await using var server = new FakeHaServer();
-        var options = Fast.Options() with { PingInterval = TimeSpan.FromMinutes(5) };
+        var options = Fast.Options() with { PingInterval = TimeSpan.FromMinutes(5), PongTimeout = TimeSpan.FromMilliseconds(250) };
         await using var run = new RunningClient(Settings(server.BaseUrl, null), options: options);
         Assert.True(await run.WaitForAsync(HaConnectionState.ConnectedLocal));
 

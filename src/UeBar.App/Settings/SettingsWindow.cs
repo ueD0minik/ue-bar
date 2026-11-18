@@ -20,6 +20,7 @@ using UeBar.Core.Layout;
 using UeBar.Core.Localization;
 using UeBar.Core.Logging;
 using UeBar.Core.Modules;
+using UeBar.Core.Bus;
 using UeBar.Core.Plugins;
 using UeBar.Core.Settings;
 using static UeBar.App.Settings.SettingsUi;
@@ -36,6 +37,9 @@ internal sealed class SettingsHost
     public required BarController Bar { get; init; }
 
     public required ModuleRegistry Registry { get; init; }
+
+    /// <summary>Module bus: what the plugins publish (page "May use", P2-3).</summary>
+    public required ModuleBus Bus { get; init; }
 
     public required ModuleLayoutStoreSource LayoutSource { get; init; }
 
@@ -124,12 +128,14 @@ internal sealed partial class SettingsWindow : Window
         _refresh.Tick += (_, _) => _onRefresh?.Invoke();
         _refresh.Start();
         _host.Registry.ModuleStatusChanged += OnModuleStatusChanged;
+        _host.Settings.BusPolicy.RequestsChanged += OnBusRequestsChanged;
         UiCultureSource.Shared.Changed += OnLanguageChanged;
         SourceInitialized += (_, _) => DarkChrome(this);
         Closed += (_, _) =>
         {
             _refresh.Stop();
             _host.Registry.ModuleStatusChanged -= OnModuleStatusChanged;
+            _host.Settings.BusPolicy.RequestsChanged -= OnBusRequestsChanged;
             UiCultureSource.Shared.Changed -= OnLanguageChanged;
             _host.Bar.SuspendHotkey(false);
             _open = null;
@@ -160,6 +166,15 @@ internal sealed partial class SettingsWindow : Window
 
     private void OnModuleStatusChanged(object? sender, ModuleEntry e) => Dispatcher.BeginInvoke(() => _onRefresh?.Invoke());
 
+    /// <summary>A plugin asked for a permission: show the hint on the pages that show requests.</summary>
+    private void OnBusRequestsChanged(object? sender, EventArgs e) => Dispatcher.BeginInvoke(() =>
+    {
+        if (_currentPage == "plugins" || _currentPage.StartsWith("module:", StringComparison.Ordinal))
+        {
+            ShowPage(_currentPage);
+        }
+    });
+
     /// <summary>Language switched (R1): rebuild title, sidebar and the current page in the new language.</summary>
     private void OnLanguageChanged(object? sender, System.Globalization.CultureInfo culture) => Dispatcher.BeginInvoke(() =>
     {
@@ -187,7 +202,7 @@ internal sealed partial class SettingsWindow : Window
         Nav("plugins", Loc.Get("Settings_Plugins"), "");
         foreach (var module in _host.Registry.Modules.Where(m => m.IsLoaded))
         {
-            Nav("module:" + module.Id, module.DisplayName, IconGlyphs.Get(module.Icon));
+            Nav("module:" + module.Id, module.DisplayName, IconGlyphs.Get(module.Icon), indent: true);
         }
 
         Nav("info", Loc.Get("Settings_Info"), "");
@@ -896,6 +911,9 @@ internal sealed partial class SettingsWindow : Window
                 page.Children.Add(Card(ResultLine(Loc.Get("Modules_NotResponding"), false)));
             }
         }
+
+        // What the plugin may use of the others (module bus, P2-3)
+        AddBusPermissions(page, module);
 
         // Diagnostics (replaces the tray diagnostics)
         if (module.Module is IModuleDiagnostics)

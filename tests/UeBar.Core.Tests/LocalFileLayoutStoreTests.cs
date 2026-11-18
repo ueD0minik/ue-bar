@@ -127,4 +127,36 @@ public class LocalFileLayoutStoreTests
 
         Assert.True(await Wait.UntilAsync(() => Volatile.Read(ref changes) > 0));
     }
+
+    [Fact]
+    public async Task Save_succeeds_while_another_program_holds_the_file_for_a_moment()
+    {
+        // P2-3: a reader (our own watcher reloading, a virus scanner) must not make the save fail.
+        using var dir = new TempDirectory();
+        var path = Path.Combine(dir.Path, "layout.json");
+        var store = new LocalFileLayoutStore(path);
+        await store.SaveAsync(new LayoutDocument { Tabs = [new LayoutTab { Id = "a", Name = "Before" }] }, CancellationToken.None);
+
+        // Held open (like a scanner or the watcher reading it) – released after a short while.
+        var held = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        _ = Task.Delay(150).ContinueWith(_ => held.Dispose(), TaskScheduler.Default);
+        await store.SaveAsync(new LayoutDocument { Tabs = [new LayoutTab { Id = "a", Name = "After" }] }, CancellationToken.None);
+
+        Assert.Equal("After", (await store.LoadAsync(CancellationToken.None))!.Tabs[0].Name);
+    }
+
+    [Fact]
+    public async Task Load_succeeds_while_the_file_is_being_replaced()
+    {
+        // P2-3: while a save replaces the file, opening it fails for a moment – loading waits briefly.
+        using var dir = new TempDirectory();
+        var path = Path.Combine(dir.Path, "layout.json");
+        var store = new LocalFileLayoutStore(path);
+        await store.SaveAsync(new LayoutDocument { Tabs = [new LayoutTab { Id = "a", Name = "Kept" }] }, CancellationToken.None);
+
+        var held = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        _ = Task.Delay(150).ContinueWith(_ => held.Dispose(), TaskScheduler.Default);
+
+        Assert.Equal("Kept", (await store.LoadAsync(CancellationToken.None))!.Tabs[0].Name);
+    }
 }

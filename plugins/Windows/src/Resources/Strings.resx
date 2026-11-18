@@ -309,4 +309,22 @@
   <data name="Win_MediaSources" xml:space="preserve">
     <value>{0} · {1} sources</value>
   </data>
+  <data name="Win_ConnectedNoName" xml:space="preserve">
+    <value>Connected (name: location access needed)</value>
+  </data>
+  <data name="Win_NameNeedsLocation" xml:space="preserve">
+    <value>Name: location access needed</value>
+  </data>
+  <data name="Win_LocationHint" xml:space="preserve">
+    <value>Wi-Fi name not readable</value>
+  </data>
+  <data name="Win_LocationHint_Detail" xml:space="preserve">
+    <value>Since Windows 11 24H2 apps only get the name of the Wi-Fi network with location access. Switch it on for desktop apps, then the tile shows the name.</value>
+  </data>
+  <data name="Win_LocationButton" xml:space="preserve">
+    <value>Open location access</value>
+  </data>
+  <data name="Win_LocationOpened" xml:space="preserve">
+    <value>Windows settings opened – switch on location access for desktop apps.</value>
+  </data>
 </root>

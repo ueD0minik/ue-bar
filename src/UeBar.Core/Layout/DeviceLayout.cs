@@ -146,7 +146,7 @@ public sealed class DeviceLayoutStore(string path, IUeLogger? log = null)
             return new DeviceLayout();
         }
 
-        var json = await File.ReadAllTextAsync(_path, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+        var json = await LocalFileLayoutStore.ReadAsync(_path, cancellationToken).ConfigureAwait(false);
         try
         {
             return UeBarJson.Deserialize<DeviceLayout>(json) ?? new DeviceLayout();
@@ -168,7 +168,7 @@ public sealed class DeviceLayoutStore(string path, IUeLogger? log = null)
 
         var tmp = _path + ".tmp";
         await File.WriteAllTextAsync(tmp, UeBarJson.Serialize(layout), new UTF8Encoding(false), cancellationToken).ConfigureAwait(false);
-        File.Move(tmp, _path, overwrite: true);
+        await LocalFileLayoutStore.ReplaceAsync(tmp, _path, cancellationToken).ConfigureAwait(false);
         _log.Debug(null, $"Device layout saved: {layout.Tabs.Count} own tabs, {layout.HiddenBaseTabs.Count} hidden");
     }
 }

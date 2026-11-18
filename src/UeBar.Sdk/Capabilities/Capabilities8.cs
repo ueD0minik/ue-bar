@@ -15,6 +15,9 @@ public sealed record ModuleVisibility(bool IsPanelOpen, IReadOnlyList<TileConfig
     /// <summary>Nothing visible (bar collapsed).</summary>
     public static ModuleVisibility Hidden { get; } = new(false, [], []);
 
+    /// <summary>The bar is out – pill or panel (contract 1.2). The pill shows <see cref="IPillActivitySource"/>.</summary>
+    public bool IsBarVisible { get; init; }
+
     /// <summary>Anything of the module visible at all?</summary>
     public bool IsAnythingVisible => VisibleTiles.Count > 0 || VisibleStatus.Count > 0;
 

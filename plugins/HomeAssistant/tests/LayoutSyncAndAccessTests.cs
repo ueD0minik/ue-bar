@@ -188,8 +188,19 @@ public class LayoutSyncAndAccessTests
         var store = env.CreateStore();
         await env.Registry.StartAllAsync();
 
-        // Migration: HA has nothing yet → upload the local one
-        Assert.True(await Wait.UntilAsync(() => TabNameIn(server.GetUserData(HaLayoutStore.Key)) == "Home", 15000));
+        // Migration: HA has nothing yet → upload the local one. Until the session runs the fake clock may
+        // move: if the first attempt missed its (real-time) local limit on a busy machine, the reconnect
+        // pause runs on the fake clock (P2-3, same cause as the network-change test). Once connected it
+        // stays still – no ping/pong limit can run out.
+        Assert.True(await Wait.UntilAsync(() =>
+        {
+            if (env.Module.Client?.IsSessionReady != true)
+            {
+                time.Advance(TimeSpan.FromMilliseconds(250));
+            }
+
+            return TabNameIn(server.GetUserData(HaLayoutStore.Key)) == "Home";
+        }, 30000));
         Assert.True(await Wait.UntilAsync(() => !store.IsPending && store.LastSync.IsCompleted, 15000));
         await store.LastSync;
         Assert.False(store.IsPending);

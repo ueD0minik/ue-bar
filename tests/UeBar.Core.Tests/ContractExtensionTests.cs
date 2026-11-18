@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Dominik Poschinger
 
 using UeBar.Core.Modules;
+using UeBar.Core.Settings;
 using UeBar.Sdk;
 
 namespace UeBar.Core.Tests;
@@ -117,6 +118,55 @@ public sealed class ContractExtensionTests
         Assert.Equal(["w1", "w1-2", "w2"], merged.AllTiles.Select(t => t.Id));
         Assert.Equal(["sensor.t"], merged.Status.Select(s => s.Entity)); // the status line stays
         Assert.Single(current.Tabs);
+    }
+
+    [Fact]
+    public async Task Permissions_granted_revoked_and_requested_through_the_settings()
+    {
+        using var dir = new TempDirectory();
+        var settings = new SettingsService(Path.Combine(dir.Path, "settings.json"), null, new ListLogger());
+        var guard = new ModuleGuard(new ListLogger());
+        var bus = new UeBar.Core.Bus.ModuleBus(guard, settings.BusPolicy, new ListLogger());
+        var provider = bus.For("provider");
+        var consumer = bus.For("consumer");
+        var calls = 0;
+        provider.PublishAction("provider.do", (_, _) =>
+        {
+            calls++;
+            return Task.FromResult<System.Text.Json.Nodes.JsonNode?>(null);
+        });
+        provider.PublishValue("provider.level", 3);
+
+        // Default: denied – the plugin asks, the settings show the request.
+        Assert.Equal(BusErrorKind.Denied, (await consumer.InvokeAsync("provider.do")).Error);
+        var changes = 0;
+        settings.BusPolicy.RequestsChanged += (_, _) => changes++;
+        consumer.RequestPermission("provider", BusAccess.Actions, "for testing");
+        consumer.RequestPermission("provider", BusAccess.Actions, "again"); // not twice
+        Assert.Single(settings.BusPolicy.PendingRequests);
+        Assert.Equal(1, changes);
+
+        // "Allow": saved, request settled, works.
+        settings.SetBusGrant("consumer", "provider", BusAccess.Actions);
+        Assert.Empty(settings.BusPolicy.PendingRequests);
+        Assert.True((await consumer.InvokeAsync("provider.do")).Success);
+        Assert.Equal(1, calls);
+        Assert.False(consumer.GetValue("provider.level").Success); // only what was allowed
+
+        // Saved in settings.json – survives a restart.
+        var reloaded = new SettingsService(Path.Combine(dir.Path, "settings.json"), null, new ListLogger());
+        reloaded.Load();
+        Assert.Equal(BusAccess.Actions, reloaded.GetBusGrant("consumer", "provider"));
+
+        // Values added, then everything revoked.
+        settings.SetBusGrant("consumer", "provider", BusAccess.Actions | BusAccess.Values);
+        Assert.True(consumer.GetValue("provider.level").Success);
+        settings.SetBusGrant("consumer", "provider", BusAccess.None);
+        Assert.Equal(BusErrorKind.Denied, (await consumer.InvokeAsync("provider.do")).Error);
+        Assert.Empty(settings.Current.BusGrants);
+
+        // All publications for the settings page, whatever is permitted.
+        Assert.Equal(["provider.do", "provider.level"], bus.GetAllPublications().Select(p => p.Id).Order());
     }
 
     private sealed class VisibleModule(string id) : IModule, IVisibilityAware

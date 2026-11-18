@@ -129,6 +129,9 @@ internal enum RadioSwitch
 /// <param name="WifiBars">0–5, null = unknown.</param>
 internal sealed record RadioState(RadioSwitch Wifi, RadioSwitch Bluetooth, string? WifiNetwork = null, int? WifiBars = null, bool WifiConnected = false)
 {
+    /// <summary>Connected, but Windows does not tell the network name (since 11 24H2 apps need the location permission).</summary>
+    public bool NetworkNameHidden => WifiConnected && string.IsNullOrWhiteSpace(WifiNetwork);
+
     public static RadioState None { get; } = new(RadioSwitch.Unavailable, RadioSwitch.Unavailable);
 }
 

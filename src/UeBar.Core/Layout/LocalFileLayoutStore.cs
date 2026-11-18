@@ -28,6 +28,7 @@ public sealed class LocalFileLayoutStore : ILayoutStore, IDisposable
     private FileSystemWatcher? _watcher;
     private Timer? _debounce;
     private string? _lastKnownHash;
+    private int _busyReads;
 
     public LocalFileLayoutStore(string path, string? backupDirectory = null, IUeLogger? log = null)
     {
@@ -73,7 +74,7 @@ public sealed class LocalFileLayoutStore : ILayoutStore, IDisposable
             return null;
         }
 
-        var json = await File.ReadAllTextAsync(_path, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+        var json = await ReadAsync(_path, cancellationToken).ConfigureAwait(false);
         lock (_lock)
         {
             _lastKnownHash = Hash(json);
@@ -108,9 +109,54 @@ public sealed class LocalFileLayoutStore : ILayoutStore, IDisposable
         lock (_lock)
         {
             _lastKnownHash = Hash(json);
-            File.Move(tmp, _path, overwrite: true);
+        }
+
+        await ReplaceAsync(tmp, _path, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Moves the written temp file over the layout. Someone may hold the file for a moment – our own
+    /// watcher reloading it, a virus scanner, an indexer – and Windows does not replace an open file:
+    /// retry briefly (up to ~1.3 s) instead of losing the save (P2-3).
+    /// </summary>
+    internal static async Task ReplaceAsync(string source, string target, CancellationToken cancellationToken)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                File.Move(source, target, overwrite: true);
+                return;
+            }
+            catch (Exception ex) when (IsBusy(ex) && attempt < 10)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(30 * attempt), cancellationToken).ConfigureAwait(false);
+            }
         }
     }
+
+    /// <summary>
+    /// Reads the layout. While a save replaces the file (ours or another instance's), opening it can
+    /// fail for a moment ("used by another process") – retry briefly like <see cref="ReplaceAsync"/>
+    /// (P2-3). A missing file is not retried.
+    /// </summary>
+    internal static async Task<string> ReadAsync(string path, CancellationToken cancellationToken)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                return await File.ReadAllTextAsync(path, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (IsBusy(ex) && attempt < 10)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(30 * attempt), cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    private static bool IsBusy(Exception ex) =>
+        ex is UnauthorizedAccessException or IOException and not FileNotFoundException and not DirectoryNotFoundException;
 
     /// <summary>Time of the file's last change (null if it does not exist).</summary>
     public DateTimeOffset? LastWriteTime => File.Exists(_path) ? new DateTimeOffset(File.GetLastWriteTime(_path)) : null;
@@ -195,6 +241,20 @@ public sealed class LocalFileLayoutStore : ILayoutStore, IDisposable
         try
         {
             json = File.ReadAllText(_path, Encoding.UTF8);
+            Volatile.Write(ref _busyReads, 0);
+        }
+        catch (Exception ex) when (IsBusy(ex))
+        {
+            // Being replaced right now – look again shortly instead of missing the change (P2-3).
+            if (Interlocked.Increment(ref _busyReads) <= 10)
+            {
+                lock (_lock)
+                {
+                    _debounce?.Change(100, Timeout.Infinite);
+                }
+            }
+
+            return;
         }
         catch (IOException)
         {

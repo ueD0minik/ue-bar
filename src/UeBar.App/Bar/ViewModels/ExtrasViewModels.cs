@@ -19,12 +19,24 @@ internal enum PillContent
     Status,
     NowPlaying,
     Notification,
+    Activity,
 }
 
 /// <summary>A notification in the pill, the panel banner and the history.</summary>
-internal sealed class NotificationViewModel(BarNotification notification)
+internal sealed class NotificationViewModel(BarNotification notification, Action<BarNotification>? dismiss = null, Action<BarNotification, string>? action = null)
 {
     public BarNotification Source { get; } = notification;
+
+    /// <summary>Buttons of the notification (P2-3), shown on the banner while the panel is open.</summary>
+    public IReadOnlyList<NotificationButtonViewModel> Actions { get; } =
+        [.. notification.Actions.Select(a => new NotificationButtonViewModel(a.Label, new RelayCommand(() => action?.Invoke(notification, a.Id))))];
+
+    public bool HasActions => Actions.Count > 0;
+
+    /// <summary>"×" – only where the notification can be dismissed (not the short confirmations).</summary>
+    public bool CanDismiss => dismiss is not null;
+
+    public RelayCommand DismissCommand { get; } = new(() => dismiss?.Invoke(notification));
 
     public string Title => Source.Title;
 
@@ -36,6 +48,19 @@ internal sealed class NotificationViewModel(BarNotification notification)
 
     public string TimeText => Source.Timestamp.ToLocalTime().ToString(
         Source.Timestamp.Date == DateTimeOffset.Now.Date ? "t" : "g", CultureInfo.CurrentCulture);
+}
+
+/// <summary>A button on a notification banner.</summary>
+internal sealed record NotificationButtonViewModel(string Label, RelayCommand Command);
+
+/// <summary>Activity in the pill (P2-3), e.g. a running timer.</summary>
+internal sealed class PillActivityViewModel(PillActivityEntry entry)
+{
+    public string Title { get; } = entry.Activity.Title;
+
+    public string Text { get; } = entry.Activity.Text;
+
+    public string Icon { get; } = entry.Activity.Icon ?? "Clock";
 }
 
 /// <summary>Current playback for pill and panel.</summary>

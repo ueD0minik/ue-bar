@@ -229,7 +229,7 @@ internal sealed class BarController : IDisposable
     // ------------------------------------------------------------------ Extras (M6)
 
     /// <summary>May a message appear as a pill now? (not paused, no fullscreen block) The reason is for the log.</summary>
-    public bool CanAnnounce(out string? reason)
+    public bool CanAnnounce(out string? reason, bool allowFullscreen = false)
     {
         reason = null;
         if (_settings.Paused)
@@ -244,7 +244,7 @@ internal sealed class BarController : IDisposable
             return false;
         }
 
-        if (AnnouncementMonitor() is { } monitor && _settings.BlockInFullscreen && _fullscreen.IsFullscreenOn(monitor))
+        if (!allowFullscreen && AnnouncementMonitor() is { } monitor && _settings.BlockInFullscreen && _fullscreen.IsFullscreenOn(monitor))
         {
             reason = "fullscreen block";
             return false;
