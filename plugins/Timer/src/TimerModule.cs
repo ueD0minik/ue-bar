@@ -15,8 +15,6 @@ internal sealed record TimerSettings(
     PomodoroSettings Pomodoro,
     string? Sound,
     double Volume,
-    bool IgnoreDoNotDisturb,
-    bool ShowInFullscreen,
     string? WorkAction,
     string? WorkArguments,
     string? BreakAction,
@@ -30,8 +28,6 @@ internal sealed record TimerSettings(
     public const string SoundKey = "sound";
     public const string SoundFileKey = "soundFile";
     public const string VolumeKey = "volume";
-    public const string DndKey = "ignoreDoNotDisturb";
-    public const string FullscreenKey = "showInFullscreen";
     public const string WorkActionKey = "workAction";
     public const string WorkArgumentsKey = "workArguments";
     public const string BreakActionKey = "breakAction";
@@ -62,8 +58,6 @@ internal sealed record TimerSettings(
                 _ => UeNotification.DefaultSound,
             },
             Math.Clamp(v.GetNumber(VolumeKey, 70), 0, 100) / 100,
-            v.GetBool(DndKey, true),
-            v.GetBool(FullscreenKey, true),
             Empty(v.GetString(WorkActionKey)),
             Empty(v.GetString(WorkArgumentsKey)),
             Empty(v.GetString(BreakActionKey)),
@@ -88,7 +82,7 @@ public sealed partial class TimerModule :
     INotificationActionHandler,
     IPillActivitySource,
     IQuickCommandProvider,
-    IModuleSettings,
+    ILiveModuleSettings,
     IVisibilityAware,
     ILayoutSuggestionProvider,
     IModuleDiagnostics
@@ -420,8 +414,9 @@ public sealed partial class TimerModule :
         {
             Id = id,
             Actions = withPlusFive ? [new NotificationAction(PlusFive, T["Timer_PlusFive"])] : null,
-            IgnoreDoNotDisturb = settings.IgnoreDoNotDisturb,
-            ShowInFullscreen = settings.ShowInFullscreen,
+
+            // P2-4: must not be missed – the bar settings decide (paused bar, "Do not disturb", fullscreen).
+            Priority = NotificationPriority.Important,
             Sound = settings.Sound,
             SoundVolume = settings.Volume,
         };

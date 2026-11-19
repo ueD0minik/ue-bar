@@ -42,10 +42,13 @@ public sealed partial class TimerModule
                     new(TimerSettings.SoundFile, T["Timer_SoundFile"]),
                     new(TimerSettings.SoundNone, T["Timer_SoundNone"]),
                 ]),
-                new(TimerSettings.SoundFileKey, T["Timer_SettingSoundFile"], SettingFieldKind.Text, null, T["Timer_SettingSoundFile_Hint"]) { Placeholder = @"C:\Users\…\Music\gong.mp3" },
+                new(TimerSettings.SoundFileKey, T["Timer_SettingSoundFile"], SettingFieldKind.File, null, T["Timer_SettingSoundFile_Hint"])
+                {
+                    Placeholder = @"C:\Users\…\Music\gong.mp3",
+                    FileFilter = T["Timer_SoundFileFilter"] + "|*.wav;*.mp3;*.wma;*.m4a",
+                    ShowWhen = TimerSettings.SoundKey + "=" + TimerSettings.SoundFile,
+                },
                 new(TimerSettings.VolumeKey, T["Timer_SettingVolume"], SettingFieldKind.Number, "70", T["Timer_SettingVolume_Hint"], Min: 0, Max: 100),
-                new(TimerSettings.DndKey, T["Timer_SettingDnd"], SettingFieldKind.Toggle, "true", T["Timer_SettingDnd_Hint"]),
-                new(TimerSettings.FullscreenKey, T["Timer_SettingFullscreen"], SettingFieldKind.Toggle, "true", T["Timer_SettingFullscreen_Hint"]),
                 new(TimerSettings.WorkActionKey, T["Timer_SettingWorkAction"], SettingFieldKind.Choice, "", T["Timer_SettingAction_Hint"], actions),
                 new(TimerSettings.WorkArgumentsKey, T["Timer_SettingWorkArguments"], SettingFieldKind.Text, null, argumentsHint) { Placeholder = ArgumentsExample },
                 new(TimerSettings.BreakActionKey, T["Timer_SettingBreakAction"], SettingFieldKind.Choice, "", T["Timer_SettingAction_Hint"], actions),

@@ -81,7 +81,7 @@ public sealed class BarStateMachine
         _zones = BarGeometry.TriggerZones(monitors, settings);
         _dwellStart = null;
 
-        if (settings.Paused)
+        if (settings.Paused && !_overridePause)
         {
             Hide();
             return;
@@ -114,12 +114,20 @@ public sealed class BarStateMachine
     /// <summary>The pill is currently shown without the mouse (notification).</summary>
     public bool IsAnnouncing => _announceUntil is not null && State == BarState.Pill;
 
+    /// <summary>
+    /// An important notification is out although the bar is paused (P2-4): until it is over, the bar
+    /// behaves as if not paused (the pill can be opened to reach its buttons), then it hides again.
+    /// </summary>
+    public bool IsOverridingPause => _overridePause;
+
+    private bool _overridePause;
+
     /// <summary>The panel is held open for input (quick search).</summary>
     public bool IsHeld => _held;
 
     public void Update(DateTimeOffset now, PixelPoint cursor)
     {
-        if (Settings.Paused && !_held)
+        if (Settings.Paused && !_held && !_overridePause)
         {
             Hide();
             return;
@@ -164,13 +172,14 @@ public sealed class BarStateMachine
     /// or "pill"; an open panel shows the message itself. Afterwards the pill hides as
     /// usual (stays while the mouse is on it).
     /// </summary>
-    public bool Announce(MonitorInfo monitor, DateTimeOffset until)
+    public bool Announce(MonitorInfo monitor, DateTimeOffset until, bool overridePause = false)
     {
-        if (Settings.Paused || State is BarState.Open or BarState.Pinned)
+        if ((Settings.Paused && !overridePause) || State is BarState.Open or BarState.Pinned)
         {
             return false;
         }
 
+        _overridePause = Settings.Paused && overridePause;
         _announceUntil = until;
         _leftAt = null;
         if (State == BarState.Hidden)
@@ -183,8 +192,15 @@ public sealed class BarStateMachine
         return true;
     }
 
-    /// <summary>End the display of a notification early.</summary>
-    public void EndAnnounce() => _announceUntil = null;
+    /// <summary>End the display of a notification early. A paused bar hides right away.</summary>
+    public void EndAnnounce()
+    {
+        _announceUntil = null;
+        if (_overridePause && Settings.Paused && !_held && State == BarState.Pill)
+        {
+            Hide();
+        }
+    }
 
     /// <summary>
     /// Open the panel and hold it, even if the bar is paused (quick search, M6). If the bar is
@@ -272,6 +288,7 @@ public sealed class BarStateMachine
 
     public void Hide()
     {
+        _overridePause = false;
         _dwellStart = null;
         _leftAt = null;
         _announceUntil = null;

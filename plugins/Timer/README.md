@@ -51,8 +51,11 @@ open panel it has a **+5 min** button (starts the same timer again for 5 minutes
 |---|---|---|
 | Sound | Windows alarm | Windows alarm, your own sound file (.wav/.mp3) or none |
 | Volume | 70 | of the sound only (0–100) |
-| Also with "Do not disturb" | on | the notification comes out even while Windows "Do not disturb" is on |
-| Also in fullscreen | on | … and over fullscreen apps |
+
+A timer that ran out is an **important** notification: by default it also comes out while the bar
+is paused, during Windows "Do not disturb" and over fullscreen apps – switch that off for all
+important notifications under **Settings → Notifications → Important notifications** (until 1.3.1
+these were two switches of the timer; a switched-off value was taken over).
 
 Pomodoro announces each phase (work, short break, long break after 4 rounds – all changeable;
 decimals such as 0.5 = 30 s are fine for trying it out).

@@ -58,7 +58,7 @@ public sealed partial class WindowsModule :
     INowPlayingSource,
     IImageSource,
     ILayoutSuggestionProvider,
-    IModuleSettings,
+    ILiveModuleSettings,
     IVisibilityAware,
     IDeviceBatterySource,
     IModuleDiagnostics,

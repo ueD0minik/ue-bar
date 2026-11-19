@@ -53,6 +53,15 @@ public sealed class BarSettings
     /// <summary>With Windows "Do not disturb": no notification pill (history only).</summary>
     public bool RespectDoNotDisturb { get; set; } = true;
 
+    /// <summary>Important notifications (P2-4, e.g. a timer ran out) come out even while the bar is paused.</summary>
+    public bool ImportantWhenPaused { get; set; } = true;
+
+    /// <summary>Important notifications come out even during Windows "Do not disturb".</summary>
+    public bool ImportantDuringDoNotDisturb { get; set; } = true;
+
+    /// <summary>Important notifications come out even over fullscreen apps (despite <see cref="BlockInFullscreen"/>).</summary>
+    public bool ImportantInFullscreen { get; set; } = true;
+
     /// <summary>Display time of a notification if the module does not specify one (seconds).</summary>
     public int NotificationSeconds { get; set; } = 6;
 

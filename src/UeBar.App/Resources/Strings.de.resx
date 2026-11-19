@@ -1021,4 +1021,31 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Bus_Decline" xml:space="preserve">
     <value>Ablehnen</value>
   </data>
+  <data name="Notify_Important" xml:space="preserve">
+    <value>Wichtige Meldungen</value>
+  </data>
+  <data name="Notify_ImportantPaused" xml:space="preserve">
+    <value>Auch bei pausierter Bar</value>
+  </data>
+  <data name="Notify_ImportantPaused_Hint" xml:space="preserve">
+    <value>Plugins kennzeichnen, was man nicht verpassen darf, z. B. einen abgelaufenen Timer.</value>
+  </data>
+  <data name="Notify_ImportantDnd" xml:space="preserve">
+    <value>Auch bei „Nicht stören“</value>
+  </data>
+  <data name="Notify_ImportantFullscreen" xml:space="preserve">
+    <value>Auch über Vollbild-Apps</value>
+  </data>
+  <data name="Fields_Browse" xml:space="preserve">
+    <value>Durchsuchen …</value>
+  </data>
+  <data name="Fields_AllFiles" xml:space="preserve">
+    <value>Alle Dateien</value>
+  </data>
+  <data name="Fields_ListAdd" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="Fields_ListRemove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
 </root>

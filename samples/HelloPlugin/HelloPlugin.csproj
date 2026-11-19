@@ -14,7 +14,7 @@
   <!-- Outside the ue Bar repository: the SDK as a NuGet package. It brings the build logic
        (plugin.json, PackPlugin) along; nothing else is needed. -->
   <ItemGroup Condition="!Exists('..\..\src\UeBar.Sdk\UeBar.Sdk.csproj')">
-    <PackageReference Include="UeBar.Sdk" Version="1.2.0" />
+    <PackageReference Include="UeBar.Sdk" Version="1.3.0" />
   </ItemGroup>
 
   <!-- Inside the ue Bar repository: the SDK project itself, with the same build logic by path. -->

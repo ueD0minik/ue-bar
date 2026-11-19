@@ -112,6 +112,7 @@ public partial class App : Application
 
             var settings = new SettingsService(paths.SettingsFile, new DpapiSecretProtector(), _log);
             settings.Load();
+            SettingsMigration.Run(settings, _log);
             var general = new GeneralSettingsStore(settings);
 
             // Language (R1) before the first window: setting, otherwise the Windows display language.

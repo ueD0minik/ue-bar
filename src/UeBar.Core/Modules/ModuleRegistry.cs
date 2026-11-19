@@ -590,6 +590,70 @@ public sealed class ModuleRegistry : IAsyncDisposable
         return list;
     }
 
+    /// <summary>
+    /// The settings of a module changed (P2-4): a running module with <see cref="ILiveModuleSettings"/>
+    /// gets them right away, without a restart; any other running module is restarted (as before).
+    /// A module that does not run gets them at its next start. Returns true if they were applied live.
+    /// </summary>
+    public async Task<bool> ApplyChangedSettingsAsync(string moduleId, CancellationToken cancellationToken = default)
+    {
+        var entry = Find(moduleId);
+        if (entry is not { IsEnabled: true, IsLoaded: true })
+        {
+            return false;
+        }
+
+        if (entry.Module is ILiveModuleSettings live && entry.IsRunning)
+        {
+            var values = _state.GetModuleSettings(entry.Id);
+            var applied = await _guard.RunAsync(
+                entry.Id,
+                "Apply settings (live)",
+                ct => live.ApplySettingsAsync(values, ct),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (applied.Succeeded)
+            {
+                _log.Info(entry.Id, "Settings applied without a restart");
+                return true;
+            }
+
+            _log.Warn(entry.Id, "Applying the settings live failed – the module restarts");
+        }
+        else
+        {
+            _log.Info(entry.Id, "Settings changed – module restarts");
+        }
+
+        await RestartModuleAsync(entry.Id, cancellationToken).ConfigureAwait(false);
+        return false;
+    }
+
+    /// <summary>
+    /// Something was dropped on the panel in edit mode (P2-4): asks the running modules with
+    /// <see cref="IDropHandler"/> one after another; the first tile wins. <see cref="TileConfig.Module"/>
+    /// is set to the module that answered. null = nobody takes it.
+    /// </summary>
+    public async Task<TileConfig?> CreateTileForDropAsync(DroppedItem item, CancellationToken cancellationToken = default)
+    {
+        foreach (var (module, handler) in GetCapabilities<IDropHandler>())
+        {
+            var result = await _guard.RunAsync(
+                module.Id,
+                $"Drop {item.Kind}",
+                ct => handler.CreateTileForDropAsync(item, ct),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (result is { Succeeded: true, Value: { } tile })
+            {
+                tile.Module = module.Id;
+                _log.Info(module.Id, $"Dropped {item.Kind} becomes a tile ({tile.Type})");
+                return tile;
+            }
+        }
+
+        _log.Info(null, $"Dropped {item.Kind}: no plugin takes it");
+        return null;
+    }
+
     public async ValueTask DisposeAsync()
     {
         await ShutdownAsync(_guard.Options.LifecycleTimeout).ConfigureAwait(false);

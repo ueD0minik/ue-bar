@@ -121,6 +121,19 @@ app passes on only changes. `IDeviceBatterySource`/`IDeviceBatteryCatalog` let o
 device batteries another plugin knows (e.g. a vendor plugin for a wireless dongle) – the core
 collects them, the plugins never see each other.
 
+Contract 1.3 (1.3.2) adds what the quick access plugin needed – all generic, none of it knows that
+plugin:
+
+- `ILiveModuleSettings`: a settings change is applied to the running module
+  (`ModuleRegistry.ApplyChangedSettingsAsync`); modules without it are restarted as before.
+- Settings fields `File`, `Folder` (the app shows the dialog) and `List` (entries with item fields),
+  plus `ShowWhen` on any field.
+- `IDropHandler`: something dropped on the panel in edit mode goes to the first running module that
+  turns it into a tile (`ModuleRegistry.CreateTileForDropAsync`); the app adds the tile.
+- `UeNotification.Priority`: important notifications pass a paused bar, "Do not disturb" and the
+  fullscreen block as far as the bar settings allow (`NotificationGate` in `UeBar.Bar`).
+- `IconGridElement` and `TileModel.ImageUrl` shown as the tile's icon.
+
 ## Tiles are data
 
 So that a module needs no WPF code, a tile describes its content as data made from elements,
@@ -138,6 +151,7 @@ elements:
 | `ChoiceElement` | choice (fan speed, input) |
 | `ValueDisplayElement` | large value + unit (sensor) |
 | `MediaInfoElement` | cover, title, artist, progress |
+| `IconGridElement` | icons with names, e.g. several shortcuts in one tile (1.3) |
 
 Elements are observable (values change live) and report interactions back to the module.
 Elements, `TileModel` and the layout are fully JSON-serializable (no WPF or Windows types,
@@ -211,7 +225,9 @@ behavior can change freely as long as the contract stays the same.
 
 - Collapsed, the bar renders nothing; the only timer is the mouse polling on a background thread,
   which wakes the UI thread only when needed.
-- Modules report changes on any thread; the app marshals them to the UI thread.
+- Modules report changes on any thread; the app marshals them to the UI thread. When it copies a
+  tile's element list it retries if the list was changed at the same moment; a module itself makes
+  sure that two of its threads never change the same tile at once.
 - A UI watchdog writes a small dump to the log folder if the UI thread hangs.
 
 ## Languages

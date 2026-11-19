@@ -53,8 +53,11 @@ Einstellungen:
 |---|---|---|
 | Ton | Windows-Alarm | Windows-Alarm, eigene Tondatei (.wav/.mp3) oder keiner |
 | Lautstärke | 70 | nur für den Ton (0–100) |
-| Auch bei „Nicht stören“ | an | die Meldung kommt auch, wenn „Nicht stören“ von Windows an ist |
-| Auch im Vollbild | an | … und über Vollbild-Apps |
+
+Ein abgelaufener Timer ist eine **wichtige** Meldung: Standardmäßig kommt sie auch bei pausierter
+Bar, bei „Nicht stören“ von Windows und über Vollbild-Apps – abschalten lässt sich das für alle
+wichtigen Meldungen unter **Einstellungen → Benachrichtigungen → Wichtige Meldungen** (bis 1.3.1
+waren das zwei Schalter des Timers; ein ausgeschalteter Wert wurde übernommen).
 
 Pomodoro meldet jede Phase (Arbeiten, kurze Pause, lange Pause nach 4 Runden – alles änderbar;
 Dezimalzahlen wie 0,5 = 30 s gehen, praktisch zum Ausprobieren).

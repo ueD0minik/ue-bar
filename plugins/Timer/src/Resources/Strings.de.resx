@@ -180,18 +180,6 @@
   <data name="Timer_SettingVolume_Hint" xml:space="preserve">
     <value>Nur für den Ton – die Windows-Lautstärke gilt zusätzlich.</value>
   </data>
-  <data name="Timer_SettingDnd" xml:space="preserve">
-    <value>Auch bei „Nicht stören“</value>
-  </data>
-  <data name="Timer_SettingDnd_Hint" xml:space="preserve">
-    <value>Ein abgelaufener Timer erscheint auch, wenn „Nicht stören“ von Windows an ist.</value>
-  </data>
-  <data name="Timer_SettingFullscreen" xml:space="preserve">
-    <value>Auch im Vollbild</value>
-  </data>
-  <data name="Timer_SettingFullscreen_Hint" xml:space="preserve">
-    <value>Ein abgelaufener Timer erscheint auch über Vollbild-Apps.</value>
-  </data>
   <data name="Timer_SettingWorkAction" xml:space="preserve">
     <value>Pomodoro: Aktion beim Arbeitsbeginn</value>
   </data>
@@ -257,5 +245,8 @@
   </data>
   <data name="Pomodoro_Stopped" xml:space="preserve">
     <value>Pomodoro beendet</value>
+  </data>
+  <data name="Timer_SoundFileFilter" xml:space="preserve">
+    <value>Töne</value>
   </data>
 </root>

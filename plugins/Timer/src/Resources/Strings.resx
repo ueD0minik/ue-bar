@@ -180,18 +180,6 @@
   <data name="Timer_SettingVolume_Hint" xml:space="preserve">
     <value>Of the sound only – the Windows volume applies on top.</value>
   </data>
-  <data name="Timer_SettingDnd" xml:space="preserve">
-    <value>Also with "Do not disturb"</value>
-  </data>
-  <data name="Timer_SettingDnd_Hint" xml:space="preserve">
-    <value>A timer that ran out shows up even when Windows' "Do not disturb" is on.</value>
-  </data>
-  <data name="Timer_SettingFullscreen" xml:space="preserve">
-    <value>Also in fullscreen</value>
-  </data>
-  <data name="Timer_SettingFullscreen_Hint" xml:space="preserve">
-    <value>A timer that ran out shows up even over fullscreen apps.</value>
-  </data>
   <data name="Timer_SettingWorkAction" xml:space="preserve">
     <value>Pomodoro: action when work starts</value>
   </data>
@@ -257,5 +245,8 @@
   </data>
   <data name="Pomodoro_Stopped" xml:space="preserve">
     <value>Pomodoro stopped</value>
+  </data>
+  <data name="Timer_SoundFileFilter" xml:space="preserve">
+    <value>Sounds</value>
   </data>
 </root>

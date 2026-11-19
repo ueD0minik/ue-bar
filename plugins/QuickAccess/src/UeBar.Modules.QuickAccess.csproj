@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Plugin "quickaccess" (P2-4): apps, files, Office templates, folders, web pages and own commands as
+       tiles. References only UeBar.Sdk; the Windows shell through own COM/Win32 declarations. -->
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>UeBar.Modules.QuickAccess</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Private=false: the SDK always comes from the app, never from the plugin folder -->
+    <ProjectReference Include="..\..\..\src\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="UeBar.Modules.QuickAccess.Tests" />
+  </ItemGroup>
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.targets" />
+</Project>

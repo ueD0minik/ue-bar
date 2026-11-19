@@ -148,7 +148,7 @@ internal sealed partial class BarWindow : Window
     /// Edit mode: the window may exceptionally get the focus (text input, Ctrl+Z).
     /// Afterwards <c>WS_EX_NOACTIVATE</c> again and the previous window gets the focus back.
     /// </summary>
-    public void AllowActivation(bool allow)
+    public void AllowActivation(bool allow, bool restorePrevious = true)
     {
         if (_hwnd == IntPtr.Zero)
         {
@@ -185,8 +185,8 @@ internal sealed partial class BarWindow : Window
         {
             Keyboard.ClearFocus();
             Focusable = false;
-            var back = "no previous window";
-            if (_previousForeground != IntPtr.Zero && _previousForeground != _hwnd && Win32.IsWindow(_previousForeground))
+            var back = restorePrevious ? "no previous window" : "left to Windows (an action ran – a started app keeps the focus)";
+            if (restorePrevious && _previousForeground != IntPtr.Zero && _previousForeground != _hwnd && Win32.IsWindow(_previousForeground))
             {
                 back = Win32.SetForegroundWindow(_previousForeground) ? $"back to 0x{_previousForeground.ToInt64():X}" : $"return to 0x{_previousForeground.ToInt64():X} refused";
             }

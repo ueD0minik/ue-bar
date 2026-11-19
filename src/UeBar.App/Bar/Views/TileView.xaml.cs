@@ -131,6 +131,15 @@ public partial class TileView : UserControl
         }
     }
 
+    /// <summary>P2-4: the module's image (e.g. a real app icon) replaces the glyph once it is there.</summary>
+    private void OnTileImageChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is TileViewModel vm && sender is Media.CoverImage image)
+        {
+            vm.HasImage = image.Source is not null;
+        }
+    }
+
     private void OnCardLeave(object sender, MouseEventArgs e)
     {
         if (_dragging)

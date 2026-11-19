@@ -786,6 +786,13 @@ internal sealed partial class SettingsWindow : Window
             SwitchRow(Loc.Get("Bar_RespectDnd"), Loc.Get("Notify_RespectDnd_Hint"), s.RespectDoNotDisturb, v => _host.Bar.Update(b => b.RespectDoNotDisturb = v)),
             Row(Loc.Get("Notify_History"), null, clear, controlBelow: false)));
         page.Children.Add(count);
+
+        // P2-4: what important notifications (e.g. a timer that ran out) may do.
+        page.Children.Add(SubHeading(Loc.Get("Notify_Important")));
+        page.Children.Add(Card(
+            SwitchRow(Loc.Get("Notify_ImportantPaused"), Loc.Get("Notify_ImportantPaused_Hint"), s.ImportantWhenPaused, v => _host.Bar.Update(b => b.ImportantWhenPaused = v)),
+            SwitchRow(Loc.Get("Notify_ImportantDnd"), null, s.ImportantDuringDoNotDisturb, v => _host.Bar.Update(b => b.ImportantDuringDoNotDisturb = v)),
+            SwitchRow(Loc.Get("Notify_ImportantFullscreen"), null, s.ImportantInFullscreen, v => _host.Bar.Update(b => b.ImportantInFullscreen = v))));
         _onRefresh = UpdateCount;
     }
 

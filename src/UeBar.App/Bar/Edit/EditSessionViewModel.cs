@@ -854,5 +854,36 @@ internal sealed class EditSessionViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// P2-4: something was dropped on the panel – every item the plugins take becomes a tile in the
+    /// current tab (the core asks them, see <see cref="ModuleRegistry.CreateTileForDropAsync"/>).
+    /// Returns how many tiles were added.
+    /// </summary>
+    public async Task<int> AddDroppedAsync(IReadOnlyList<DroppedItem> items)
+    {
+        if (SelectedTabId is not { } tabId)
+        {
+            return 0;
+        }
+
+        var added = 0;
+        foreach (var item in items)
+        {
+            if (await _registry.CreateTileForDropAsync(item) is not { } config)
+            {
+                continue;
+            }
+
+            if (Editor.AddTile(tabId, config) is { } id)
+            {
+                SelectedTileId = id;
+                added++;
+            }
+        }
+
+        _log.Info(null, $"Edit: {added} of {items.Count} dropped item(s) became tiles");
+        return added;
+    }
+
     private static string Key(TileConfig config) => UeBarJson.Serialize(config);
 }

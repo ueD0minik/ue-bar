@@ -90,7 +90,7 @@ internal sealed class ExtrasController
         _viewModel.QuickSearch = new QuickSearchViewModel(registry, quickCommands, log);
         _viewModel.QuickSearch.Executed += (_, result) =>
         {
-            CloseQuickSearch("action run");
+            CloseQuickSearch("action run", restoreFocus: false);
             ShowConfirmation(result);
         };
 
@@ -144,7 +144,7 @@ internal sealed class ExtrasController
     /// <summary>The view then sets the focus into the search field.</summary>
     public event EventHandler? QuickSearchOpened;
 
-    public void CloseQuickSearch(string reason = "Esc")
+    public void CloseQuickSearch(string reason = "Esc", bool restoreFocus = true)
     {
         if (!_viewModel.IsQuickSearchOpen)
         {
@@ -152,7 +152,7 @@ internal sealed class ExtrasController
         }
 
         _viewModel.IsQuickSearchOpen = false;
-        _bar.CloseQuickSearch();
+        _bar.CloseQuickSearch(restoreFocus);
         _log.Info(null, $"Quick search closed ({reason}, bar {_bar.StateText})");
     }
 
@@ -184,11 +184,14 @@ internal sealed class ExtrasController
     {
         var settings = _bar.Settings;
         var duration = notification.Duration ?? TimeSpan.FromSeconds(Math.Clamp(settings.NotificationSeconds, 2, 60));
-        var suppress = !_bar.CanAnnounce(out var reason, allowFullscreen: notification.ShowInFullscreen);
-        if (!suppress && settings.RespectDoNotDisturb && !notification.IgnoreDoNotDisturb && ExtrasInterop.IsDoNotDisturbActive())
+        // P2-4: one decision for all (paused, locked, fullscreen, "Do not disturb") – important ones may pass.
+        var request = new NotificationRequest(notification.Priority == NotificationPriority.Important, notification.IgnoreDoNotDisturb, notification.ShowInFullscreen);
+        var decision = NotificationGate.Decide(request, _bar.CurrentAnnounceConditions(settings.RespectDoNotDisturb && ExtrasInterop.IsDoNotDisturbActive()), settings);
+        var suppress = !decision.Show;
+        var reason = decision.Reason;
+        if (decision.OverridesPause)
         {
-            suppress = true;
-            reason = "do not disturb";
+            _log.Info(notification.Source, "Important notification comes out although the bar is paused");
         }
 
         if (suppress)
@@ -205,6 +208,7 @@ internal sealed class ExtrasController
         {
             Id = notification.Id,
             Actions = [.. (notification.Actions ?? []).Where(a => a is not null).Select(a => (a.Id, a.Label))],
+            OverridesPause = decision.OverridesPause,
         }, suppress);
         _viewModel.SetHistory(_queue.History);
         AdvanceQueue();
@@ -299,7 +303,7 @@ internal sealed class ExtrasController
             _viewModel.Notification = current is null ? null : Show(current);
             if (current is not null)
             {
-                _bar.Announce(current.Duration);
+                _bar.Announce(current.Duration, current.OverridesPause);
             }
         }
 

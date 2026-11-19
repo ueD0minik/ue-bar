@@ -33,7 +33,7 @@ in a release is called `ueBar-plugin-<id>-<version>.zip`.
 ```powershell
 dotnet new classlib -n MyPlugin -f net10.0
 cd MyPlugin
-dotnet add package UeBar.Sdk --version 1.2.0
+dotnet add package UeBar.Sdk --version 1.3.0
 ```
 
 - Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF. A plugin that needs
@@ -66,7 +66,7 @@ Next to the `.csproj`:
   "author": "Your Name",
   "license": "GPL-3.0-or-later",
   "homepage": "https://example.org/myplugin",
-  "sdkVersion": "1.2",
+  "sdkVersion": "1.3",
   "entryAssembly": "MyPlugin.dll"
 }
 ```
@@ -181,9 +181,18 @@ internal sealed class CounterTileType : ITileType
 ```
 
 Elements: `TapAction`, `SliderElement`, `StepperElement`, `ButtonRowElement`, `ChoiceElement`,
-`ValueDisplayElement`, `MediaInfoElement`. Changing a property (like `value.Value` above) updates
-the tile live; ue Bar moves the change to the UI thread. A 1x1 tile shows icon, title and state,
-2x1 also the first visible element, 2x2 all of them.
+`ValueDisplayElement`, `MediaInfoElement`, `IconGridElement` (icons with names, e.g. several
+shortcuts in one tile; a tap reports `Press` with the entry's ID, 1.3). Changing a property (like
+`value.Value` above) updates the tile live; ue Bar moves the change to the UI thread. A 1x1 tile
+shows icon, title and state, 2x1 also the first visible element, 2x2 all of them.
+
+`TileModel.ImageUrl` (an image ID your `IImageSource` answers, or an http(s) address) replaces the
+icon of the tile with a real image, e.g. an app icon (1.3); the glyph stays until the image is there.
+
+If your plugin changes a tile's elements on its own thread (adding/removing elements), make sure two
+threads never change the same tile at once: a new tile is refreshed on the core's thread while your
+worker may refresh it already – one lock around "track + first refresh" and around your refresh
+round is enough.
 
 ## 5. Optional capabilities
 
@@ -193,7 +202,8 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 |---|---|
 | `IEntitySource` | searchable things with a default action (quick search, "Add tile", tile suggestion) |
 | `IStatusProvider` | small values for the status line |
-| `IModuleSettings` | settings fields; ue Bar builds a settings page and stores secrets encrypted |
+| `IModuleSettings` | settings fields; ue Bar builds a settings page and stores secrets encrypted ([fields](#settings-fields)) |
+| `ILiveModuleSettings` | a change of the settings is applied while the plugin runs – no restart, no flicker (1.3) |
 | `IModuleSettingsTest` | "Test connection" for the entered settings |
 | `IModuleDiagnostics` | diagnostic lines on the plugin's settings page |
 | `INotificationSource` | notifications shown as a pill and in the history |
@@ -204,7 +214,8 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 | `IVisibilityAware` | what of the plugin is on screen right now – pause polling while nothing is visible (1.1) |
 | `IDeviceBatterySource` | battery levels of devices (headphones, mice …) for other plugins to show (1.1) |
 | `IPillActivitySource` | something going on (e.g. a timer) the pill shows when it comes out (1.2) |
-| `INotificationActionHandler` | buttons on your notifications (`UeNotification.Actions`, e.g. "+5 min"); notifications can also bring a sound and show during "Do not disturb"/fullscreen (1.2) |
+| `INotificationActionHandler` | buttons on your notifications (`UeNotification.Actions`, e.g. "+5 min"); notifications can also bring a sound (1.2) and be **important** (`Priority`, 1.3, see below) |
+| `IDropHandler` | turn something dropped on the panel in edit mode (file, folder, shortcut, link) into a tile (1.3) |
 | `IModuleSettingsActions` | buttons on your settings page (`SettingFieldKind.Button`, 1.2) |
 | `ILayoutStoreProvider` | a place to sync the layout (e.g. a server) |
 | `ILayoutSuggestionProvider` / `ILayoutSuggestionOptions` | a suggested layout for the first start |
@@ -212,6 +223,36 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 | `IImageSource` | images (cover art) by image ID – credentials stay in the plugin |
 | `ILocationProvider` | at home / away (for tabs visible only at home or away) |
 | `IDeveloperModule` | marks a developer/test plugin |
+
+### Settings fields
+
+`SettingFieldKind`: `Text`, `Password` (stored encrypted), `Number`, `Toggle`, `Choice`,
+`MultiChoice`, `Button` (1.2) and from 1.3:
+
+- `File` / `Folder` – a path with "Browse…" (the core's dialog; `FileFilter` like
+  `"Sounds|*.wav;*.mp3"`). Plugins never show windows of their own.
+- `List` – entries with the fields of `ItemFields` (no secrets, no nested lists). The value is a JSON
+  array; read it with `values.GetList(key)`. Every entry gets a stable `"id"` from the core.
+- `ShowWhen = "kind=file"` (or `"kind=app|command"`) on any field: shown only while the other field
+  of the same level – the page or the same list entry – has one of these values.
+
+With `ILiveModuleSettings` your `ApplySettingsAsync` is also called while the plugin runs; it must
+then be safe against your own work (a lock around the values is usually all it takes).
+
+### Important notifications
+
+`UeNotification.Priority = NotificationPriority.Important` marks what must not be missed (a timer
+that ran out). The user decides in Settings → Notifications what important notifications may do:
+come out while the bar is paused, during "Do not disturb" and over fullscreen apps (all on by
+default). Everything else follows the bar. The flags `IgnoreDoNotDisturb`/`ShowInFullscreen` of 1.2
+still work, but prefer the priority.
+
+### Drag and drop
+
+In edit mode the user can drop files, folders, shortcuts (`.lnk`, `.url`) and links on the panel.
+ue Bar asks the running plugins with `IDropHandler` one after another
+(`CreateTileForDropAsync(DroppedItem, ct)`); the first that returns a `TileConfig` gets the tile,
+`null` means "not mine". Only describe the tile – ue Bar adds it to the layout.
 
 On the module context ue Bar offers more: `context as IHostInfo` (device name),
 `context as IModuleSecrets` (small encrypted secrets), `context as IUiLanguageInfo` (UI language
@@ -279,7 +320,7 @@ checksum of the plugin's code files (`.dll`, `.exe`, `*.deps.json`, `plugin.json
 - The **major** version changes only for an unavoidable breaking change. Plugins for another major
   version are not loaded – Settings → Plugins says why.
 
-A plugin that needs `1.3` is not loaded by a ue Bar that offers `1.2` (it says "update ue Bar").
+A plugin that needs `1.4` is not loaded by a ue Bar that offers `1.3` (it says "update ue Bar").
 
 ## Rules
 

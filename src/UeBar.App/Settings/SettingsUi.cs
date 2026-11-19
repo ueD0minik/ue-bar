@@ -29,6 +29,15 @@ internal static class SettingsUi
         Margin = new Thickness(4, 0, 0, 14),
     };
 
+    /// <summary>Heading of a section within a page (P2-4).</summary>
+    public static TextBlock SubHeading(string text) => new()
+    {
+        Text = text,
+        FontSize = 15,
+        FontWeight = FontWeights.SemiBold,
+        Margin = new Thickness(4, 18, 0, 8),
+    };
+
     public static TextBlock Hint(string text, double top = 0) => new()
     {
         Text = text,

@@ -49,8 +49,8 @@ internal sealed class ModuleFieldEditor
             _restart.Stop();
             if (_registry.Find(_module.Id) is { IsEnabled: true })
             {
-                _log.Info(_module.Id, "Settings changed – module restarts");
-                await _registry.RestartModuleAsync(_module.Id);
+                // P2-4: a module that can apply settings live keeps running (no flicker), others restart.
+                await _registry.ApplyChangedSettingsAsync(_module.Id);
             }
 
             _saved.Text = "Gespeichert.";
@@ -64,9 +64,12 @@ internal sealed class ModuleFieldEditor
     {
         var current = _settings.GetModuleSettings(_module.Id);
         var rows = new List<UIElement>();
+        _shown.Clear();
         foreach (var field in _fields)
         {
-            rows.Add(BuildField(field, current));
+            var row = BuildField(field, current);
+            _shown.Add((field, row));
+            rows.Add(row);
         }
 
         if (withTest && _module.Module is IModuleSettingsTest)
@@ -82,16 +85,67 @@ internal sealed class ModuleFieldEditor
             rows.Add(_saved);
         }
 
-        return Card([.. rows]);
+        var card = Card([.. rows]);
+        UpdateShown();
+        return card;
+    }
+
+    private readonly List<(SettingField Field, UIElement Row)> _shown = [];
+
+    /// <summary>Current value of a field of the page: entered, saved or its default (for <see cref="SettingField.ShowWhen"/>).</summary>
+    private string? ValueOf(string key) =>
+        _pending.TryGetValue(key, out var p) ? p.Value
+        : _settings.GetModuleSettings(_module.Id).GetString(key) ?? _fields.FirstOrDefault(f => f.Key == key)?.DefaultValue;
+
+    private void UpdateShown() => ApplyShown(_shown, ValueOf);
+
+    /// <summary>
+    /// P2-4: fields with <see cref="SettingField.ShowWhen"/> come and go with the field they depend on; the
+    /// separator line of the card goes with its row.
+    /// </summary>
+    private static void ApplyShown(IEnumerable<(SettingField Field, UIElement Row)> rows, Func<string, string?> valueOf)
+    {
+        foreach (var (field, row) in rows)
+        {
+            row.Visibility = field.IsShown(valueOf) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        var panel = (rows.Select(r => r.Row).FirstOrDefault() as FrameworkElement)?.Parent as Panel;
+        if (panel is null)
+        {
+            return;
+        }
+
+        var anyBefore = false;
+        UIElement? separator = null;
+        foreach (UIElement child in panel.Children)
+        {
+            if (child is Border { Height: 1 } line)
+            {
+                separator = line;
+                continue;
+            }
+
+            var visible = child.Visibility == Visibility.Visible;
+            if (separator is not null)
+            {
+                separator.Visibility = visible && anyBefore ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            anyBefore |= visible;
+            separator = null;
+        }
     }
 
     public Button TestButton() => Button(Loc.Get("Fields_TestConnection"), async () => await TestAsync(), icon: "");
 
     public StackPanel TestResults => _testResults;
 
-    private FrameworkElement BuildField(SettingField field, ModuleSettingValues current)
+    private FrameworkElement BuildField(SettingField field, ModuleSettingValues current) =>
+        BuildField(field, current.GetString(field.Key) ?? field.DefaultValue, v => Changed(field, v));
+
+    private FrameworkElement BuildField(SettingField field, string? value, Action<string?> changed)
     {
-        var value = current.GetString(field.Key) ?? field.DefaultValue;
         switch (field.Kind)
         {
             case SettingFieldKind.Button:
@@ -113,7 +167,7 @@ internal sealed class ModuleFieldEditor
             }
 
             case SettingFieldKind.Toggle:
-                return SwitchRow(field.Label, field.Description, bool.TryParse(value, out var b) && b, v => Changed(field, v ? "true" : "false"));
+                return SwitchRow(field.Label, field.Description, bool.TryParse(value, out var b) && b, v => changed(v ? "true" : "false"));
 
             case SettingFieldKind.Choice when field.Choices is { Count: > 0 } choices:
             {
@@ -123,7 +177,7 @@ internal sealed class ModuleFieldEditor
                     items.Insert(0, (Loc.F("Fields_NotFound", value), value));
                 }
 
-                return Row(field.Label, field.Description, Combo(items, value, v => Changed(field, v), width: 320), controlBelow: true);
+                return Row(field.Label, field.Description, Combo(items, value, v => changed(v), width: 320), controlBelow: true);
             }
 
             case SettingFieldKind.MultiChoice when field.Choices is { Count: > 0 } choices:
@@ -144,7 +198,7 @@ internal sealed class ModuleFieldEditor
                             selected.Remove(id);
                         }
 
-                        Changed(field, string.Join(",", choices.Select(c => c.Value).Where(selected.Contains)));
+                        changed(string.Join(",", choices.Select(c => c.Value).Where(selected.Contains)));
                     });
                     row.Margin = new Thickness(0, 2, 0, 2);
                     list.Children.Add(row);
@@ -161,10 +215,16 @@ internal sealed class ModuleFieldEditor
                 {
                     if (text.Length > 0)
                     {
-                        Changed(field, text);
+                        changed(text);
                     }
                 }, width: 420, password: true), controlBelow: true);
             }
+
+            case SettingFieldKind.File or SettingFieldKind.Folder:
+                return Row(field.Label, field.Description, PathField(field, value, changed), controlBelow: true);
+
+            case SettingFieldKind.List:
+                return Row(field.Label, field.Description, ListField(field, value, changed), controlBelow: true);
 
             default:
                 return Row(field.Label, field.Description, TextField(value, field.Placeholder, text =>
@@ -180,14 +240,154 @@ internal sealed class ModuleFieldEditor
                         text = d.ToString(CultureInfo.InvariantCulture);
                     }
 
-                    Changed(field, text.Length == 0 ? null : text);
+                    changed(text.Length == 0 ? null : text);
                 }, width: 420), controlBelow: true);
         }
+    }
+
+    /// <summary>P2-4: path as text + "Browse…" with the Windows dialog (plugins show no windows of their own).</summary>
+    private FrameworkElement PathField(SettingField field, string? value, Action<string?> changed)
+    {
+        var panel = new StackPanel { Orientation = Orientation.Horizontal };
+        var text = TextField(value, field.Placeholder, t => changed(t.Length == 0 ? null : t), width: 330);
+        panel.Children.Add(text);
+        var browse = Button(Loc.Get("Fields_Browse"), () =>
+        {
+            var start = string.IsNullOrWhiteSpace(value) ? null : Environment.ExpandEnvironmentVariables(value);
+            string? chosen;
+            if (field.Kind == SettingFieldKind.Folder)
+            {
+                var dialog = new Microsoft.Win32.OpenFolderDialog { Title = field.Label };
+                if (start is not null && System.IO.Directory.Exists(start))
+                {
+                    dialog.InitialDirectory = start;
+                }
+
+                chosen = dialog.ShowDialog(_owner) == true ? dialog.FolderName : null;
+            }
+            else
+            {
+                var dialog = new Microsoft.Win32.OpenFileDialog { Title = field.Label, Filter = field.FileFilter ?? Loc.Get("Fields_AllFiles") + "|*.*" };
+                if (start is not null && System.IO.Path.GetDirectoryName(start) is { } dir && System.IO.Directory.Exists(dir))
+                {
+                    dialog.InitialDirectory = dir;
+                }
+
+                chosen = dialog.ShowDialog(_owner) == true ? dialog.FileName : null;
+            }
+
+            if (chosen is null)
+            {
+                return;
+            }
+
+            value = chosen;
+            if (FindTextBox(text) is { } box)
+            {
+                box.Text = chosen;
+            }
+
+            changed(chosen);
+        });
+        browse.Margin = new Thickness(8, 0, 0, 0);
+        panel.Children.Add(browse);
+        return panel;
+    }
+
+    private static TextBox? FindTextBox(DependencyObject root)
+    {
+        if (root is TextBox box)
+        {
+            return box;
+        }
+
+        for (var i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            if (FindTextBox(System.Windows.Media.VisualTreeHelper.GetChild(root, i)) is { } found)
+            {
+                return found;
+            }
+        }
+
+        return root is Panel panel ? panel.Children.OfType<UIElement>().Select(FindTextBox).FirstOrDefault(b => b is not null) : null;
+    }
+
+    /// <summary>
+    /// P2-4: a list of entries, each with the item fields; "Add" and "Remove". Every change saves the whole
+    /// list (JSON); new entries get a stable "id".
+    /// </summary>
+    private FrameworkElement ListField(SettingField field, string? value, Action<string?> changed)
+    {
+        var items = ModuleSettingValues.ParseList(value).Select(i => new Dictionary<string, string>(i, StringComparer.Ordinal)).ToList();
+        var fields = (field.ItemFields ?? []).Where(f => f.Kind is not (SettingFieldKind.List or SettingFieldKind.Password or SettingFieldKind.Button)).ToList();
+        var host = new StackPanel();
+
+        void Save() => changed(items.Count == 0 ? null : ModuleSettingValues.FormatList(items));
+
+        void Render()
+        {
+            host.Children.Clear();
+            foreach (var item in items)
+            {
+                var rows = new List<UIElement>();
+                var shown = new List<(SettingField, UIElement)>();
+                string? ItemValue(string key) => item.TryGetValue(key, out var value) ? value : fields.FirstOrDefault(f => f.Key == key)?.DefaultValue;
+                foreach (var itemField in fields)
+                {
+                    var current = item.TryGetValue(itemField.Key, out var v) ? v : itemField.DefaultValue;
+                    var row = BuildField(itemField, current, nv =>
+                    {
+                        if (nv is null)
+                        {
+                            item.Remove(itemField.Key);
+                        }
+                        else
+                        {
+                            item[itemField.Key] = nv;
+                        }
+
+                        Save();
+                        ApplyShown(shown, ItemValue);
+                    });
+                    shown.Add((itemField, row));
+                    rows.Add(row);
+                }
+
+                var remove = Button(Loc.Get("Fields_ListRemove"), () =>
+                {
+                    items.Remove(item);
+                    Save();
+                    Render();
+                }, icon: "\uE74D");
+                rows.Add(remove);
+                var card = Card([.. rows]);
+                card.Margin = new Thickness(0, 0, 0, 10);
+                host.Children.Add(card);
+                ApplyShown(shown, ItemValue);
+            }
+
+            host.Children.Add(Button(field.AddText ?? Loc.Get("Fields_ListAdd"), () =>
+            {
+                var item = new Dictionary<string, string>(StringComparer.Ordinal) { ["id"] = Guid.NewGuid().ToString("N")[..8] };
+                foreach (var itemField in fields.Where(f => f.DefaultValue is not null))
+                {
+                    item[itemField.Key] = itemField.DefaultValue!;
+                }
+
+                items.Add(item);
+                Save();
+                Render();
+            }, icon: "\uE710"));
+        }
+
+        Render();
+        return host;
     }
 
     private void Changed(SettingField field, string? value)
     {
         _pending[field.Key] = (value, field.IsSecret);
+        UpdateShown();
         if (!_immediate)
         {
             return;

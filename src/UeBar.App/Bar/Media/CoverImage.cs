@@ -42,6 +42,18 @@ internal sealed class CoverImage : Image
         set => SetValue(ImageIdProperty, value);
     }
 
+    /// <summary>The shown image changed (P2-4: the tile shows its glyph only while there is none).</summary>
+    public event EventHandler? ImageChanged;
+
+    protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.Property == SourceProperty)
+        {
+            ImageChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private async void Reload()
     {
         // async void only here in the app view (event handler); errors are caught.

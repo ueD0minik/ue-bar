@@ -26,4 +26,7 @@
     <DataTemplate DataType="{x:Type tiles:MediaInfoElement}">
         <views:MediaInfoElementView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type tiles:IconGridElement}">
+        <views:IconGridElementView />
+    </DataTemplate>
 </ResourceDictionary>

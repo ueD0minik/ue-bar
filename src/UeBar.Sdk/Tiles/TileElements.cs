@@ -18,6 +18,7 @@ namespace UeBar.Sdk;
 [JsonDerivedType(typeof(ChoiceElement), "choice")]
 [JsonDerivedType(typeof(ValueDisplayElement), "valueDisplay")]
 [JsonDerivedType(typeof(MediaInfoElement), "mediaInfo")]
+[JsonDerivedType(typeof(IconGridElement), "iconGrid")]
 public abstract class TileElement : ObservableModel
 {
     /// <summary>ID within the tile, so interactions can be assigned.</summary>

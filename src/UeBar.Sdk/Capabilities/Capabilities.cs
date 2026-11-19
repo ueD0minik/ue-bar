@@ -93,6 +93,13 @@ public sealed record UeNotification(
 
     /// <summary>Value for <see cref="Sound"/>: the Windows alarm sound.</summary>
     public const string DefaultSound = "default";
+
+    /// <summary>
+    /// How important it is (contract 1.3). <see cref="NotificationPriority.Important"/> may come out while
+    /// the bar is paused, during "Do not disturb" and over fullscreen apps – as the bar settings allow.
+    /// Prefer this over <see cref="IgnoreDoNotDisturb"/>/<see cref="ShowInFullscreen"/> (still honored).
+    /// </summary>
+    public NotificationPriority Priority { get; init; }
 }
 
 /// <summary>Delivers notifications to the core; the core shows them.</summary>

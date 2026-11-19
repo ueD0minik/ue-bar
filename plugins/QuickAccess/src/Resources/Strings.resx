@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="Qa_ModuleName" xml:space="preserve">
+    <value>Quick access</value>
+  </data>
+  <data name="Qa_SettingEntries" xml:space="preserve">
+    <value>Entries</value>
+  </data>
+  <data name="Qa_SettingEntries_Hint" xml:space="preserve">
+    <value>Your own shortcuts on this PC: they appear in the search (also to add tiles) and can be opened by other plugins ("quickaccess.open"). Files and folders can also simply be dropped on the panel in edit mode.</value>
+  </data>
+  <data name="Qa_SettingAdd" xml:space="preserve">
+    <value>Add entry</value>
+  </data>
+  <data name="Qa_FieldName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Qa_FieldName_Example" xml:space="preserve">
+    <value>e.g. Maths</value>
+  </data>
+  <data name="Qa_FieldKind" xml:space="preserve">
+    <value>Kind</value>
+  </data>
+  <data name="Qa_KindApp" xml:space="preserve">
+    <value>App</value>
+  </data>
+  <data name="Qa_KindFile" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Qa_KindFolder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Qa_KindUrl" xml:space="preserve">
+    <value>Web page</value>
+  </data>
+  <data name="Qa_KindCommand" xml:space="preserve">
+    <value>Command (advanced)</value>
+  </data>
+  <data name="Qa_FieldFile" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Qa_FieldFile_Hint" xml:space="preserve">
+    <value>Office templates (.dotx, .xltx, .potx) open a new document.</value>
+  </data>
+  <data name="Qa_FieldFolder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Qa_FieldText" xml:space="preserve">
+    <value>Address, app or command</value>
+  </data>
+  <data name="Qa_FieldText_Hint" xml:space="preserve">
+    <value>Web page: the address (https://…). App: its name as in the Start menu. Command: a script (.ps1, .bat) or a command line – for advanced users: it runs with your rights, only enter what you know.</value>
+  </data>
+  <data name="Qa_FieldAdmin" xml:space="preserve">
+    <value>As administrator</value>
+  </data>
+  <data name="Qa_FieldAdmin_Hint" xml:space="preserve">
+    <value>Windows asks for permission (UAC) on every start.</value>
+  </data>
+  <data name="Qa_NotFound" xml:space="preserve">
+    <value>Not found</value>
+  </data>
+  <data name="Qa_Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="Qa_StartFailed" xml:space="preserve">
+    <value>Could not start: {0}</value>
+  </data>
+  <data name="Qa_Entries" xml:space="preserve">
+    <value>Quick access</value>
+  </data>
+  <data name="Qa_Apps" xml:space="preserve">
+    <value>Apps</value>
+  </data>
+  <data name="Qa_Group" xml:space="preserve">
+    <value>Collection</value>
+  </data>
+  <data name="Qa_Group_Hint" xml:space="preserve">
+    <value>Up to 6 entries in one tile</value>
+  </data>
+  <data name="Qa_GroupWords" xml:space="preserve">
+    <value>group, collection, shortcuts</value>
+  </data>
+  <data name="Qa_GroupEmpty" xml:space="preserve">
+    <value>Choose entries in edit mode</value>
+  </data>
+  <data name="Qa_TileItem" xml:space="preserve">
+    <value>Shortcut</value>
+  </data>
+  <data name="Qa_SlotTarget" xml:space="preserve">
+    <value>App, file, folder or web page</value>
+  </data>
+  <data name="Qa_SlotItem" xml:space="preserve">
+    <value>Entry {0}</value>
+  </data>
+  <data name="Qa_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Qa_Template" xml:space="preserve">
+    <value>Template – new document</value>
+  </data>
+  <data name="Qa_AsAdmin" xml:space="preserve">
+    <value>As administrator</value>
+  </data>
+  <data name="Qa_OneEntry" xml:space="preserve">
+    <value>1 entry</value>
+  </data>
+  <data name="Qa_Entries_Count" xml:space="preserve">
+    <value>{0} entries</value>
+  </data>
+  <data name="Qa_KindCommandShort" xml:space="preserve">
+    <value>Command</value>
+  </data>
+</root>

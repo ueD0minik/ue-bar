@@ -321,6 +321,9 @@ public sealed record BarNotification(string Title, string Message, string? Icon,
 
     /// <summary>Buttons (ID, label) – shown in the panel while it is the current notification.</summary>
     public IReadOnlyList<(string Id, string Label)> Actions { get; init; } = [];
+
+    /// <summary>Comes out although the bar is paused (important, P2-4).</summary>
+    public bool OverridesPause { get; init; }
 }
 
 /// <summary>

@@ -1021,4 +1021,31 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Bus_Decline" xml:space="preserve">
     <value>Decline</value>
   </data>
+  <data name="Notify_Important" xml:space="preserve">
+    <value>Important notifications</value>
+  </data>
+  <data name="Notify_ImportantPaused" xml:space="preserve">
+    <value>Also while the bar is paused</value>
+  </data>
+  <data name="Notify_ImportantPaused_Hint" xml:space="preserve">
+    <value>Plugins mark what must not be missed, e.g. a timer that ran out.</value>
+  </data>
+  <data name="Notify_ImportantDnd" xml:space="preserve">
+    <value>Also during "Do not disturb"</value>
+  </data>
+  <data name="Notify_ImportantFullscreen" xml:space="preserve">
+    <value>Also over fullscreen apps</value>
+  </data>
+  <data name="Fields_Browse" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Fields_AllFiles" xml:space="preserve">
+    <value>All files</value>
+  </data>
+  <data name="Fields_ListAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Fields_ListRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
 </root>

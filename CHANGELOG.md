@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.3.2 – Quick access plugin, important notifications, live settings
+
+**Plugin interface (`CoreApiVersion`): 1.3** – extended, nothing broken: plugins for 1.0–1.2 keep
+loading. SDK package `UeBar.Sdk 1.3.0`.
+
+### New
+- **Quick access plugin** (`plugins/QuickAccess`, plugin ID `quickaccess`, comes with ue Bar and is
+  on): Start menu apps (classic and Store, optionally as administrator), files, Office templates (a
+  tap opens a new document from the template), folders, web pages and own commands as tiles with the
+  real icons from Windows. A collection tile (2x2) holds up to six of them. Tiles by search in edit
+  mode, by drag and drop (files, folders, `.lnk`, `.url`, links) and from own entries in the settings;
+  Start menu apps and entries in the quick search. Paths below the user folder are stored as
+  `%USERPROFILE%\…`, so a synced layout fits another PC; a missing target shows "Not found" and stays.
+  Own commands never travel with the layout – a command tile only points to the entry of this PC.
+  Bus action `quickaccess.open` (entry ID).
+- **Important notifications:** `UeNotification.Priority` (normal/important). Settings →
+  Notifications → "Important notifications": also while the bar is paused, during "Do not disturb",
+  over fullscreen apps (all on). A paused bar lets an important pill out (it can be opened for its
+  buttons) and is paused again afterwards. The timer reports a timer that ran out as important; its
+  two own switches of 1.3.1 are gone – a switched-off value is taken over once (settings.json
+  version 2).
+- **Settings applied live:** `ILiveModuleSettings` – a module with it gets changed settings while it
+  runs instead of a restart. Timer, Windows and Quick access use it (no flicker any more).
+- **New settings fields:** `File` and `Folder` with "Browse…" (dialog of the app), `List` of entries
+  with item fields, and `ShowWhen` (show a field only while another one has a certain value). The
+  timer's own sound file uses `File` and appears only with "Own sound file".
+- **Drag and drop:** `IDropHandler` – in edit mode the panel takes files, folders, shortcuts and
+  links; the first plugin that turns it into a tile gets it.
+- **Tile building blocks:** `IconGridElement` (icons with names); `TileModel.ImageUrl` is now shown as
+  the tile's icon (a real app icon instead of the glyph).
+
+### Changed
+- After the quick search ran an action, the bar no longer pulls the previously active window back to
+  the front – an app the action started keeps the focus.
+
 ## 1.3.1 – Timer plugin, bus permissions
 
 **Plugin interface (`CoreApiVersion`): 1.2** – extended, nothing broken: plugins for 1.0 and 1.1

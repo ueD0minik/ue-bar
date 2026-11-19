@@ -43,6 +43,7 @@ internal static class SourceTree
         ["Dummy"] = Path.Combine("plugins", "Dummy", "src"),
         ["Win"] = Path.Combine("plugins", "Windows", "src"),
         ["Timer"] = Path.Combine("plugins", "Timer", "src"),
+        ["Qa"] = Path.Combine("plugins", "QuickAccess", "src"),
     };
 
     public static Dictionary<string, string> ReadResx(string project, string? language)
@@ -110,8 +111,8 @@ public sealed class ResourceCompletenessTests
     public void Every_key_used_in_the_code_exists()
     {
         var keys = SourceTree.Projects.ToDictionary(p => p.Key, p => SourceTree.ReadResx(p.Value, null).Keys.ToHashSet());
-        var catalogs = new Dictionary<string, string> { ["Loc"] = "App", ["CoreText"] = "Core", ["BarText"] = "Bar", ["HaText"] = "Ha", ["DummyText"] = "Dummy", ["WinText"] = "Win", ["TimerText"] = "Timer" };
-        var call = new Regex(@"\b(Loc|CoreText|BarText|HaText|DummyText|WinText|TimerText)\.(?:Get\(|F\(|T\[|T\.Format\()""([A-Za-z0-9_]+)""");
+        var catalogs = new Dictionary<string, string> { ["Loc"] = "App", ["CoreText"] = "Core", ["BarText"] = "Bar", ["HaText"] = "Ha", ["DummyText"] = "Dummy", ["WinText"] = "Win", ["TimerText"] = "Timer", ["QuickText"] = "Qa" };
+        var call = new Regex(@"\b(Loc|CoreText|BarText|HaText|DummyText|WinText|TimerText|QuickText)\.(?:Get\(|F\(|T\[|T\.Format\()""([A-Za-z0-9_]+)""");
         var xaml = new Regex(@"\{l:T ([A-Za-z0-9_]+)\}");
         var literalKey = new Regex(@"""([A-Z][a-z][A-Za-z]*_[A-Za-z0-9_]+)""");
         var missing = new List<string>();

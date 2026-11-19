@@ -84,6 +84,25 @@ internal sealed class TileViewModel : ObservableObject, IDisposable
     /// <summary>1x1: only icon, name, state.</summary>
     public bool IsSmall => Size.Columns <= 1 && Size.Rows <= 1;
 
+    /// <summary>The module's image (<see cref="TileModel.ImageUrl"/>, e.g. a real app icon) is shown instead of the glyph (P2-4).</summary>
+    public bool HasImage
+    {
+        get => _hasImage;
+        set
+        {
+            if (_hasImage != value)
+            {
+                _hasImage = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ShowGlyph));
+            }
+        }
+    }
+
+    private bool _hasImage;
+
+    public bool ShowGlyph => !_hasImage;
+
     public bool ShowElements => !IsSmall && !Model.IsPlaceholder;
 
     /// <summary>Operable: no placeholder and not "unavailable"/"disconnected".</summary>

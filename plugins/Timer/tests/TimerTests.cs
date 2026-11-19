@@ -214,7 +214,7 @@ public sealed class ModuleTests
     public async Task Timer_runs_out_with_notification_sound_and_plus_five()
     {
         await using var env = await new TimerEnv().StartAsync();
-        await env.SettingsAsync((TimerSettings.VolumeKey, "40"), (TimerSettings.DndKey, "false"));
+        await env.SettingsAsync((TimerSettings.VolumeKey, "40"));
         await env.Module.ExecuteQuickCommandAsync("t", "10 Pizza", default);
 
         await env.AdvanceAsync(TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(2));
@@ -225,8 +225,9 @@ public sealed class ModuleTests
         Assert.Equal(TimeSpan.FromSeconds(60), notification.Duration);
         Assert.Equal(UeNotification.DefaultSound, notification.Sound);
         Assert.Equal(0.4, notification.SoundVolume, 3);
+        Assert.Equal(NotificationPriority.Important, notification.Priority); // P2-4: the bar decides the rest
         Assert.False(notification.IgnoreDoNotDisturb);
-        Assert.True(notification.ShowInFullscreen);
+        Assert.False(notification.ShowInFullscreen);
         var plusFive = Assert.Single(notification.Actions!);
         Assert.Equal("+5 min", plusFive.Label);
         Assert.Null(env.Module.CurrentPillActivity);
@@ -468,5 +469,21 @@ public sealed class CoreServiceTests
 
         Assert.True(await Wait.UntilAsync(() => service.Current?.Activity.Title == "Tee"));
         Assert.Equal(TimerModule.ModuleId, service.Current!.ModuleId);
+    }
+
+    [Fact]
+    public async Task Changed_settings_apply_live_without_a_restart_and_running_timers_go_on()
+    {
+        // P2-4: no flicker – the plugin keeps running, the tile shows the new presets right away.
+        await using var env = await new TimerEnv().StartAsync();
+        await env.Module.ExecuteQuickCommandAsync("t", "10", default);
+        var start = await env.TileAsync("timer.start", TimerIds.Start);
+
+        env.State.SetValue(TimerModule.ModuleId, TimerSettings.PresetsKey, "3, 7");
+        Assert.True(await env.Registry.ApplyChangedSettingsAsync(TimerModule.ModuleId));
+
+        Assert.True(await Wait.UntilAsync(() => start.Find<ChoiceElement>("presets")?.Options.Select(o => o.Label).SequenceEqual(["3", "7"]) == true));
+        Assert.Single(env.Module.With(e => e.Timers.ToList()));
+        Assert.DoesNotContain(env.Log.Lines, l => l.Contains("Manual restart", StringComparison.Ordinal));
     }
 }

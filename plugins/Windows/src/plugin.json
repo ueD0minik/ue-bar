@@ -8,10 +8,10 @@
     "en": "This PC: volume and output device, app volume, media of all apps, Wi-Fi and Bluetooth, device batteries, battery, CPU, memory, disk, brightness, lock and sleep.",
     "de": "Dieser PC: Lautstärke und Ausgabegerät, App-Lautstärke, Medien aller Apps, WLAN und Bluetooth, Geräte-Akkus, Akku, CPU, Arbeitsspeicher, Datenträger, Helligkeit, Sperren und Energiesparen."
   },
-  "version": "1.3.1",
+  "version": "1.3.2",
   "author": "Dominik Poschinger",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/ueD0minik/ue-bar",
-  "sdkVersion": "1.2",
+  "sdkVersion": "1.3",
   "entryAssembly": "UeBar.Modules.Windows.dll"
 }

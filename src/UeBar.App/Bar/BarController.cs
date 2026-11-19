@@ -229,42 +229,31 @@ internal sealed class BarController : IDisposable
     // ------------------------------------------------------------------ Extras (M6)
 
     /// <summary>May a message appear as a pill now? (not paused, no fullscreen block) The reason is for the log.</summary>
-    public bool CanAnnounce(out string? reason, bool allowFullscreen = false)
-    {
-        reason = null;
-        if (_settings.Paused)
-        {
-            reason = "bar paused";
-            return false;
-        }
-
-        if (_sessionLocked || _displayOff)
-        {
-            reason = "locked/display off";
-            return false;
-        }
-
-        if (!allowFullscreen && AnnouncementMonitor() is { } monitor && _settings.BlockInFullscreen && _fullscreen.IsFullscreenOn(monitor))
-        {
-            reason = "fullscreen block";
-            return false;
-        }
-
-        return true;
-    }
+    /// <summary>What would keep a notification from coming out right now (P2-4, decided by <see cref="NotificationGate"/>).</summary>
+    public AnnounceConditions CurrentAnnounceConditions(bool doNotDisturb) => new(
+        _settings.Paused,
+        _sessionLocked || _displayOff,
+        AnnouncementMonitor() is { } monitor && _fullscreen.IsFullscreenOn(monitor),
+        doNotDisturb);
 
     /// <summary>Show the pill without the mouse (notification). If the panel is open, it shows the message itself.</summary>
-    public bool Announce(TimeSpan duration)
+    public bool Announce(TimeSpan duration, bool overridePause = false)
     {
         if (IsPanelOpen)
         {
             return true;
         }
 
-        return AnnouncementMonitor() is { } monitor && _machine.Announce(monitor, DateTimeOffset.UtcNow + duration);
+        var shown = AnnouncementMonitor() is { } monitor && _machine.Announce(monitor, DateTimeOffset.UtcNow + duration, overridePause);
+        UpdatePollerPause(); // a paused bar polls the mouse while an important notification is out
+        return shown;
     }
 
-    public void EndAnnounce() => _machine.EndAnnounce();
+    public void EndAnnounce()
+    {
+        _machine.EndAnnounce();
+        UpdatePollerPause();
+    }
 
     /// <summary>Quick search: open and hold the panel (also when paused, not with a fullscreen block), activate the window.</summary>
     public bool OpenQuickSearch()
@@ -325,9 +314,13 @@ internal sealed class BarController : IDisposable
         $"{_machine.State}{(_machine.IsHeld ? ", held" : "")}{(_machine.IsAnnouncing ? ", announcing" : "")}{(_heldForInput ? ", input" : "")}{(_heldForEdit ? ", editing" : "")}";
 
     /// <summary>Quick search closed: focus back to the previous window, panel as before.</summary>
-    public void CloseQuickSearch()
+    /// <summary>
+    /// Close the quick search. After an action ran (<paramref name="restoreFocus"/> false, P2-4) the previous
+    /// window is not pulled back to the front: an app the action started would land behind it.
+    /// </summary>
+    public void CloseQuickSearch(bool restoreFocus = true)
     {
-        _window.AllowActivation(false);
+        _window.AllowActivation(false, restoreFocus);
         _machine.ReleaseHeld(DateTimeOffset.UtcNow);
     }
 
@@ -544,6 +537,11 @@ internal sealed class BarController : IDisposable
     private void OnStateChanged(object? sender, BarStateChangedEventArgs e)
     {
         var action = BarWindowTransitions.For(e.OldState, e.NewState);
+        if (e.NewState == BarState.Hidden)
+        {
+            UpdatePollerPause(); // an important notification on a paused bar is over
+        }
+
         _log.Info(null, $"Bar: {e.OldState} → {e.NewState} ({e.Monitor?.Name ?? "-"}){(_machine.IsHeld ? ", held" : "")}{(_machine.IsAnnouncing ? ", announcing" : "")} → window {action}");
         var reduce = _settings.ReduceAnimations;
         _viewModel.IsPinned = e.NewState == BarState.Pinned;
@@ -667,7 +665,7 @@ internal sealed class BarController : IDisposable
 
     private void UpdatePollerPause()
     {
-        var paused = _settings.Paused || _sessionLocked || _displayOff;
+        var paused = (_settings.Paused && !_machine.IsOverridingPause) || _sessionLocked || _displayOff;
         if (paused != _pollerPaused)
         {
             _pollerPaused = paused;

@@ -21,6 +21,11 @@ public partial class PanelView : UserControl
     public PanelView()
     {
         InitializeComponent();
+
+        // P2-4: in edit mode files, folders, shortcuts and links can be dropped on the panel.
+        AllowDrop = true;
+        DragOver += OnExternalDragOver;
+        Drop += OnExternalDrop;
         DataContextChanged += (_, e) =>
         {
             if (e.OldValue is BarViewModel old)
@@ -41,6 +46,55 @@ public partial class PanelView : UserControl
         if (e.PropertyName is nameof(BarViewModel.IsEditing) or nameof(BarViewModel.IsSetup) && sender is BarViewModel vm)
         {
             SetEditing(vm.IsEditing || vm.IsSetup); // the first start scrolls as a whole like edit mode
+        }
+    }
+
+    private static IReadOnlyList<UeBar.Sdk.DroppedItem> DroppedItems(IDataObject data)
+    {
+        if (data.GetDataPresent(DataFormats.FileDrop) && data.GetData(DataFormats.FileDrop) is string[] paths)
+        {
+            return UeBar.Bar.DropClassifier.FromPaths(paths);
+        }
+
+        // Address bar of a browser: "UniformResourceLocatorW" (UTF-16), otherwise the text.
+        string? text = null;
+        if (data.GetDataPresent("UniformResourceLocatorW") && data.GetData("UniformResourceLocatorW") is System.IO.MemoryStream stream)
+        {
+            text = System.Text.Encoding.Unicode.GetString(stream.ToArray()).TrimEnd('\0');
+        }
+
+        text ??= data.GetDataPresent(DataFormats.UnicodeText) ? data.GetData(DataFormats.UnicodeText) as string : null;
+        return UeBar.Bar.DropClassifier.FromText(text) is { } item ? [item] : [];
+    }
+
+    private void OnExternalDragOver(object sender, DragEventArgs e)
+    {
+        var accepted = DataContext is BarViewModel { Edit: not null }
+            && (e.Data.GetDataPresent(DataFormats.FileDrop) || e.Data.GetDataPresent("UniformResourceLocatorW") || e.Data.GetDataPresent(DataFormats.UnicodeText));
+        e.Effects = accepted ? DragDropEffects.Copy | DragDropEffects.Link : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private async void OnExternalDrop(object sender, DragEventArgs e)
+    {
+        // async void only here in the view (event handler); errors are caught.
+        e.Handled = true;
+        if (DataContext is not BarViewModel { Edit: { } edit })
+        {
+            return;
+        }
+
+        try
+        {
+            var items = DroppedItems(e.Data);
+            if (items.Count > 0)
+            {
+                await edit.AddDroppedAsync(items);
+            }
+        }
+        catch (Exception)
+        {
+            // A broken drag source (e.g. data that cannot be read) – nothing is added.
         }
     }
 
