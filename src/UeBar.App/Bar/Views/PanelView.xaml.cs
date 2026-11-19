@@ -26,6 +26,7 @@ public partial class PanelView : UserControl
         AllowDrop = true;
         DragOver += OnExternalDragOver;
         Drop += OnExternalDrop;
+        DragLeave += (_, _) => ClearExternalTarget();
         DataContextChanged += (_, e) =>
         {
             if (e.OldValue is BarViewModel old)
@@ -73,6 +74,50 @@ public partial class PanelView : UserControl
             && (e.Data.GetDataPresent(DataFormats.FileDrop) || e.Data.GetDataPresent("UniformResourceLocatorW") || e.Data.GetDataPresent(DataFormats.UnicodeText));
         e.Effects = accepted ? DragDropEffects.Copy | DragDropEffects.Link : DragDropEffects.None;
         e.Handled = true;
+
+        // P2-4-Fix 1: over a tile that takes entries (e.g. a collection) – mark it, the drop goes into it.
+        var tile = accepted ? TileUnder(e) : null;
+        if (!ReferenceEquals(tile, _externalTarget))
+        {
+            if (_externalTarget is not null)
+            {
+                _externalTarget.IsDropTarget = false;
+            }
+
+            _externalTarget = tile is { Config.Id: { } id } && DataContext is BarViewModel { Edit: { } edit } && edit.TakesDrop(id) ? tile : null;
+            if (_externalTarget is not null)
+            {
+                _externalTarget.IsDropTarget = true;
+            }
+        }
+    }
+
+    private TileViewModel? _externalTarget;
+
+    private void ClearExternalTarget()
+    {
+        if (_externalTarget is not null)
+        {
+            _externalTarget.IsDropTarget = false;
+            _externalTarget = null;
+        }
+    }
+
+    /// <summary>The tile under the mouse during a drag from outside.</summary>
+    private TileViewModel? TileUnder(DragEventArgs e)
+    {
+        var hit = InputHitTest(e.GetPosition(this)) as DependencyObject;
+        while (hit is not null)
+        {
+            if (hit is TileView { DataContext: TileViewModel vm })
+            {
+                return vm;
+            }
+
+            hit = VisualTreeHelper.GetParent(hit) ?? LogicalTreeHelper.GetParent(hit);
+        }
+
+        return null;
     }
 
     private async void OnExternalDrop(object sender, DragEventArgs e)
@@ -84,12 +129,14 @@ public partial class PanelView : UserControl
             return;
         }
 
+        var onTile = _externalTarget?.Config?.Id;
+        ClearExternalTarget();
         try
         {
             var items = DroppedItems(e.Data);
             if (items.Count > 0)
             {
-                await edit.AddDroppedAsync(items);
+                await edit.AddDroppedAsync(items, onTile);
             }
         }
         catch (Exception)
@@ -247,6 +294,102 @@ public partial class PanelView : UserControl
         if (e.Key == Key.Enter && sender is TextBox box)
         {
             box.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+            e.Handled = true;
+        }
+    }
+
+    // ------------------------------------------------------------------ Editing: entries of a tile (P2-4-Fix 1)
+
+    private TileItemRowDrag? _itemDrag;
+
+    private sealed record TileItemRowDrag(string Id, FrameworkElement Grip);
+
+    private void OnItemGripDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: Edit.TileItemRow row } grip)
+        {
+            _itemDrag = new TileItemRowDrag(row.Id, grip);
+            grip.CaptureMouse();
+            e.Handled = true;
+        }
+    }
+
+    private void OnItemGripMove(object sender, MouseEventArgs e)
+    {
+        if (_itemDrag is not null)
+        {
+            Mouse.OverrideCursor = Cursors.SizeAll;
+        }
+    }
+
+    private void OnItemGripUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_itemDrag is not { } drag)
+        {
+            return;
+        }
+
+        _itemDrag = null;
+        drag.Grip.ReleaseMouseCapture();
+        Mouse.OverrideCursor = null;
+        e.Handled = true;
+        if (DataContext is not BarViewModel { Edit.TileItems: { } items })
+        {
+            return;
+        }
+
+        // New place = how many of the other rows have their middle above the mouse.
+        var mouse = e.GetPosition(TileItemList).Y;
+        var from = items.Items.ToList().FindIndex(r => r.Id == drag.Id);
+        var target = 0;
+        for (var i = 0; i < TileItemList.Items.Count; i++)
+        {
+            if (i != from && TileItemList.ItemContainerGenerator.ContainerFromIndex(i) is FrameworkElement container
+                && container.TranslatePoint(new Point(0, container.ActualHeight / 2), TileItemList).Y < mouse)
+            {
+                target++;
+            }
+        }
+
+        if (target >= 0 && target != from)
+        {
+            items.Move(drag.Id, target);
+        }
+    }
+
+    private void OnItemChooseFile(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not BarViewModel { Edit.TileItems: { } items })
+        {
+            return;
+        }
+
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = UeBar.App.Localization.Loc.Get("Edit_ItemFile") };
+        if (dialog.ShowDialog(Window.GetWindow(this)) == true)
+        {
+            items.Add(new UeBar.Sdk.DroppedItem(UeBar.Sdk.DropKind.File, dialog.FileName));
+        }
+    }
+
+    private void OnItemChooseFolder(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not BarViewModel { Edit.TileItems: { } items })
+        {
+            return;
+        }
+
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = UeBar.App.Localization.Loc.Get("Edit_ItemFolder") };
+        if (dialog.ShowDialog(Window.GetWindow(this)) == true)
+        {
+            items.Add(new UeBar.Sdk.DroppedItem(UeBar.Sdk.DropKind.Folder, dialog.FolderName));
+        }
+    }
+
+    private void OnItemLinkKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && DataContext is BarViewModel { Edit.TileItems: { } items })
+        {
+            items.AddLinkCommand.Execute(null);
             e.Handled = true;
         }
     }

@@ -120,8 +120,33 @@ internal static class QuickNames
         EntryKind.Folder => Path.GetFileName(Trimmed(value)) is { Length: > 0 } d ? d : value,
         EntryKind.Url => Host(value),
         EntryKind.Command => FirstToken(value),
-        _ => value.Split('!', '\\').Last(),
+        _ => AppName(value),
     };
+
+    /// <summary>
+    /// A readable name from an app ID while the Start menu is not read yet:
+    /// <c>Microsoft.WindowsCalculator_8wekyb3d8bbwe!App</c> → "WindowsCalculator",
+    /// <c>Microsoft.Office.WINWORD.EXE.15</c> → "WINWORD", a path → the program's name.
+    /// </summary>
+    public static string AppName(string appId)
+    {
+        if (appId.Contains('\\'))
+        {
+            return Path.GetFileNameWithoutExtension(appId.Split('\\').Last()) is { Length: > 0 } program ? program : appId;
+        }
+
+        var name = appId.Split('!')[0];
+        var underscore = name.LastIndexOf('_');
+        if (underscore > 0)
+        {
+            name = name[..underscore]; // the publisher hash of a Store app
+        }
+
+        var parts = name.Split('.', StringSplitOptions.RemoveEmptyEntries)
+            .Where(p => !p.All(char.IsDigit) && !string.Equals(p, "EXE", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return parts.Count > 0 ? parts[^1] : appId;
+    }
 
     public static string Icon(EntryKind kind) => kind switch
     {

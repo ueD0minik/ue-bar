@@ -312,74 +312,244 @@ internal sealed class ModuleFieldEditor
         return root is Panel panel ? panel.Children.OfType<UIElement>().Select(FindTextBox).FirstOrDefault(b => b is not null) : null;
     }
 
+    /// <summary>A row button: rounded background, content over the whole width (the bar's button style centers it).</summary>
+    private static readonly ControlTemplate RowTemplate = CreateRowTemplate();
+
+    private static ControlTemplate CreateRowTemplate()
+    {
+        var border = new FrameworkElementFactory(typeof(Border));
+        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(12));
+        border.SetBinding(Border.BackgroundProperty, new System.Windows.Data.Binding(nameof(Control.Background)) { RelativeSource = System.Windows.Data.RelativeSource.TemplatedParent });
+        border.SetBinding(Border.PaddingProperty, new System.Windows.Data.Binding(nameof(Control.Padding)) { RelativeSource = System.Windows.Data.RelativeSource.TemplatedParent });
+        var content = new FrameworkElementFactory(typeof(ContentPresenter));
+        content.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+        border.AppendChild(content);
+        return new ControlTemplate(typeof(Button)) { VisualTree = border };
+    }
+
     /// <summary>
-    /// P2-4: a list of entries, each with the item fields; "Add" and "Remove". Every change saves the whole
-    /// list (JSON); new entries get a stable "id".
+    /// A list of entries (P2-4): every change saves the whole list (JSON), new entries get a stable "id".
+    /// P2-4-Fix 1: compact – one row per entry (icon, name, detail), a click opens its fields; grouped and
+    /// worded by the module (<see cref="ISettingListPresenter"/>, also rows that are only shown); a search
+    /// field filters. Without a presenter: one row per entry with its first text field.
     /// </summary>
     private FrameworkElement ListField(SettingField field, string? value, Action<string?> changed)
     {
         var items = ModuleSettingValues.ParseList(value).Select(i => new Dictionary<string, string>(i, StringComparer.Ordinal)).ToList();
         var fields = (field.ItemFields ?? []).Where(f => f.Kind is not (SettingFieldKind.List or SettingFieldKind.Password or SettingFieldKind.Button)).ToList();
+        var expanded = new HashSet<string>(StringComparer.Ordinal);
+        var headers = new Dictionary<string, (TextBlock Title, TextBlock Detail)>(StringComparer.Ordinal);
         var host = new StackPanel();
+        var list = new StackPanel();
+        var filter = "";
 
         void Save() => changed(items.Count == 0 ? null : ModuleSettingValues.FormatList(items));
 
-        void Render()
+        IReadOnlyList<SettingListRow> Rows()
         {
-            host.Children.Clear();
-            foreach (var item in items)
+            IReadOnlyList<SettingListRow>? rows = null;
+            if (_module.Module is ISettingListPresenter)
             {
-                var rows = new List<UIElement>();
-                var shown = new List<(SettingField, UIElement)>();
-                string? ItemValue(string key) => item.TryGetValue(key, out var value) ? value : fields.FirstOrDefault(f => f.Key == key)?.DefaultValue;
-                foreach (var itemField in fields)
-                {
-                    var current = item.TryGetValue(itemField.Key, out var v) ? v : itemField.DefaultValue;
-                    var row = BuildField(itemField, current, nv =>
-                    {
-                        if (nv is null)
-                        {
-                            item.Remove(itemField.Key);
-                        }
-                        else
-                        {
-                            item[itemField.Key] = nv;
-                        }
-
-                        Save();
-                        ApplyShown(shown, ItemValue);
-                    });
-                    shown.Add((itemField, row));
-                    rows.Add(row);
-                }
-
-                var remove = Button(Loc.Get("Fields_ListRemove"), () =>
-                {
-                    items.Remove(item);
-                    Save();
-                    Render();
-                }, icon: "\uE74D");
-                rows.Add(remove);
-                var card = Card([.. rows]);
-                card.Margin = new Thickness(0, 0, 0, 10);
-                host.Children.Add(card);
-                ApplyShown(shown, ItemValue);
+                IReadOnlyList<IReadOnlyDictionary<string, string>> snapshot = [.. items.Select(i => (IReadOnlyDictionary<string, string>)new Dictionary<string, string>(i, StringComparer.Ordinal))];
+                rows = _registry.Invoke(_module.Id, "List rows", m => ((ISettingListPresenter)m).GetListRows(field.Key, snapshot)).Value;
             }
 
-            host.Children.Add(Button(field.AddText ?? Loc.Get("Fields_ListAdd"), () =>
+            var result = new List<SettingListRow>(rows ?? []);
+            var titleField = fields.FirstOrDefault(f => f.Kind == SettingFieldKind.Text);
+            foreach (var item in items.Where(i => i.TryGetValue("id", out var id) && result.All(r => r.EntryId != id)))
             {
-                var item = new Dictionary<string, string>(StringComparer.Ordinal) { ["id"] = Guid.NewGuid().ToString("N")[..8] };
-                foreach (var itemField in fields.Where(f => f.DefaultValue is not null))
-                {
-                    item[itemField.Key] = itemField.DefaultValue!;
-                }
+                var title = titleField is not null && item.TryGetValue(titleField.Key, out var t) && t.Length > 0 ? t : Loc.Get("Fields_ListNew");
+                result.Add(new SettingListRow(title, null, null, null, item["id"]));
+            }
 
-                items.Add(item);
-                Save();
-                Render();
-            }, icon: "\uE710"));
+            return result;
         }
 
+        void UpdateHeaders()
+        {
+            foreach (var row in Rows())
+            {
+                if (row.EntryId is { } id && headers.TryGetValue(id, out var header))
+                {
+                    header.Title.Text = row.Title;
+                    header.Detail.Text = row.Detail ?? "";
+                }
+            }
+        }
+
+        FrameworkElement Editor(Dictionary<string, string> item)
+        {
+            var rows = new List<UIElement>();
+            var shown = new List<(SettingField, UIElement)>();
+            string? ItemValue(string key) => item.TryGetValue(key, out var v) ? v : fields.FirstOrDefault(f => f.Key == key)?.DefaultValue;
+            foreach (var itemField in fields)
+            {
+                var current = item.TryGetValue(itemField.Key, out var v) ? v : itemField.DefaultValue;
+                var row = BuildField(itemField, current, nv =>
+                {
+                    if (nv is null)
+                    {
+                        item.Remove(itemField.Key);
+                    }
+                    else
+                    {
+                        item[itemField.Key] = nv;
+                    }
+
+                    Save();
+                    ApplyShown(shown, ItemValue);
+                    UpdateHeaders();
+                });
+                shown.Add((itemField, row));
+                rows.Add(row);
+            }
+
+            rows.Add(Button(Loc.Get("Fields_ListRemove"), () =>
+            {
+                items.Remove(item);
+                Save();
+                Render();
+            }, icon: "\uE74D"));
+            var card = Card([.. rows]);
+            card.Margin = new Thickness(18, 2, 0, 8);
+            ApplyShown(shown, ItemValue);
+            return card;
+        }
+
+        FrameworkElement Header(SettingListRow row)
+        {
+            var icon = new TextBlock
+            {
+                Text = UeBar.App.Bar.Converters.IconGlyphs.Get(row.Icon ?? "Puzzle"),
+                FontFamily = new System.Windows.Media.FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"),
+                FontSize = 16,
+                Width = 28,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            var title = new TextBlock { Text = row.Title, FontSize = 13, FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis };
+            var detail = new TextBlock { Text = row.Detail ?? "", FontSize = 11, Foreground = Res("SubTextBrush"), TextTrimming = TextTrimming.CharacterEllipsis };
+            var texts = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+            texts.Children.Add(title);
+            texts.Children.Add(detail);
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            grid.Children.Add(icon);
+            Grid.SetColumn(texts, 1);
+            grid.Children.Add(texts);
+            if (row.EntryId is not { } id)
+            {
+                // Only shown – lives elsewhere (e.g. in the layout).
+                return new Border { Padding = new Thickness(10, 6, 10, 6), Opacity = 0.75, Child = grid };
+            }
+
+            headers[id] = (title, detail);
+            var chevron = new TextBlock
+            {
+                Text = expanded.Contains(id) ? "" : "",
+                FontFamily = icon.FontFamily,
+                FontSize = 11,
+                Foreground = Res("SubTextBrush"),
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            Grid.SetColumn(chevron, 2);
+            grid.Children.Add(chevron);
+
+            // A real button: mouse, keyboard and screen readers open the fields alike.
+            var button = new Button
+            {
+                Template = RowTemplate,
+                Foreground = Res("TextBrush"),
+                Background = System.Windows.Media.Brushes.Transparent,
+                Padding = new Thickness(10, 6, 10, 6),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Cursor = System.Windows.Input.Cursors.Hand,
+                Content = grid,
+                Focusable = true,
+            };
+            button.MouseEnter += (_, _) => button.Background = Res("ControlBrush");
+            button.MouseLeave += (_, _) => button.Background = System.Windows.Media.Brushes.Transparent;
+            System.Windows.Automation.AutomationProperties.SetName(button, row.Title);
+            button.Click += (_, _) =>
+            {
+                if (!expanded.Remove(id))
+                {
+                    expanded.Add(id);
+                }
+
+                Render();
+            };
+            return button;
+        }
+
+        void Render()
+        {
+            list.Children.Clear();
+            headers.Clear();
+            string? group = null;
+            var any = false;
+            foreach (var row in Rows())
+            {
+                if (filter.Length > 0
+                    && !row.Title.Contains(filter, StringComparison.CurrentCultureIgnoreCase)
+                    && !(row.Detail ?? "").Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (row.Group is { } g && g != group)
+                {
+                    group = g;
+                    var heading = Hint(g, top: any ? 12 : 4);
+                    heading.FontWeight = FontWeights.SemiBold;
+                    list.Children.Add(heading);
+                }
+
+                any = true;
+                list.Children.Add(Header(row));
+                if (row.EntryId is { } id && expanded.Contains(id) && items.FirstOrDefault(i => i.TryGetValue("id", out var x) && x == id) is { } item)
+                {
+                    list.Children.Add(Editor(item));
+                }
+            }
+
+            if (!any)
+            {
+                list.Children.Add(Hint(filter.Length > 0 ? Loc.Get("Fields_ListNoMatch") : Loc.Get("Fields_ListEmpty"), top: 4));
+            }
+        }
+
+        var search = new TextBox { Style = StyleOf("EditTextBox"), Padding = new Thickness(4, 7, 4, 7), Width = 420, HorizontalAlignment = HorizontalAlignment.Left };
+        var searchHint = new TextBlock { Text = Loc.Get("Fields_ListSearch"), Foreground = Res("SubTextBrush"), FontSize = 13, Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, IsHitTestVisible = false };
+        search.TextChanged += (_, _) =>
+        {
+            filter = search.Text.Trim();
+            searchHint.Visibility = search.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+            Render();
+        };
+        var searchBox = new Grid { HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 0, 6) };
+        searchBox.Children.Add(search);
+        searchBox.Children.Add(searchHint);
+        host.Children.Add(searchBox);
+        host.Children.Add(list);
+        var add = Button(field.AddText ?? Loc.Get("Fields_ListAdd"), () =>
+        {
+            var item = new Dictionary<string, string>(StringComparer.Ordinal) { ["id"] = Guid.NewGuid().ToString("N")[..8] };
+            foreach (var itemField in fields.Where(f => f.DefaultValue is not null))
+            {
+                item[itemField.Key] = itemField.DefaultValue!;
+            }
+
+            items.Add(item);
+            expanded.Add(item["id"]);
+            search.Text = "";
+            Save();
+            Render();
+        }, icon: "\uE710");
+        add.Margin = new Thickness(0, 8, 0, 0);
+        add.HorizontalAlignment = HorizontalAlignment.Left;
+        host.Children.Add(add);
         Render();
         return host;
     }

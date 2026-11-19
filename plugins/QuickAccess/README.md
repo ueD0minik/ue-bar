@@ -17,8 +17,23 @@ comes with ue Bar (plugin ID `quickaccess`), is on by default and needs no setup
   (`.url`) or a link from the browser's address bar onto the panel – it becomes a tile in the
   current tab. A shortcut to a folder becomes the folder; any other shortcut stays the shortcut (it
   keeps its arguments).
-- **Collection:** add "Collection" (2x2) and pick up to six entries for its slots – apps, files,
-  folders, web pages. Give it a name in edit mode (e.g. "School").
+- **Collection:** add "Collection" (2x2) and fill it right in the bar – see below.
+
+## Building a collection in the bar
+
+In edit mode tap the collection tile. Its properties show the **entries** (up to six):
+
+- **Add entry:** type a part of a name – Start menu apps and your entries – and tap a hit;
+  **Choose file …** / **Choose folder …**; **Enter web page …** (`example.org` is enough).
+- **Drop** a file, folder, shortcut or link **on the collection tile** – it goes into it (on the rest
+  of the panel it becomes a tile of its own, as before).
+- **Reorder** by dragging the grip, **rename** in the name field (empty = the name from the target),
+  **remove** with ×. Rename the collection itself like any tile.
+
+The entries live in the collection tile itself, i.e. in the layout: they sync to your other PCs and
+"Cancel" in edit mode also discards changes to them. Removing an entry leaves nothing behind.
+
+![A collection in edit mode](images/quickaccess-collection-edit.png)
 
 ## What a tap does
 
@@ -36,8 +51,13 @@ found"** and stays – ue Bar looks again whenever the panel opens.
 ## Entries (settings)
 
 **Settings → Plugins → Quick access → Entries:** your own shortcuts on this PC with name, kind and
-target (file and folder with "Browse…"). They appear in the search – also to add tiles – and other
-plugins can open them by ID (module bus, below).
+target (file and folder with "Browse…"). They appear in the search – also to add tiles and entries of
+collections – and other plugins can open them by ID (module bus, below).
+
+The page is compact: one row per entry (icon, name, kind, shortened target), a click opens its fields,
+a search field filters. Rows are grouped by where they are used: **Single tiles**, each
+**collection**, **Not used**. Things that live only in the layout (a folder dropped on a collection)
+are listed too, marked "edit in the bar".
 
 ![Settings of the quick access plugin](images/quickaccess-settings.png)
 

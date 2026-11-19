@@ -28,7 +28,10 @@ public sealed partial class QuickAccessModule :
     IDropHandler,
     IImageSource,
     IVisibilityAware,
-    IModuleDiagnostics
+    IModuleDiagnostics,
+    ITileItemEditor,
+    ILayoutAware,
+    ISettingListPresenter
 {
     public const string ModuleId = "quickaccess";
     internal const string GroupEntity = "group";

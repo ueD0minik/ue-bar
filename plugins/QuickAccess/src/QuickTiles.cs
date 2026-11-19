@@ -127,10 +127,8 @@ internal sealed class GroupTileType(QuickAccessModule module) : QuickTileType(mo
 
     public override TileSize DefaultSize => TileSize.Large;
 
-    public override IReadOnlyList<TileSlot> Slots =>
-        [.. Enumerable.Range(1, MaxItems).Select(i => new TileSlot(Slot(i), T.Format("Qa_SlotItem", i.ToString(CultureInfo.CurrentCulture)), Required: false))];
-
-    private static string Slot(int i) => "item" + i.ToString(CultureInfo.InvariantCulture);
+    /// <summary>No slots to choose when adding: the entries are edited in the bar (<see cref="ITileItemEditor"/>, P2-4-Fix 1).</summary>
+    public override IReadOnlyList<TileSlot> Slots => [];
 
     protected override void Build(TileModel tile)
     {
@@ -140,9 +138,10 @@ internal sealed class GroupTileType(QuickAccessModule module) : QuickTileType(mo
     public override void Refresh(TileModel tile, TileConfig config)
     {
         var wanted = new List<IconGridItem>();
-        for (var i = 1; i <= MaxItems; i++)
+        var items = CollectionItems.Read(config);
+        for (var i = 0; i < items.Count; i++)
         {
-            if (QuickTarget.Parse(config.GetEntity(Slot(i))) is not { } target)
+            if (QuickTarget.Parse(items[i].Target) is not { } target)
             {
                 continue;
             }
@@ -156,8 +155,8 @@ internal sealed class GroupTileType(QuickAccessModule module) : QuickTileType(mo
             var exists = resolved?.Exists == true;
             wanted.Add(new IconGridItem
             {
-                Id = Slot(i),
-                Label = resolved?.Name ?? T["Qa_NotFound"],
+                Id = CollectionItems.Slot(i),
+                Label = items[i].Name ?? resolved?.Name ?? T["Qa_NotFound"],
                 Icon = resolved is null ? QuickNames.AppIcon : QuickNames.Icon(resolved.Kind),
                 ImageUrl = exists && resolved!.IconSource is not null ? QuickAccessModule.IconId(target) : null,
                 StateText = exists ? resolved!.Name : T["Qa_NotFound"],
@@ -189,8 +188,16 @@ internal sealed class GroupTileType(QuickAccessModule module) : QuickTileType(mo
         }
     }
 
-    protected override Task HandleAsync(TileModel tile, TileConfig config, TileInteraction interaction) =>
-        interaction.Kind == InteractionKind.Press && interaction.Text is { } slot
-            ? OpenAsync(tile, QuickTarget.Parse(config.GetEntity(slot)))
-            : Task.CompletedTask;
+    protected override Task HandleAsync(TileModel tile, TileConfig config, TileInteraction interaction)
+    {
+        if (interaction.Kind != InteractionKind.Press || interaction.Text is not { } slot)
+        {
+            return Task.CompletedTask;
+        }
+
+        // Entries are counted without gaps (an old layout may have item5 without item4).
+        var items = CollectionItems.Read(config);
+        var index = Enumerable.Range(0, items.Count).FirstOrDefault(i => CollectionItems.Slot(i) == slot, -1);
+        return OpenAsync(tile, index < 0 ? null : QuickTarget.Parse(items[index].Target));
+    }
 }

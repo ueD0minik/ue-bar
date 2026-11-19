@@ -33,7 +33,7 @@ in a release is called `ueBar-plugin-<id>-<version>.zip`.
 ```powershell
 dotnet new classlib -n MyPlugin -f net10.0
 cd MyPlugin
-dotnet add package UeBar.Sdk --version 1.3.0
+dotnet add package UeBar.Sdk --version 1.4.0
 ```
 
 - Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF. A plugin that needs
@@ -66,7 +66,7 @@ Next to the `.csproj`:
   "author": "Your Name",
   "license": "GPL-3.0-or-later",
   "homepage": "https://example.org/myplugin",
-  "sdkVersion": "1.3",
+  "sdkVersion": "1.4",
   "entryAssembly": "MyPlugin.dll"
 }
 ```
@@ -216,6 +216,8 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 | `IPillActivitySource` | something going on (e.g. a timer) the pill shows when it comes out (1.2) |
 | `INotificationActionHandler` | buttons on your notifications (`UeNotification.Actions`, e.g. "+5 min"); notifications can also bring a sound (1.2) and be **important** (`Priority`, 1.3, see below) |
 | `IDropHandler` | turn something dropped on the panel in edit mode (file, folder, shortcut, link) into a tile (1.3) |
+| `ITileItemEditor` | the user edits the entries of a tile right in the bar's edit mode: add (search, file, folder, web page, drop on the tile), reorder, rename, remove (1.4) |
+| `ISettingListPresenter` | how a `List` field is shown: compact rows, groups, rows that are only shown (1.4) |
 | `IModuleSettingsActions` | buttons on your settings page (`SettingFieldKind.Button`, 1.2) |
 | `ILayoutStoreProvider` | a place to sync the layout (e.g. a server) |
 | `ILayoutSuggestionProvider` / `ILayoutSuggestionOptions` | a suggested layout for the first start |
@@ -238,6 +240,15 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 
 With `ILiveModuleSettings` your `ApplySettingsAsync` is also called while the plugin runs; it must
 then be safe against your own work (a lock around the values is usually all it takes).
+
+### Entries of a tile, edited in the bar (1.4)
+
+With `ITileItemEditor` a tile (like the quick access collection) gets an entries section in edit mode.
+ue Bar gives you a copy of the tile's `TileConfig`; return the changed copy, or `null` for "not
+possible". ue Bar puts it into the layout like any edit, so undo, "Cancel" and the layout sync cover
+it. Keep the entries in the configuration: slots in `Entities` and own values in `Options` (a
+string dictionary that travels with the layout, 1.4). `GetTileItems` says which entries there are, how
+many are allowed and where new ones may come from (`TileItemSources`).
 
 ### Important notifications
 
@@ -320,7 +331,7 @@ checksum of the plugin's code files (`.dll`, `.exe`, `*.deps.json`, `plugin.json
 - The **major** version changes only for an unavoidable breaking change. Plugins for another major
   version are not loaded – Settings → Plugins says why.
 
-A plugin that needs `1.4` is not loaded by a ue Bar that offers `1.3` (it says "update ue Bar").
+A plugin that needs `1.5` is not loaded by a ue Bar that offers `1.4` (it says "update ue Bar").
 
 ## Rules
 

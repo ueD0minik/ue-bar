@@ -102,9 +102,6 @@
   <data name="Qa_SlotTarget" xml:space="preserve">
     <value>App, Datei, Ordner oder Webseite</value>
   </data>
-  <data name="Qa_SlotItem" xml:space="preserve">
-    <value>Eintrag {0}</value>
-  </data>
   <data name="Qa_Open" xml:space="preserve">
     <value>Öffnen</value>
   </data>
@@ -122,5 +119,17 @@
   </data>
   <data name="Qa_KindCommandShort" xml:space="preserve">
     <value>Befehl</value>
+  </data>
+  <data name="Qa_EditInBar" xml:space="preserve">
+    <value>in der Bar bearbeiten</value>
+  </data>
+  <data name="Qa_GroupSingle" xml:space="preserve">
+    <value>Einzelne Kacheln</value>
+  </data>
+  <data name="Qa_GroupCollection" xml:space="preserve">
+    <value>Sammlung „{0}“</value>
+  </data>
+  <data name="Qa_GroupUnused" xml:space="preserve">
+    <value>Nicht verwendet</value>
   </data>
 </root>

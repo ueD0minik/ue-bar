@@ -1048,4 +1048,46 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Fields_ListRemove" xml:space="preserve">
     <value>Remove</value>
   </data>
+  <data name="Edit_Items" xml:space="preserve">
+    <value>Entries</value>
+  </data>
+  <data name="Edit_ItemDrag" xml:space="preserve">
+    <value>Drag to reorder</value>
+  </data>
+  <data name="Edit_ItemRemove" xml:space="preserve">
+    <value>Remove entry</value>
+  </data>
+  <data name="Edit_ItemSearch" xml:space="preserve">
+    <value>Add entry: search an app or entry …</value>
+  </data>
+  <data name="Edit_ItemFile" xml:space="preserve">
+    <value>Choose file …</value>
+  </data>
+  <data name="Edit_ItemFolder" xml:space="preserve">
+    <value>Choose folder …</value>
+  </data>
+  <data name="Edit_ItemLink" xml:space="preserve">
+    <value>Enter web page …</value>
+  </data>
+  <data name="Edit_ItemDropHint" xml:space="preserve">
+    <value>You can also drop files, folders, shortcuts and links on the tile.</value>
+  </data>
+  <data name="Edit_ItemsFull" xml:space="preserve">
+    <value>Full – remove an entry to add another one.</value>
+  </data>
+  <data name="Edit_ItemNotTaken" xml:space="preserve">
+    <value>Not added (already in it, or not something this tile takes).</value>
+  </data>
+  <data name="Fields_ListNew" xml:space="preserve">
+    <value>(new)</value>
+  </data>
+  <data name="Fields_ListSearch" xml:space="preserve">
+    <value>Search …</value>
+  </data>
+  <data name="Fields_ListNoMatch" xml:space="preserve">
+    <value>Nothing matches.</value>
+  </data>
+  <data name="Fields_ListEmpty" xml:space="preserve">
+    <value>No entries yet.</value>
+  </data>
 </root>

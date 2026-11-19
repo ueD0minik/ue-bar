@@ -17,8 +17,11 @@ internal sealed class Heartbeat(ModuleRegistry registry, IUeLogger log, Location
 {
     public static readonly TimeSpan Interval = TimeSpan.FromHours(1);
 
-    /// <summary>Hard limit according to the SPEC (private memory).</summary>
-    public const long MemoryLimitBytes = 80L * 1024 * 1024;
+    /// <summary>
+    /// From here on something is to be done according to the SPEC (private memory; target below 100 MB,
+    /// act from 150 MB since 09.11.2026 – before 80 MB, which warned on normal use, P2-4-Fix 1).
+    /// </summary>
+    public const long MemoryLimitBytes = 150L * 1024 * 1024;
 
     private Timer? _timer;
 

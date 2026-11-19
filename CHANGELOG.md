@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.3.3 – Collections edited in the bar, compact settings lists
+
+**Plugin interface (`CoreApiVersion`): 1.4** – extended, nothing broken: plugins for 1.0–1.3 keep
+loading. SDK package `UeBar.Sdk 1.4.0`. From now on the app follows Semantic Versioning: the last
+digit for fixes and improvements, the middle one for new features and plugins, the first one when
+something breaks.
+
+### New
+- **Quick access: build collections right in the bar.** In edit mode tap the collection tile: add
+  entries by search (Start menu apps and your entries), "Choose file …", "Choose folder …", "Enter
+  web page …" or by dropping a file, folder, shortcut or link on the tile; reorder by dragging,
+  rename, remove. The entries live in the tile (layout): they sync, and "Cancel" discards them too.
+- **Compact settings lists:** one row per entry (icon, name, detail), a click opens its fields, a
+  search field, groups. Quick access groups by single tiles, each collection and not used, and also
+  lists what lives only in the layout.
+- **SDK:** `ITileItemEditor` (edit a tile's entries in the bar), `TileConfig.Options` (own values of a
+  tile, synced with the layout), `ISettingListPresenter` (how a list setting is shown).
+
+### Changed
+- The collection tile no longer asks for six slots when it is added – it starts empty and is filled
+  in the bar. Old collections (also with gaps between their entries) keep working.
+- The memory warning of the sign-of-life log line now starts at 150 MB (the target since 09.11.),
+  not 80 MB.
+
 ## 1.3.2 – Quick access plugin, important notifications, live settings
 
 **Plugin interface (`CoreApiVersion`): 1.3** – extended, nothing broken: plugins for 1.0–1.2 keep

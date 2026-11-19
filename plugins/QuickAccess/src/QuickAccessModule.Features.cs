@@ -138,24 +138,7 @@ public sealed partial class QuickAccessModule
 
     public Task<TileConfig?> CreateTileForDropAsync(DroppedItem item, CancellationToken cancellationToken)
     {
-        string? label = null;
-        QuickTarget? target = null;
-        switch (item.Kind)
-        {
-            case DropKind.Folder:
-                target = new QuickTarget(TargetKind.Folder, QuickPaths.Collapse(item.Value, UserProfile));
-                break;
-
-            case DropKind.Link when QuickTarget.IsAllowedUrl(item.Value):
-                target = new QuickTarget(TargetKind.Url, item.Value);
-                label = item.Title;
-                break;
-
-            case DropKind.File:
-                (target, label) = FromDroppedFile(item.Value);
-                break;
-        }
-
+        var (target, label) = FromDropped(item);
         if (target is null)
         {
             return Task.FromResult<TileConfig?>(null);
@@ -170,6 +153,38 @@ public sealed partial class QuickAccessModule
             Entities = new Dictionary<string, string> { ["main"] = target.ToString() },
             Label = string.IsNullOrWhiteSpace(label) ? null : label.Trim(),
         });
+    }
+
+    /// <summary>
+    /// Something dropped, chosen or typed → the target (and a name if it brings one). A typed web page
+    /// without "https://" gets it ("example.org" → "https://example.org").
+    /// </summary>
+    internal (QuickTarget? Target, string? Label) FromDropped(DroppedItem item)
+    {
+        switch (item.Kind)
+        {
+            case DropKind.Folder:
+                return (new QuickTarget(TargetKind.Folder, QuickPaths.Collapse(item.Value, UserProfile)), null);
+
+            case DropKind.Link:
+            {
+                var url = item.Value.Trim();
+                if (!url.Contains("://", StringComparison.Ordinal) && !url.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
+                {
+                    url = "https://" + url;
+                }
+
+                return QuickTarget.IsAllowedUrl(url) && Uri.TryCreate(url, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeMailto || uri.Host.Contains('.'))
+                    ? (new QuickTarget(TargetKind.Url, url), item.Title)
+                    : (null, null);
+            }
+
+            case DropKind.File:
+                return FromDroppedFile(item.Value);
+
+            default:
+                return (null, null);
+        }
     }
 
     /// <summary>

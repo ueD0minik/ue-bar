@@ -110,6 +110,7 @@ internal sealed class EditSessionViewModel : ObservableObject
         _registry = registry;
         _log = log;
         DeviceName = deviceName;
+        TileItems = new TileItemsViewModel(registry, editor, log);
 
         // Reuse existing tile models (same configuration = same tile).
         var byId = existingModels.GroupBy(m => m.TileId).ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
@@ -443,6 +444,9 @@ internal sealed class EditSessionViewModel : ObservableObject
 
     public ObservableCollection<Option<string?>> MoveTargets { get; } = [];
 
+    /// <summary>Entries of the selected tile, if its module edits them in the bar (P2-4-Fix 1).</summary>
+    public TileItemsViewModel TileItems { get; }
+
     // ------------------------------------------------------------------ Adding
 
     public bool IsAdding
@@ -633,6 +637,7 @@ internal sealed class EditSessionViewModel : ObservableObject
                 TileLabel = "";
             }
 
+            TileItems.Load(found?.Tile);
             OnPropertyChanged(nameof(HasSelectedTile));
             OnPropertyChanged(nameof(ShowTabProperties));
         }
@@ -859,7 +864,7 @@ internal sealed class EditSessionViewModel : ObservableObject
     /// current tab (the core asks them, see <see cref="ModuleRegistry.CreateTileForDropAsync"/>).
     /// Returns how many tiles were added.
     /// </summary>
-    public async Task<int> AddDroppedAsync(IReadOnlyList<DroppedItem> items)
+    public async Task<int> AddDroppedAsync(IReadOnlyList<DroppedItem> items, string? onTileId = null)
     {
         if (SelectedTabId is not { } tabId)
         {
@@ -869,6 +874,15 @@ internal sealed class EditSessionViewModel : ObservableObject
         var added = 0;
         foreach (var item in items)
         {
+            // P2-4-Fix 1: dropped on a tile that takes entries (e.g. a collection) → into it.
+            if (onTileId is not null && TakesDrop(onTileId)
+                && TileItemsViewModel.Change(_registry, Editor, onTileId, "Drop on tile", (e, t) => e.AddTileItem(t, new TileItemSource(Dropped: item))))
+            {
+                SelectedTileId = onTileId;
+                added++;
+                continue;
+            }
+
             if (await _registry.CreateTileForDropAsync(item) is not { } config)
             {
                 continue;
@@ -884,6 +898,12 @@ internal sealed class EditSessionViewModel : ObservableObject
         _log.Info(null, $"Edit: {added} of {items.Count} dropped item(s) became tiles");
         return added;
     }
+
+    /// <summary>Whether the tile takes dropped things as entries (its module edits its entries and allows dropping).</summary>
+    public bool TakesDrop(string tileId) =>
+        Editor.FindTile(tileId) is { } found
+        && TileItemsViewModel.ItemsOf(_registry, found.Tile) is { } list
+        && list.Sources.HasFlag(TileItemSources.Drop) && !list.IsFull;
 
     private static string Key(TileConfig config) => UeBarJson.Serialize(config);
 }

@@ -55,6 +55,16 @@ public sealed class TargetTests
         Assert.Null(QuickTarget.Parse(text));
     }
 
+    [Theory]
+    [InlineData("Microsoft.WindowsCalculator_8wekyb3d8bbwe!App", "WindowsCalculator")]
+    [InlineData("Microsoft.Office.WINWORD.EXE.15", "WINWORD")]
+    [InlineData("MSEdge", "MSEdge")]
+    [InlineData(@"{6D809377-6AF0-444B-8957-A3773F02200E}\Fabrikam\Paint\paint.exe", "paint")]
+    public void App_ids_give_a_readable_name_until_the_start_menu_is_read(string id, string name)
+    {
+        Assert.Equal(name, QuickNames.AppName(id));
+    }
+
     [Fact]
     public void Only_apps_may_ask_for_administrator_rights_in_a_tile()
     {

@@ -1048,4 +1048,46 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Fields_ListRemove" xml:space="preserve">
     <value>Entfernen</value>
   </data>
+  <data name="Edit_Items" xml:space="preserve">
+    <value>Einträge</value>
+  </data>
+  <data name="Edit_ItemDrag" xml:space="preserve">
+    <value>Zum Umsortieren ziehen</value>
+  </data>
+  <data name="Edit_ItemRemove" xml:space="preserve">
+    <value>Eintrag entfernen</value>
+  </data>
+  <data name="Edit_ItemSearch" xml:space="preserve">
+    <value>Eintrag hinzufügen: App oder Eintrag suchen …</value>
+  </data>
+  <data name="Edit_ItemFile" xml:space="preserve">
+    <value>Datei wählen …</value>
+  </data>
+  <data name="Edit_ItemFolder" xml:space="preserve">
+    <value>Ordner wählen …</value>
+  </data>
+  <data name="Edit_ItemLink" xml:space="preserve">
+    <value>Webseite eingeben …</value>
+  </data>
+  <data name="Edit_ItemDropHint" xml:space="preserve">
+    <value>Du kannst auch Dateien, Ordner, Verknüpfungen und Links auf die Kachel ziehen.</value>
+  </data>
+  <data name="Edit_ItemsFull" xml:space="preserve">
+    <value>Voll – entferne einen Eintrag, um einen anderen hinzuzufügen.</value>
+  </data>
+  <data name="Edit_ItemNotTaken" xml:space="preserve">
+    <value>Nicht hinzugefügt (schon drin oder nichts, was diese Kachel nimmt).</value>
+  </data>
+  <data name="Fields_ListNew" xml:space="preserve">
+    <value>(neu)</value>
+  </data>
+  <data name="Fields_ListSearch" xml:space="preserve">
+    <value>Suchen …</value>
+  </data>
+  <data name="Fields_ListNoMatch" xml:space="preserve">
+    <value>Nichts gefunden.</value>
+  </data>
+  <data name="Fields_ListEmpty" xml:space="preserve">
+    <value>Noch keine Einträge.</value>
+  </data>
 </root>

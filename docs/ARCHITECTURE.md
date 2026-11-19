@@ -134,6 +134,11 @@ plugin:
   fullscreen block as far as the bar settings allow (`NotificationGate` in `UeBar.Bar`).
 - `IconGridElement` and `TileModel.ImageUrl` shown as the tile's icon.
 
+Contract 1.4 (1.3.3): `ITileItemEditor` – a module lets the user edit the entries of a tile in edit
+mode; it returns a changed copy of the `TileConfig`, the app gives it to the layout editor
+(`TileItemEditing` in the core), so undo, cancel and sync work as for every edit. `TileConfig.Options`
+holds own values of a tile. `ISettingListPresenter` shows a `List` setting compact and grouped.
+
 ## Tiles are data
 
 So that a module needs no WPF code, a tile describes its content as data made from elements,

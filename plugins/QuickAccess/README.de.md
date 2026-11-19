@@ -18,8 +18,26 @@ Einrichtung.
   eine Internetverknüpfung (`.url`) oder einen Link aus der Adresszeile des Browsers aufs Panel
   ziehen – daraus wird eine Kachel im aktuellen Tab. Eine Verknüpfung auf einen Ordner wird der
   Ordner, jede andere bleibt die Verknüpfung (mit ihren Argumenten).
-- **Sammlung:** „Sammlung“ (2x2) hinzufügen und bis zu sechs Einträge in ihre Felder wählen – Apps,
-  Dateien, Ordner, Webseiten. Im Bearbeiten-Modus einen Namen geben (z. B. „Schule“).
+- **Sammlung:** „Sammlung“ (2x2) hinzufügen und direkt in der Bar füllen – siehe unten.
+
+## Eine Sammlung in der Bar bauen
+
+Im Bearbeiten-Modus die Sammel-Kachel antippen. Ihre Eigenschaften zeigen die **Einträge** (bis zu
+sechs):
+
+- **Eintrag hinzufügen:** einen Teil des Namens tippen – Startmenü-Apps und deine Einträge – und einen
+  Treffer antippen; **Datei wählen …** / **Ordner wählen …**; **Webseite eingeben …** (`example.org`
+  reicht).
+- Eine Datei, einen Ordner, eine Verknüpfung oder einen Link **auf die Sammel-Kachel ziehen** – er
+  landet darin (aufs übrige Panel gezogen wird es wie bisher eine eigene Kachel).
+- **Umsortieren** am Griff ziehen, **umbenennen** im Namensfeld (leer = Name aus dem Ziel),
+  **entfernen** mit ×. Die Sammlung selbst benennst du um wie jede Kachel.
+
+Die Einträge liegen in der Sammel-Kachel selbst, also im Layout: Sie kommen auf deine anderen PCs mit,
+und „Abbrechen“ im Bearbeiten-Modus verwirft auch Änderungen daran. Ein entfernter Eintrag hinterlässt
+nichts.
+
+![Eine Sammlung im Bearbeiten-Modus](images/quickaccess-collection-edit.png)
 
 ## Was ein Tippen macht
 
@@ -38,7 +56,13 @@ gefunden“** und bleibt – die ue Bar schaut bei jedem Öffnen des Panels erne
 
 **Einstellungen → Plugins → Schnellzugriff → Einträge:** deine eigenen Verknüpfungen auf diesem PC
 mit Name, Art und Ziel (Datei und Ordner mit „Durchsuchen …“). Sie erscheinen in der Suche – auch
-zum Anlegen von Kacheln – und andere Plugins können sie über ihre ID öffnen (Modul-Bus, unten).
+zum Anlegen von Kacheln und Sammlungs-Einträgen – und andere Plugins können sie über ihre ID öffnen
+(Modul-Bus, unten).
+
+Die Seite ist kompakt: eine Zeile pro Eintrag (Symbol, Name, Art, gekürztes Ziel), ein Klick klappt die
+Felder auf, ein Suchfeld filtert. Gruppiert nach Verwendung: **Einzelne Kacheln**, je **Sammlung**,
+**Nicht verwendet**. Was nur im Layout liegt (ein auf die Sammlung gezogener Ordner), steht mit dabei,
+markiert mit „in der Bar bearbeiten“.
 
 ![Einstellungen des Schnellzugriff-Plugins](images/quickaccess-settings.png)
 

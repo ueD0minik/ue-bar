@@ -120,7 +120,7 @@ public sealed class Contract13Tests
         Assert.False(grid.Items[1].IsEnabled);
         Assert.Equal(json, UeBarJson.Serialize(back));
         Assert.Equal(NotificationPriority.Normal, new UeNotification("a", "b").Priority);
-        Assert.Equal(new Version(1, 3), CoreApiVersion.Version);
+        Assert.True(CoreApiVersion.Version >= new Version(1, 3));
     }
 
     private class SettingsModule(string id) : IModule, IModuleSettings

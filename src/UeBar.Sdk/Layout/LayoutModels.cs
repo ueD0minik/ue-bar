@@ -84,10 +84,18 @@ public sealed class TileConfig
     /// <summary>Icon overridden by the user.</summary>
     public string? Icon { get; set; }
 
+    /// <summary>
+    /// Own values of the module for this tile (contract 1.4), e.g. the names of the entries of a
+    /// collection – stored and synced with the layout. Keys and values are the module's business.
+    /// </summary>
+    public Dictionary<string, string>? Options { get; set; }
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? Extra { get; set; }
 
     public string? GetEntity(string slot) => Entities.TryGetValue(slot, out var id) ? id : null;
+
+    public string? GetOption(string key) => Options is not null && Options.TryGetValue(key, out var value) ? value : null;
 }
 
 /// <summary>A value in the status line: which module, which key.</summary>
