@@ -21,8 +21,9 @@ Fixes only; plugin interface unchanged (1.6).
 - The real screenshots stay private; their tests run only where they are (skipped on the build server).
 
 ### Tests
-- Screenshot +4 (real screenshots: the shipped preparation is the best and under 1 s, the bullet case;
-  the order-free error rate; punctuation). Total 798.
+- Screenshot +3 (real screenshots: the shipped preparation is the best and under 1 s, the bullet case; the
+  order-free error rate; punctuation). The comparison on the made-up pictures of 1.4.2 is gone – the real
+  screenshots decide, and the build server can read only part of the made-up set. Total 797.
 
 ## 1.4.2 – More reliable text recognition, keys for the picker bar
 
