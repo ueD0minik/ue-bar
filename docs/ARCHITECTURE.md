@@ -183,6 +183,12 @@ Contract 1.5 (1.4.0) – pins and screenshots, all generic:
 - `SettingFieldKind.Info` (a hint) and `ISettingListTiles` (a list entry becomes a tile; the app puts it
   into the layout through `LayoutCoordinator.AddTileAsync`).
 
+Contract 1.6 (1.4.2): `ScreenAreaAction.Shortcut` – a key for a button of the picker bar ("Ctrl+C"),
+handled by the overlay while the bar is shown (`PickerKeys` in `UeBar.Bar`), never registered system-wide.
+Recognized text (Screenshot plugin, `OcrLayout`) is rebuilt from the word boxes: pieces of one screen line
+are joined (Windows returns a bullet "•" as its own line), spaces only where the boxes have a gap, type size
+by width per character, hanging indents of list items, tables only for runs of rows with the same structure.
+
 ## Tiles are data
 
 So that a module needs no WPF code, a tile describes its content as data made from elements,

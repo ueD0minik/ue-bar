@@ -33,7 +33,7 @@ in a release is called `ueBar-plugin-<id>-<version>.zip`.
 ```powershell
 dotnet new classlib -n MyPlugin -f net10.0
 cd MyPlugin
-dotnet add package UeBar.Sdk --version 1.5.0
+dotnet add package UeBar.Sdk --version 1.6.0
 ```
 
 - Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF. A plugin that needs
@@ -66,7 +66,7 @@ Next to the `.csproj`:
   "author": "Your Name",
   "license": "GPL-3.0-or-later",
   "homepage": "https://example.org/myplugin",
-  "sdkVersion": "1.5",
+  "sdkVersion": "1.6",
   "entryAssembly": "MyPlugin.dll"
 }
 ```
@@ -307,7 +307,9 @@ if (context is IFileSaveDialog dialog)
   (`ScreenRect`), right with any scaling; `result.MainMonitor` is the monitor with most of the area.
   One pick at a time – a second call while one is open returns `null`.
   An action with `Compact = true` is drawn as a small icon right after the previous button, its label as
-  tooltip (the arrow "Save as …" next to "Save").
+  tooltip (the arrow "Save as …" next to "Save"). From 1.6 an action may bring a key:
+  `new("copy", "Copy", "U+E8C8") { Shortcut = "Ctrl+C" }` – it works only while the bar is shown (never
+  system-wide) and is named in the tooltip. Enter always takes the first action, Esc cancels.
 - The clipboard can only be **written**.
 - **"Save as"** (`IFileSaveDialog`) is the Windows dialog, shown by the core. It starts in the folder the
   user picked last time for your plugin (remembered per PC); your plugin writes the file itself.

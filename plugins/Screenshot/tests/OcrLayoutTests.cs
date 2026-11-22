@@ -157,6 +157,85 @@ public sealed class OcrLayoutTests
     }
 
     [Fact]
+    public void Regression_a_quoted_list_in_running_text_does_not_turn_the_paragraph_into_lines()
+    {
+        // P2-5-Fix 3: one " - " (and a ": " in another line) made 1.4.1 keep every line break of the paragraph.
+        OcrLineBox[] page =
+        [
+            Line("Im Praxistest ist dabei ein Fehler aufgefallen: Deine Vokabelfolie", 40, 100),
+            Line("wurde im Fließtext zu einer einzigen Zeile.", 40, 128),
+            Line("Das habe ich korrigiert. Zeilen, die wie eine Tabelle oder", 40, 186),
+            Line("Vokabelliste aufgebaut sind („to achieve - erreichen“), bleiben", 40, 214),
+            Line("jetzt Zeilen.", 40, 242),
+        ];
+
+        Assert.Equal(
+            $"Im Praxistest ist dabei ein Fehler aufgefallen: Deine Vokabelfolie wurde im Fließtext zu einer einzigen Zeile.{N}{N}Das habe ich korrigiert. Zeilen, die wie eine Tabelle oder Vokabelliste aufgebaut sind („to achieve - erreichen“), bleiben jetzt Zeilen.",
+            OcrLayout.Format(page, OcrTextFormat.Flow));
+    }
+
+    /// <summary>A bullet as Windows returns it: its own line, with a smaller box a little lower than the text.</summary>
+    private static OcrLineBox Dot(double x, double y) => new("•", [new OcrWordBox("•", x, y + 6, 8, 8)]);
+
+    [Fact]
+    public void Regression_a_wrapped_list_item_stays_one_item_without_empty_lines_and_keeps_its_number()
+    {
+        // Windows' order: the text first, the bullet after it; the second row of item 1 comes in two pieces.
+        OcrLineBox[] page =
+        [
+            Line("Deine Daten und die Plugins: Mit einer Kopie (auch mit HA an)", 64, 100),
+            Dot(40, 100),
+            Line("startet dieselbe 1.4.0 in", 64, 128),
+            Line("1,1 s.", 324, 128),
+            Line("Netzwerk-, Signatur- und Zertifikatsprüfungen: nichts.", 64, 156),
+            Dot(40, 156),
+            Line("Eine zweite laufende Instanz oder fremde Plugins.", 64, 184),
+            Dot(40, 184),
+        ];
+
+        Assert.Equal(
+            $"• Deine Daten und die Plugins: Mit einer Kopie (auch mit HA an) startet dieselbe 1.4.0 in 1,1 s.{N}• Netzwerk-, Signatur- und Zertifikatsprüfungen: nichts.{N}• Eine zweite laufende Instanz oder fremde Plugins.",
+            OcrLayout.Format(page, OcrTextFormat.Flow));
+        Assert.Equal(
+            $"• Deine Daten und die Plugins: Mit einer Kopie (auch mit HA an){N}startet dieselbe 1.4.0 in 1,1 s.{N}• Netzwerk-, Signatur- und Zertifikatsprüfungen: nichts.{N}• Eine zweite laufende Instanz oder fremde Plugins.",
+            OcrLayout.Format(page, OcrTextFormat.Lines));
+    }
+
+    [Fact]
+    public void A_space_only_where_the_words_really_have_a_gap()
+    {
+        // Windows: "hast ." and "Vokabel liste" – the boxes touch.
+        OcrWordBox[] words =
+        [
+            new("Du", 0, 0, 20, 20), new("hast", 30, 0, 40, 20), new(".", 71, 0, 4, 20),
+            new("Vokabel", 85, 0, 70, 20), new("liste", 156, 0, 50, 20), new("gesehen", 216, 0, 70, 20),
+        ];
+
+        Assert.Equal("Du hast. Vokabelliste gesehen", OcrLayout.Compose(new OcrLineBox("Du hast . Vokabel liste gesehen", words)));
+        Assert.Equal("text", OcrLayout.Compose(new OcrLineBox("text", [new OcrWordBox("text", 0, 0, 40, 20)])));
+    }
+
+    [Fact]
+    public void Pieces_far_apart_on_one_height_stay_columns()
+    {
+        OcrLineBox[] page = [Line("left column", 40, 100), Line("right column", 600, 100)];
+        Assert.Equal(2, OcrLayout.Rows([.. page]).Count);
+    }
+
+    [Fact]
+    public void A_line_without_descenders_is_not_taken_for_smaller_type()
+    {
+        // Same size, but the second line has no letters below the baseline: its tallest box is lower.
+        OcrLineBox[] page =
+        [
+            Line("Start early on Saturday and take the", 40, 100, 20),
+            Line("connection to the lake", 40, 128, 15) with { Words = [.. Line("connection to the lake", 40, 128).Words.Select(w => w with { Height = 15 })] },
+        ];
+
+        Assert.Single(OcrLayout.Paragraphs(page));
+    }
+
+    [Fact]
     public void No_boxes_means_the_plain_text_of_windows()
     {
         var outcome = new OcrOutcome($"a{N}b", "en-US");
@@ -172,7 +251,9 @@ public sealed class OcrLayoutImageTests
 
     private static async Task<OcrOutcome?> RecognizeAsync(string image)
     {
-        var english = Ocr.Languages.FirstOrDefault(l => l.Tag.StartsWith("en", StringComparison.OrdinalIgnoreCase)).Tag;
+        // English, else German (it reads these English slides just as well) – so the tests run on every PC.
+        var english = Ocr.Languages.FirstOrDefault(l => l.Tag.StartsWith("en", StringComparison.OrdinalIgnoreCase)).Tag
+            ?? Ocr.Languages.FirstOrDefault(l => l.Tag.StartsWith("de", StringComparison.OrdinalIgnoreCase)).Tag;
         if (english is null)
         {
             return null; // no English recognition on this PC – covered by the made-up boxes above

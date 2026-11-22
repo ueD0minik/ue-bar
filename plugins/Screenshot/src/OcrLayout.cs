@@ -30,10 +30,26 @@ internal sealed record OcrLineBox(string Text, IReadOnlyList<OcrWordBox> Words)
 
     public double Bottom => Words.Count == 0 ? 0 : Words.Max(w => w.Y + w.Height);
 
-    /// <summary>Height of the letters (median of the words – one tall word does not count).</summary>
-    public double Height => Words.Count == 0 ? 0 : OcrLayout.Median(Words.Select(w => w.Height));
+    /// <summary>
+    /// Height of the letters: the tallest word box (P2-5-Fix 3). Windows fits each box to its letters, so "in s."
+    /// is much lower than "Daten" – the median made a short line look like smaller type and broke paragraphs.
+    /// </summary>
+    public double Height => Words.Count == 0 ? 0 : Words.Max(w => w.Height);
 
     public double Center => (Left + Right) / 2;
+
+    /// <summary>
+    /// Width per character (median of the words) – a measure of the type size that does not depend on which
+    /// letters reach up or down (P2-5-Fix 3: a line without descenders looked like smaller type).
+    /// </summary>
+    public double CharWidth
+    {
+        get
+        {
+            var words = Words.Where(w => w.Text.Length >= 2).ToList();
+            return OcrLayout.Median((words.Count > 0 ? words : Words).Select(w => w.Width / Math.Max(1, w.Text.Length)));
+        }
+    }
 }
 
 /// <summary>
@@ -57,28 +73,53 @@ internal static partial class OcrLayout
 
     public static bool IsBullet(string line) => BulletPattern().IsMatch(line.TrimStart());
 
-    [GeneratedRegex(@"\S\s+(?:[-–—=]|->|→|=>)\s+\S|\S:\s+\S")]
+    [GeneratedRegex(@"\S\s+(?<sep>[-–—=]|->|→|=>)\s+\S|\S(?<sep>:)\s+\S")]
     private static partial Regex SeparatorPattern();
 
-    /// <summary>A line with a separator in the middle or a wide gap between two words (a table column).</summary>
-    internal static bool IsStructured(OcrLineBox line, double letter)
+    /// <summary>
+    /// What makes a line look like a table or vocabulary row (P2-5-Fix 3): its separator ("-" for every dash,
+    /// ":", "=", "→") or a wide gap between two words with its x position ("gap@…"). Null = plain text. Only
+    /// several rows in a row with the same kind count as a table – one " - " in running text never does.
+    /// </summary>
+    internal static string? StructureOf(OcrLineBox line, double letter)
     {
-        if (SeparatorPattern().IsMatch(line.Text))
+        if (SeparatorPattern().Match(line.Text) is { Success: true } match)
         {
-            return true;
+            var sep = match.Groups["sep"].Value;
+            return sep is "-" or "–" or "—" ? "-" : sep is "->" or "=>" ? "→" : sep;
         }
 
         for (var i = 1; i < line.Words.Count; i++)
         {
-            var gap = line.Words[i].X - (line.Words[i - 1].X + line.Words[i - 1].Width);
-            if (gap > 1.5 * letter)
+            var end = line.Words[i - 1].X + line.Words[i - 1].Width;
+            if (line.Words[i].X - end > 1.5 * letter)
             {
-                return true;
+                return $"gap@{line.Words[i].X}";
             }
         }
 
-        return false;
+        return null;
     }
+
+    /// <summary>Two structure kinds belong to one table: same separator, or a column gap at about the same x.</summary>
+    private static bool SameStructure(string? a, string? b, double letter)
+    {
+        if (a is null || b is null)
+        {
+            return false;
+        }
+
+        if (a.StartsWith("gap@", StringComparison.Ordinal) && b.StartsWith("gap@", StringComparison.Ordinal))
+        {
+            return Math.Abs(double.Parse(a[4..], System.Globalization.CultureInfo.InvariantCulture) - double.Parse(b[4..], System.Globalization.CultureInfo.InvariantCulture)) <= 1.5 * letter;
+        }
+
+        return a == b;
+    }
+
+    /// <summary>Where the text of a list item starts: after the bullet ("•" as its own word) – the hanging indent.</summary>
+    internal static double ItemTextLeft(OcrLineBox line) =>
+        line.Words.Count > 1 && IsBullet(line.Words[0].Text + " x") ? line.Words[1].X : line.Left;
 
     public static double Median(IEnumerable<double> values)
     {
@@ -120,7 +161,7 @@ internal static partial class OcrLayout
 
     private static List<List<OcrLineBox>> ParagraphBoxes(IReadOnlyList<OcrLineBox> lines)
     {
-        var usable = lines.Where(l => l.Words.Count > 0 && !string.IsNullOrWhiteSpace(l.Text)).ToList();
+        var usable = Rows(lines.Where(l => l.Words.Count > 0 && !string.IsNullOrWhiteSpace(l.Text)).ToList());
         var result = new List<List<OcrLineBox>>();
         foreach (var column in Columns(usable))
         {
@@ -131,10 +172,14 @@ internal static partial class OcrLayout
     }
 
     /// <summary>
-    /// Line breaks inside a paragraph that were made on purpose: the first word of the next line would still
-    /// have fitted into the line above (a list of short lines, vocabulary, an address). If that is so for most
-    /// breaks of the paragraph, every line stays a line; otherwise only those breaks stay. Text that only
-    /// wrapped is joined. Index i = the break before line i.
+    /// Line breaks inside a paragraph that stay in running text (P2-5-Fix 3). Index i = the break before line i.
+    /// <list type="bullet">
+    /// <item>A line that reaches the right edge of the paragraph – the next word would not have fitted – wrapped:
+    /// joined, whatever characters it holds.</item>
+    /// <item>A line that ends clearly earlier (the next word would have fitted) ended on purpose: the break stays.</item>
+    /// <item>A table or vocabulary list – at least two rows in a row with the same separator or column gap, two
+    /// of them short – keeps all its breaks, also after its longest row.</item>
+    /// </list>
     /// </summary>
     internal static bool[] WantedBreaks(IReadOnlyList<OcrLineBox> paragraph)
     {
@@ -146,39 +191,155 @@ internal static partial class OcrLayout
 
         var right = paragraph.Max(l => l.Right);
         var letter = Math.Max(Median(paragraph.Select(l => l.Height)), 1);
-
-        // Lines built like a table or a vocabulary list ("to achieve - erreichen", "Name:  Value", columns) stay
-        // lines when most of the paragraph looks like that – they are as long as wrapped text, so the fit test
-        // below cannot tell them apart.
-        var structured = paragraph.Count(l => IsStructured(l, letter));
-        if (structured * 3 >= paragraph.Count * 2)
-        {
-            Array.Fill(wanted, true);
-            return wanted;
-        }
-
-        var count = 0;
-        var breaks = 0;
+        var full = new bool[paragraph.Count];
         for (var i = 1; i < paragraph.Count; i++)
         {
-            if (IsBullet(paragraph[i].Text))
-            {
-                continue; // a new line anyway
-            }
-
-            breaks++;
             var first = paragraph[i].Words[0];
             var space = Math.Max(first.Height * 0.3, letter * 0.3);
-            wanted[i] = paragraph[i - 1].Right + space + first.Width < right - (letter * 0.5);
-            count += wanted[i] ? 1 : 0;
+            full[i - 1] = paragraph[i - 1].Right + space + first.Width >= right - (letter * 0.5);
         }
 
-        if (breaks > 0 && count * 2 > breaks)
+        full[^1] = paragraph[^1].Right >= right - letter;
+        double? itemLeft = null;
+        for (var i = 0; i < paragraph.Count; i++)
         {
-            Array.Fill(wanted, true);
+            var bullet = IsBullet(paragraph[i].Text);
+
+            // A line at the text edge of the list item above (hanging indent) is that item going on – always joined.
+            var continuesItem = !bullet && itemLeft is { } edge && Math.Abs(paragraph[i].Left - edge) <= letter;
+            if (i > 0)
+            {
+                wanted[i] = !bullet && !continuesItem && !full[i - 1];
+            }
+
+            itemLeft = bullet ? ItemTextLeft(paragraph[i]) : continuesItem ? itemLeft : null;
+        }
+
+        // Tables and vocabulary: runs of rows with the same structure.
+        var kinds = paragraph.Select(l => StructureOf(l, letter)).ToArray();
+        var start = 0;
+        while (start < paragraph.Count)
+        {
+            var end = start;
+            while (end + 1 < paragraph.Count && SameStructure(kinds[start], kinds[end + 1], letter))
+            {
+                end++;
+            }
+
+            // Two rows in a row that end clearly before the right edge – wrapped text reaches it.
+            var shortPair = false;
+            for (var i = start; i < end; i++)
+            {
+                shortPair |= paragraph[i].Right < right - letter && paragraph[i + 1].Right < right - letter;
+            }
+
+            // A column gap at the same x in several rows never comes from wrapping – that alone is a table.
+            var aligned = kinds[start]?.StartsWith("gap@", StringComparison.Ordinal) == true;
+            if (end > start && (shortPair || aligned))
+            {
+                for (var i = start + 1; i <= end; i++)
+                {
+                    wanted[i] = true;
+                }
+            }
+
+            start = end + 1;
         }
 
         return wanted;
+    }
+
+    /// <summary>
+    /// Puts back together what is one line on the screen (P2-5-Fix 3): Windows sometimes returns a line in pieces
+    /// – a bullet "•" as its own line (listed after its text, because its box starts lower), or a line split at
+    /// a dash. Pieces whose heights overlap by at least half and that lie close side by side (gap below two
+    /// letter heights – a column gap is wider) become one line, left to right. Nothing is dropped.
+    /// </summary>
+    internal static List<OcrLineBox> Rows(List<OcrLineBox> lines)
+    {
+        var rows = Merged(lines);
+        return [.. rows.Select(r => r with { Text = Compose(r) })];
+    }
+
+    /// <summary>
+    /// The text of a line from its words (P2-5-Fix 3): Windows puts a space between all word boxes, also where
+    /// they touch – "hast .", "Netzwerk- ,", "Vokabel liste". A space only where there is a gap of more than a
+    /// fifth of the letter height. Only for lines whose words make up the whole text (Latin script).
+    /// </summary>
+    internal static string Compose(OcrLineBox line)
+    {
+        if (line.Words.Count < 2 || string.Concat(line.Words.Select(w => w.Text)) != line.Text.Replace(" ", "", StringComparison.Ordinal))
+        {
+            return line.Text.Trim();
+        }
+
+        var letter = Math.Max(line.Height, 1);
+        var gaps = new double[line.Words.Count];
+        for (var i = 1; i < line.Words.Count; i++)
+        {
+            gaps[i] = line.Words[i].X - (line.Words[i - 1].X + line.Words[i - 1].Width);
+        }
+
+        // "Touching" = far below the usual word gap of this line and below a fifth of the letter height.
+        var usual = Median(gaps.Skip(1).Where(g => g > 0));
+        var text = new StringBuilder(line.Words[0].Text);
+        for (var i = 1; i < line.Words.Count; i++)
+        {
+            var touching = gaps[i] < 0.2 * letter && (usual <= 0 || gaps[i] < 0.35 * usual);
+            if (!touching)
+            {
+                text.Append(' ');
+            }
+
+            text.Append(line.Words[i].Text);
+        }
+
+        return text.ToString();
+    }
+
+    private static List<OcrLineBox> Merged(List<OcrLineBox> lines)
+    {
+        var pending = lines.OrderBy(l => l.Left).ToList();
+        var rows = new List<OcrLineBox>();
+        while (pending.Count > 0)
+        {
+            var row = pending[0];
+            pending.RemoveAt(0);
+            for (var merged = true; merged;)
+            {
+                merged = false;
+                for (var i = 0; i < pending.Count; i++)
+                {
+                    if (SameRow(row, pending[i]))
+                    {
+                        var words = row.Words.Concat(pending[i].Words).OrderBy(w => w.X).ToList();
+                        var pieces = new[] { row, pending[i] }.OrderBy(l => l.Left).Select(l => l.Text.Trim());
+                        row = new OcrLineBox(string.Join(" ", pieces), words);
+                        pending.RemoveAt(i);
+                        merged = true;
+                        break;
+                    }
+                }
+            }
+
+            rows.Add(row);
+        }
+
+        return rows;
+    }
+
+    private static bool SameRow(OcrLineBox a, OcrLineBox b)
+    {
+        var overlap = Math.Min(a.Bottom, b.Bottom) - Math.Max(a.Top, b.Top);
+        var smaller = Math.Max(Math.Min(a.Bottom - a.Top, b.Bottom - b.Top), 1);
+        if (overlap < smaller / 2)
+        {
+            return false;
+        }
+
+        var letter = Math.Max(a.Height, b.Height);
+        var gap = a.Left <= b.Left ? b.Left - a.Right : a.Left - b.Right;
+        return gap < 2 * letter;
     }
 
     /// <summary>
@@ -230,22 +391,36 @@ internal static partial class OcrLayout
         // Usual pitch: the median – but never more than 1.6 letter heights, otherwise text whose paragraphs are
         // all one line long (pitch = paragraph gap) would never break.
         var basePitch = pitch > 0 ? Math.Min(pitch, 1.6 * height) : 1.6 * height;
+
+        // P2-5-Fix 3: with few lines the median already holds paragraph gaps – the tightest real line pitch
+        // (lines not overlapping) is the measure then.
+        var tightest = lines.Zip(lines.Skip(1), (a, b) => b.Top - a.Top).Where(p => p >= 0.8 * height).DefaultIfEmpty(0).Min();
         var current = new List<OcrLineBox> { lines[0] };
+        double? itemLeft = IsBullet(lines[0].Text) ? ItemTextLeft(lines[0]) : null;
         for (var i = 1; i < lines.Count; i++)
         {
             var above = lines[i - 1];
             var line = lines[i];
             var gap = line.Top - above.Top;
             var letter = Math.Max(Math.Min(line.Height, above.Height), 1);
-            var otherSize = Math.Abs(line.Height - above.Height) > 0.25 * letter;
-            var otherIndent = Math.Abs(line.Left - above.Left) > 2 * letter && Math.Abs(line.Center - above.Center) > 2 * letter;
-            if (gap > 1.4 * basePitch || otherSize || otherIndent)
+            var bullet = IsBullet(line.Text);
+
+            // P2-5-Fix 3: a line at the text edge of the list item above (hanging indent) belongs to that item.
+            var continuesItem = !bullet && itemLeft is { } edge && Math.Abs(line.Left - edge) <= letter;
+            // Another type size (a heading): clearly wider letters, or very different heights.
+            var widths = (Small: Math.Min(line.CharWidth, above.CharWidth), Large: Math.Max(line.CharWidth, above.CharWidth));
+            var heights = (Small: Math.Min(line.Height, above.Height), Large: Math.Max(line.Height, above.Height));
+            var otherSize = (widths.Small > 0 && widths.Large > 1.3 * widths.Small) || heights.Large > 1.6 * Math.Max(heights.Small, 1);
+            var otherIndent = !continuesItem && Math.Abs(line.Left - above.Left) > 2 * letter && Math.Abs(line.Center - above.Center) > 2 * letter;
+            var widerThanTightest = tightest > 0 && gap > 1.35 * tightest;
+            if (gap > 1.4 * basePitch || widerThanTightest || otherSize || otherIndent)
             {
                 paragraphs.Add(current);
                 current = [];
             }
 
             current.Add(line);
+            itemLeft = bullet ? ItemTextLeft(line) : continuesItem ? itemLeft : null;
         }
 
         paragraphs.Add(current);

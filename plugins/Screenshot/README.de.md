@@ -30,7 +30,8 @@ Der Bildschirm friert ein und wird abgedunkelt:
 ## Nach der Aufnahme
 
 Am Bereich erscheint eine kleine Leiste: **Anpinnen · Kopieren · Speichern ˅ · Text erkennen**
-(`Enter` = Anpinnen). In den Einstellungen lässt sich eine davon als Standard wählen – dann entfällt
+– Tasten, solange sie zu sehen ist: `Enter` = Anpinnen (Standard), `Strg + C` = Kopieren, `Strg + S` =
+Speichern unter …, `Esc` = abbrechen. In den Einstellungen lässt sich eine davon als Standard wählen – dann entfällt
 die Leiste.
 
 - **Anpinnen:** Der Screenshot wird ein [Pin](../../README.de.md#pins) genau dort, wo er auf dem
@@ -78,9 +79,17 @@ stehen:
   früher enden, bleiben Zeilen.
 - **Zeilen wie im Bild:** Jede erkannte Zeile bleibt eine Zeile.
 
+**Was wann?** Fließtext für alles, was man als Sätze liest: eine Antwort im Chat oder Terminal, eine
+Webseite, einen Artikel, Folien mit Absätzen – auch Aufzählungen (ein umbrochener Punkt bleibt ein Punkt).
+Zeilen wie im Bild für Code, Adressen, Tabellen, Einstellungslisten und alles, wo jede Zeile für sich steht.
+
 Grenzen: Tabellen mit vielen Spalten, Text, der um Bilder fließt, und eine Überschrift über zwei Spalten
 werden nicht genau nachgebaut – dann „Zeilen wie im Bild“ wählen oder eine Spalte nach der anderen
-aufnehmen.
+aufnehmen. Bei einer Liste kurzer Zeilen ohne Trennzeichen (z. B. Dateiangaben in einem Programm) können im
+Fließtext nach der längsten Zeile zwei Zeilen zusammenrutschen – ob dort umbrochen wurde, sieht man nicht.
+Die Erkennung selbst ist die von Windows: Auf 11 Test-Bildschirmfotos lag sie bei etwa 2–3 falschen Wörtern
+pro 100 (typisch: „Start“ → „Statt“, „I“ → „l“, „0“ → „e“ in Code-Schriften). Das Bild vorher aufzubereiten
+(dunkles Design umkehren, kleine Schrift vergrößern) wurde gemessen und war nicht besser.
 
 ## Sprachen der Texterkennung
 

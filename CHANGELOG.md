@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.4.2 – More reliable text recognition, keys for the picker bar
+
+**Plugin interface (`CoreApiVersion`): 1.6** – extended by one property (SDK package 1.6.0); plugins for
+1.0–1.5 keep loading.
+
+### Fixed
+- **Running text broke mid-paragraph** when one line held " - " and another ": " (1.4.1 took that for a
+  table). A line that reaches the right edge of its paragraph wrapped and is always joined; a table or
+  vocabulary list needs at least two rows in a row with the same separator (two of them ending clearly
+  before the edge) or a column gap at the same position.
+- **Lists:** Windows returns a bullet "•" as its own line (after its text) and sometimes one screen line in
+  pieces. These pieces are put back together, so a wrapped item stays one item (hanging indent), there is no
+  empty line inside a list, and no word or number gets lost.
+- **Spaces:** a space only where the word boxes really have a gap – no more "hast ." or "Vokabel liste".
+- **Type size** (headings) is compared by width per character; lines without letters below the baseline no
+  longer look like smaller type.
+
+### New
+- **Keys at the picker bar:** `Ctrl + C` copy, `Ctrl + S` save as …, `Enter` the default action, `Esc`
+  cancel – only while the bar is shown, named in the tooltips. SDK 1.6: `ScreenAreaAction.Shortcut`.
+
+### Measured
+- 11 test screenshots with demo text (dark terminal, dark editor, dark chat, light web page, slide, small
+  text at 100 %, vocabulary, whole-window captures), wrong words per 100: 4.8 with the text as Windows gives
+  it (1.4.1) → 2.4 now. Inverting dark images (3.2) or a second, enlarged pass (2.8) did not read better – they
+  stay off (switchable for measuring). Under 1 s per capture (17–57 ms).
+
+### Tests
+- Screenshot +29 (quality and structure of all 11 screenshots through the real Windows OCR, the reported
+  cases as regression tests), Bar +4 (picker keys). Total 794.
+
 ## 1.4.1 – Text pins, paragraphs of recognized text, start
 
 Fixes only; plugin interface unchanged (`CoreApiVersion` 1.5, SDK 1.5.0).

@@ -1,0 +1,3 @@
+Ich habe die Einstellungen geprüft und zwei Fehler gefunden. Der erste betrifft den Absatz über die Startzeit: Dort fehlte ein Wort. Der zweite steckt in der Tabelle mit den Messwerten, die Spalte für den Speicher war vertauscht.
+
+Beide sind jetzt korrigiert, die Tests laufen wieder durch.

@@ -1,0 +1,7 @@
+// Reads the settings file once at start-up and keeps a copy in memory.
+// Changes are written back after a short delay, so several quick changes
+// end up in one write. A broken file is renamed and replaced by defaults.
+
+public sealed class SettingsStore
+private readonly string _path;
+private int _version = 2;

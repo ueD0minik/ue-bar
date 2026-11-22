@@ -345,7 +345,7 @@ public sealed class Contract15Tests
     [Fact]
     public void Version_and_screen_rectangles()
     {
-        Assert.Equal(new Version(1, 5), CoreApiVersion.Version);
+        Assert.True(CoreApiVersion.Version >= new Version(1, 5)); // later contracts only extend it
         var a = new ScreenRect(0, 0, 100, 50);
 
         Assert.Equal(new ScreenRect(50, 10, 50, 40), a.Intersect(new ScreenRect(50, 10, 200, 200)));

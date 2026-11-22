@@ -28,7 +28,8 @@ The screen freezes and darkens:
 
 ## After capturing
 
-A small bar appears at the area: **Pin · Copy · Save ˅ · Recognize text** (`Enter` = Pin). In the
+A small bar appears at the area: **Pin · Copy · Save ˅ · Recognize text** – keys while it is shown:
+`Enter` = Pin (the default), `Ctrl + C` = Copy, `Ctrl + S` = Save as …, `Esc` = cancel. In the
 settings you can choose one of them as the default – then the bar is skipped.
 
 - **Pin:** the screenshot becomes a [pin](../../README.md#pins) exactly where it was on the screen –
@@ -73,8 +74,16 @@ Windows recognizes lines. ue Bar gets the paragraphs back from where the lines a
   table or a vocabulary list ("to achieve - erreichen") and lines that end on purpose stay lines.
 - **Lines as in the image:** every recognized line stays a line.
 
+**Which one when?** Running text for anything you read as sentences: a chat or terminal answer, a web page,
+an article, slides with paragraphs – also lists (a wrapped item stays one item). Lines as in the image for
+code, addresses, tables, settings lists and anything where every line means something on its own.
+
 Limits: tables with many columns, text flowing around pictures and a heading across two columns are not
-rebuilt exactly – pick "Lines as in the image" or capture one column at a time.
+rebuilt exactly – pick "Lines as in the image" or capture one column at a time. A list of short lines without
+separators (e.g. file details in an app) may get two lines joined after its longest line in running text –
+whether that line wrapped cannot be seen. The recognition itself is Windows' own: on 11 test screenshots it
+got about 2–3 of 100 words wrong (typical mix-ups: "Start" → "Statt", "I" → "l", "0" → "e" in code fonts).
+Preparing the image (inverting dark designs, enlarging small text) was measured and did not read better.
 
 ## Text recognition languages
 

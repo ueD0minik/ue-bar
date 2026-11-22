@@ -1,0 +1,3 @@
+Automatische Updates werden heruntergeladen, wenn keine getaktete Verbindung besteht. Neustarts werden außerhalb der Nutzungszeit von 8:00 bis 17:00 Uhr geplant.
+
+Hinweis: Einige Geräte benötigen nach dem Update einen zweiten Neustart.

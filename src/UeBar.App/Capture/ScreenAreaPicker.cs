@@ -317,10 +317,31 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
                 e.Handled = true;
                 Cancel();
             }
-            else if (e.Key == System.Windows.Input.Key.Enter && _waitingForAction && _request.Actions.Count > 0)
+            else if (_waitingForAction && _request.Actions.Count > 0)
             {
-                e.Handled = true;
-                Choose(_request.Actions[0].Id);
+                // P2-5-Fix 3: Enter = first action, the actions' own keys (Ctrl+C, Ctrl+S) – only while the bar is shown.
+                var key = e.Key == System.Windows.Input.Key.System ? e.SystemKey : e.Key;
+                var modifiers = HotkeyModifiers.None;
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                {
+                    modifiers |= HotkeyModifiers.Control;
+                }
+
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                {
+                    modifiers |= HotkeyModifiers.Shift;
+                }
+
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+                {
+                    modifiers |= HotkeyModifiers.Alt;
+                }
+
+                if (PickerKeys.ActionFor([.. _request.Actions.Select(a => (a.Id, a.Shortcut))], modifiers, KeyInterop.VirtualKeyFromKey(key)) is { } id)
+                {
+                    e.Handled = true;
+                    Choose(id);
+                }
             }
         }
 

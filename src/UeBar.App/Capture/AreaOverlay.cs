@@ -210,7 +210,8 @@ internal sealed class AreaOverlay : Window
                 Margin = new Thickness(first ? 0 : compact ? 2 : 6, 0, 0, 0),
                 Cursor = Cursors.Hand,
                 Focusable = true,
-                ToolTip = compact ? action.Label : null,
+                // P2-5-Fix 3: the key in the tooltip – "Kopieren (Strg + C)"; Enter is the first button.
+                ToolTip = first || compact || action.Shortcut is not null ? PickerKeys.Tooltip(action.Label, first ? action.Shortcut ?? "Enter" : action.Shortcut) : null,
             };
             if (first)
             {

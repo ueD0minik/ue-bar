@@ -331,9 +331,9 @@ public sealed class ScreenshotModule :
     internal static IReadOnlyList<ScreenAreaAction> Actions() =>
     [
         new("pin", T["Shot_ActionPin"], "U+E718"),
-        new("copy", T["Shot_ActionCopy"], "U+E8C8"),
+        new("copy", T["Shot_ActionCopy"], "U+E8C8") { Shortcut = "Ctrl+C" },
         new("save", T["Shot_ActionSave"], "U+E74E"),
-        new("saveas", T["Shot_ActionSaveAs"], "U+E70D") { Compact = true }, // the small arrow at "Save"
+        new("saveas", T["Shot_ActionSaveAs"], "U+E70D") { Compact = true, Shortcut = "Ctrl+S" }, // the small arrow at "Save"
         new("ocr", T["Shot_ActionOcr"], "U+E8D2"),
     ];
 

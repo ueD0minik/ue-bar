@@ -1,0 +1,1 @@
+Der Absatz über die Startzeit war zu lang und ist jetzt gekürzt. Im zweiten Absatz stehen die Messwerte: 1,1 s beim zweiten Start, 15,0 s beim ersten Start nach dem Update. Das Protokoll liegt im Ordner logs, die Einstellungen sind unverändert.

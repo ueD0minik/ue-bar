@@ -1,0 +1,7 @@
+Im Praxistest ist dabei ein Fehler aufgefallen: Deine Vokabelfolie wurde im Fließtext zu einer einzigen Zeile zusammengezogen. Das wäre genau die Art falscher Absätze, über die du dich beschwert hast.
+
+Das habe ich korrigiert. Zeilen, die wie eine Tabelle oder Vokabelliste aufgebaut sind ("to achieve - erreichen"), bleiben jetzt Zeilen. Der Absatz darüber bleibt ein Absatz.
+
+• Deine Daten und die Plugins: Mit einer vollständigen Kopie deines Datenordners (auch mit HA an) startet dieselbe 1.4.0 in 1,1 s.
+• Netzwerk-, Signatur- und Zertifikatsprüfungen: Davon gibt es in der Plugin-Erkennung nichts.
+• Eine zweite laufende Instanz oder fremde Plugins.

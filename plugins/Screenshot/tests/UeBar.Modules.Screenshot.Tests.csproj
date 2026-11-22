@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <!-- Test images for the text recognition (demo text, made for these tests) -->
-    <None Include="images\*.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="images\**\*.png;images\**\*.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

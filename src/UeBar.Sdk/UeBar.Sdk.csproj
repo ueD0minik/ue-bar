@@ -6,9 +6,9 @@
     <RootNamespace>UeBar.Sdk</RootNamespace>
     <!-- The SDK has its own version: major.minor = contract version (CoreApiVersion), independent
          of the app version. A test checks that they match. -->
-    <Version>1.5.0</Version>
-    <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.0.0</FileVersion>
+    <Version>1.6.0</Version>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.0.0</FileVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- CS1591: not every public member needs a doc comment -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>

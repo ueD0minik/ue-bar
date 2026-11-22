@@ -138,6 +138,13 @@ public sealed record ScreenAreaAction(string Id, string Label, string? Icon = nu
     /// arrow "Save as …" next to "Save".
     /// </summary>
     public bool Compact { get; init; }
+
+    /// <summary>
+    /// Key for this button while the bar is shown (contract 1.6), e.g. "Ctrl+C" or "Ctrl+S" – only then, never
+    /// system-wide. The core shows it in the tooltip ("Copy (Ctrl + C)"). Enter always chooses the first action,
+    /// Esc always cancels; null = no key.
+    /// </summary>
+    public string? Shortcut { get; init; }
 }
 
 /// <summary>How to pick a screen area.</summary>
