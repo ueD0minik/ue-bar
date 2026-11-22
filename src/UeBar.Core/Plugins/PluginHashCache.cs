@@ -133,7 +133,15 @@ public sealed class PluginHashCache
             _misses++;
             if (!Disabled)
             {
-                _entries[full] = new Entry { Size = size, Written = written, Created = created, Sha256 = hash };
+                if (_entries.TryGetValue(full, out var same) && same.Size == size && same.Written == written && same.Created == created)
+                {
+                    same.Sha256 = hash; // keep the notes of the unchanged file
+                }
+                else
+                {
+                    _entries[full] = new Entry { Size = size, Written = written, Created = created, Sha256 = hash };
+                }
+
                 _changed = true;
             }
         }
@@ -141,8 +149,66 @@ public sealed class PluginHashCache
         return hash;
     }
 
+    /// <summary>
+    /// A small note about the file (P2-5-Fix 2: "the entry assembly passed the check") – only while the file
+    /// is unchanged, exactly like the checksum. Null = unknown, check again.
+    /// </summary>
+    public string? NoteOf(string path, string key)
+    {
+        if (Disabled)
+        {
+            return null;
+        }
+
+        var (full, size, written, created) = Identity(path);
+        lock (_lock)
+        {
+            if (_entries.TryGetValue(full, out var known) && known.Size == size && known.Written == written && known.Created == created
+                && known.Notes is { } notes && notes.TryGetValue(key, out var value))
+            {
+                _hits++;
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Remembers a note for the file as it is now (a changed file gets a new entry, without notes).</summary>
+    public void SetNote(string path, string key, string value)
+    {
+        if (Disabled)
+        {
+            return;
+        }
+
+        var (full, size, written, created) = Identity(path);
+        lock (_lock)
+        {
+            if (!_entries.TryGetValue(full, out var entry) || entry.Size != size || entry.Written != written || entry.Created != created)
+            {
+                entry = new Entry { Size = size, Written = written, Created = created };
+                _entries[full] = entry;
+            }
+
+            entry.Notes ??= new Dictionary<string, string>(StringComparer.Ordinal);
+            entry.Notes[key] = value;
+            _misses++;
+            _changed = true;
+        }
+    }
+
+    private static (string Full, long Size, long Written, long Created) Identity(string path)
+    {
+        var full = Path.GetFullPath(path);
+        var info = new FileInfo(full);
+        return (full, info.Length, info.LastWriteTimeUtc.Ticks, info.CreationTimeUtc.Ticks);
+    }
+
     public sealed class Entry
     {
+        public Dictionary<string, string>? Notes { get; set; }
+
         public long Size { get; set; }
 
         public long Written { get; set; }

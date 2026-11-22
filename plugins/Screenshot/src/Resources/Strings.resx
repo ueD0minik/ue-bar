@@ -186,4 +186,16 @@
   <data name="Shot_SaveType" xml:space="preserve">
     <value>PNG image</value>
   </data>
+  <data name="Shot_SettingOcrFormat" xml:space="preserve">
+    <value>Format of the recognized text</value>
+  </data>
+  <data name="Shot_SettingOcrFormat_Hint" xml:space="preserve">
+    <value>Running text: the lines of a paragraph are joined, hyphens at the line end removed. Lines as in the image: every recognized line stays a line. Either way an empty line separates paragraphs; bullets always start a new line.</value>
+  </data>
+  <data name="Shot_OcrFormatFlow" xml:space="preserve">
+    <value>Running text</value>
+  </data>
+  <data name="Shot_OcrFormatLines" xml:space="preserve">
+    <value>Lines as in the image</value>
+  </data>
 </root>

@@ -88,6 +88,64 @@ public sealed class PluginHashCacheTests
     }
 }
 
+/// <summary>
+/// P2-5-Fix 2: a slow start on a test PC coincided with the virus scanner's cloud check. Discovering now opens
+/// no DLL of an unchanged plugin at all – the check of the entry assembly is remembered like its checksum.
+/// </summary>
+public sealed class PluginEntryCheckCacheTests
+{
+    [Fact]
+    public void A_note_holds_only_while_the_file_is_unchanged_and_survives_a_restart()
+    {
+        using var dir = new TempDirectory();
+        var file = Path.Combine(dir.Path, "a.dll");
+        File.WriteAllBytes(file, [1, 2, 3]);
+        var cacheFile = Path.Combine(dir.Path, "cache.json");
+
+        var first = new PluginHashCache(cacheFile);
+        Assert.Null(first.NoteOf(file, "sdk"));
+        first.SetNote(file, "sdk", "1.5");
+        first.HashOf(file); // the checksum of the same file keeps the note
+        first.Save();
+
+        var second = new PluginHashCache(cacheFile);
+        second.Load();
+        Assert.Equal("1.5", second.NoteOf(file, "sdk"));
+
+        File.WriteAllBytes(file, [1, 2, 3, 4]);
+        Assert.Null(second.NoteOf(file, "sdk")); // changed → check again
+        Assert.Null(PluginHashCache.None.NoteOf(file, "sdk"));
+    }
+
+    [Fact]
+    public void An_unchanged_plugin_is_not_checked_again_but_a_replaced_entry_assembly_is()
+    {
+        using var sandbox = new PluginSandbox();
+        var directory = sandbox.Add(sandbox.User, "beta");
+        var cacheFile = Path.Combine(sandbox.Root, "data", "plugin-hashes.json");
+
+        PluginHost Host() => new(
+            new PluginHostOptions { UserDirectory = sandbox.User, HashCache = new PluginHashCache(cacheFile, sandbox.Log) },
+            sandbox.State,
+            new PluginTrustStore(sandbox.TrustFile, sandbox.Log),
+            sandbox.Log);
+
+        var plugin = Assert.Single(Host().Discover());
+        Assert.Equal(PluginState.NeedsApproval, plugin.State);
+        Assert.Equal(PluginState.NeedsApproval, Assert.Single(Host().Discover()).State); // second start: check from the cache
+        Assert.Contains(sandbox.Log.Entries, e => e.Message.Contains("beta: entry assembly unchanged, check from the cache", StringComparison.Ordinal));
+
+        // Another file under the same name: not an assembly any more – found, because the file changed.
+        File.WriteAllBytes(Path.Combine(directory, "UeBar.TestPlugin.dll"), [0x4D, 0x5A, 1, 2, 3]);
+        var broken = Assert.Single(Host().Discover());
+        Assert.Equal(PluginState.Error, broken.State);
+    }
+
+    [Fact]
+    public void Loading_waits_long_enough_for_a_virus_scanner() =>
+        Assert.True(new PluginHostOptions { UserDirectory = "x" }.LoadTimeout >= TimeSpan.FromSeconds(45));
+}
+
 public sealed class SharedPluginAssembliesTests
 {
     [Fact]

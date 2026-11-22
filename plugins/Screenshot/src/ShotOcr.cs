@@ -23,6 +23,12 @@ internal enum OcrProblem
 internal sealed record OcrOutcome(string Text, string? Language, OcrProblem Problem = OcrProblem.None, string? Detail = null)
 {
     public bool HasText => Problem == OcrProblem.None && !string.IsNullOrWhiteSpace(Text);
+
+    /// <summary>The lines with the boxes of their words (P2-5-Fix 2) – for <see cref="OcrLayout"/>; empty = only <see cref="Text"/>.</summary>
+    public IReadOnlyList<OcrLineBox> Lines { get; init; } = [];
+
+    /// <summary>The text in the wanted format: paragraphs rebuilt from the boxes when there are any.</summary>
+    public string Formatted(OcrTextFormat format) => Lines.Count > 0 ? OcrLayout.Format(Lines, format) : Text;
 }
 
 /// <summary>Text recognition (tests use a fake).</summary>
@@ -100,7 +106,10 @@ internal sealed class WindowsOcr : IShotOcr
                 .AsTask(cancellationToken).ConfigureAwait(false);
             var result = await engine.RecognizeAsync(bitmap).AsTask(cancellationToken).ConfigureAwait(false);
             var text = string.Join(Environment.NewLine, result.Lines.Select(l => l.Text));
-            return new OcrOutcome(text, engine.RecognizerLanguage?.LanguageTag);
+            var lines = result.Lines
+                .Select(l => new OcrLineBox(l.Text, [.. l.Words.Select(w => new OcrWordBox(w.Text, w.BoundingRect.X, w.BoundingRect.Y, w.BoundingRect.Width, w.BoundingRect.Height))]))
+                .ToList();
+            return new OcrOutcome(text, engine.RecognizerLanguage?.LanguageTag) { Lines = lines };
         }
         catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or ArgumentException or InvalidOperationException or UnauthorizedAccessException)
         {

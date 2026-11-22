@@ -438,7 +438,8 @@ public sealed class ScreenshotModule :
             return outcome;
         }
 
-        var text = outcome.Text.Trim();
+        // P2-5-Fix 2: paragraphs, lists and headings rebuilt from the line positions – the same for copying and pins.
+        var text = outcome.Formatted(options.OcrFormat).Trim();
         _context?.Log.Info($"OCR: {text.Length} characters ({outcome.Language})");
         var copy = options.OcrResult is OcrTarget.Copy or OcrTarget.Both;
         var pin = options.OcrResult is OcrTarget.Pin or OcrTarget.Both;

@@ -124,7 +124,7 @@ internal static class PluginInspector
     /// Checks the entry assembly against the app's SDK. Throws a <see cref="PluginException"/> with the
     /// reason if it cannot work.
     /// </summary>
-    public static void Check(string assemblyPath, Version hostApi)
+    public static Version Check(string assemblyPath, Version hostApi)
     {
         var fileName = Path.GetFileName(assemblyPath);
         var sdkName = typeof(IModule).Assembly.GetName().Name!;
@@ -175,7 +175,9 @@ internal static class PluginInspector
         }
 
         // The SDK assembly version is major.minor of the contract: what the plugin was really built against.
-        ThrowIfIncompatible(new Version(sdkReference.Major, sdkReference.Minor), hostApi);
+        var built = new Version(sdkReference.Major, sdkReference.Minor);
+        ThrowIfIncompatible(built, hostApi);
+        return built;
     }
 
     /// <summary>Same major version, and the app's minor version must not be older than the plugin needs.</summary>

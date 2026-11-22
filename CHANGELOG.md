@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.4.1 – Text pins, paragraphs of recognized text, start
+
+Fixes only; plugin interface unchanged (`CoreApiVersion` 1.5, SDK 1.5.0).
+
+### Fixed
+- **Text pins can be resized** at every edge and corner (image pins too), with a minimum size; the text
+  wraps to the width and scrolls when it is longer. The size is kept, also after a restart. ue Bar now
+  resizes pins itself – Windows did not size the borderless window reliably.
+- **`Ctrl` + mouse wheel** over a text pin changes the font size (it never arrived: the scroll viewer took
+  every wheel turn). Without `Ctrl` the wheel scrolls the text. The size is kept.
+- **Paragraphs of recognized text:** instead of Windows' plain lines, the structure is rebuilt from the
+  line positions – a new paragraph at a clearly larger gap than the usual line pitch (median), at a
+  heading in larger letters or another indent; bullets and numbers (`•`, `-`, `1.`, `a)`) always start a
+  new line; two columns are read one after the other. New setting **Format of the recognized text**:
+  running text (default – lines of a paragraph joined, hyphens at line ends removed, table and
+  vocabulary lines kept) or lines as in the image. The same for copying and text pins.
+- **Start:** plugin discovery opens no DLL of an unchanged plugin any more (the check of the entry
+  assembly is remembered with its checksum). On a test PC discovery took 15 s each time – the same
+  moments the virus scanner reported a cloud lookup. Every sub-step of discovery is measured (Debug,
+  Info when ≥ 1 s), and a still-running discovery says after 3 s which step it is in. Plugins may take
+  45 s instead of 15 s to load, so a scan of their DLLs cannot make them fail.
+
+### Tests
+- Screenshot +13 (paragraphs, headings, hyphens, lists, vocabulary and table lines, columns – with
+  made-up boxes and with three test slides through the real Windows OCR), Bar +12 (resizing at edges
+  and corners, minimum size), Core +3 (remembered entry check, a changed DLL is checked again, load
+  time limit). Total 761.
+
 ## 1.4.0 – Pins and the Screenshot plugin
 
 **Plugin interface (`CoreApiVersion`): 1.5** – extended, nothing broken: plugins for 1.0–1.4 keep

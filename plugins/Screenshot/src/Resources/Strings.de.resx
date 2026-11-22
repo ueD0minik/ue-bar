@@ -186,4 +186,16 @@
   <data name="Shot_SaveType" xml:space="preserve">
     <value>PNG-Bild</value>
   </data>
+  <data name="Shot_SettingOcrFormat" xml:space="preserve">
+    <value>Format des erkannten Texts</value>
+  </data>
+  <data name="Shot_SettingOcrFormat_Hint" xml:space="preserve">
+    <value>Fließtext: Die Zeilen eines Absatzes werden zusammengefügt, Trennstriche am Zeilenende entfernt. Zeilen wie im Bild: Jede erkannte Zeile bleibt eine Zeile. In beiden Fällen steht zwischen Absätzen eine Leerzeile; Aufzählungspunkte beginnen immer eine neue Zeile.</value>
+  </data>
+  <data name="Shot_OcrFormatFlow" xml:space="preserve">
+    <value>Fließtext</value>
+  </data>
+  <data name="Shot_OcrFormatLines" xml:space="preserve">
+    <value>Zeilen wie im Bild</value>
+  </data>
 </root>

@@ -36,7 +36,8 @@ internal sealed record ShotOptions(
     ShotAction After,
     string Folder,
     OcrTarget OcrResult,
-    string? OcrLanguage)
+    string? OcrLanguage,
+    OcrTextFormat OcrFormat = OcrTextFormat.Flow)
 {
     public const string HotkeyKey = "hotkey";
     public const string ModeKey = "mode";
@@ -44,6 +45,7 @@ internal sealed record ShotOptions(
     public const string FolderKey = "folder";
     public const string OcrResultKey = "ocrResult";
     public const string OcrLanguageKey = "ocrLanguage";
+    public const string OcrFormatKey = "ocrFormat";
     public const string DefaultHotkey = "Win+Alt+S";
 
     public static ShotOptions Default { get; } = new(DefaultHotkey, ScreenAreaMode.Region, ShotAction.Ask, ShotFiles.DefaultFolder, OcrTarget.Copy, null);
@@ -59,7 +61,8 @@ internal sealed record ShotOptions(
             "both" => OcrTarget.Both,
             _ => OcrTarget.Copy,
         },
-        values.GetString(OcrLanguageKey) is { Length: > 0 } tag && tag != "auto" ? tag : null);
+        values.GetString(OcrLanguageKey) is { Length: > 0 } tag && tag != "auto" ? tag : null,
+        string.Equals(values.GetString(OcrFormatKey), "lines", StringComparison.OrdinalIgnoreCase) ? OcrTextFormat.Lines : OcrTextFormat.Flow);
 
     public static ScreenAreaMode? ParseMode(string? text) => text?.Trim().ToLowerInvariant() switch
     {
@@ -117,6 +120,11 @@ internal sealed record ShotOptions(
             new("copy", T["Shot_OcrCopy"]),
             new("pin", T["Shot_OcrPin"]),
             new("both", T["Shot_OcrBoth"]),
+        ]),
+        new(OcrFormatKey, T["Shot_SettingOcrFormat"], SettingFieldKind.Choice, "flow", T["Shot_SettingOcrFormat_Hint"],
+        [
+            new("flow", T["Shot_OcrFormatFlow"]),
+            new("lines", T["Shot_OcrFormatLines"]),
         ]),
         new(OcrLanguageKey, T["Shot_SettingOcrLanguage"], SettingFieldKind.Choice, "auto",
             languages.Count == 0 ? T["Shot_OcrNoLanguage"] : T["Shot_SettingOcrLanguage_Hint"],

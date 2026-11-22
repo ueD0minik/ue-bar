@@ -27,7 +27,6 @@ namespace UeBar.App.Pins;
 internal sealed class PinWindow : Window
 {
     private const double Radius = 14;
-    private const int ResizeBorder = 7;
 
     private readonly PinController _controller;
     private readonly Border _shell = new() { CornerRadius = new CornerRadius(Radius), ClipToBounds = true };
@@ -107,10 +106,18 @@ internal sealed class PinWindow : Window
 
             _controller.Hover(this, inside: false);
         };
+        PreviewMouseLeftButtonDown += OnPreviewLeftDown;
+        PreviewMouseMove += OnPreviewMove;
+        PreviewMouseLeftButtonUp += OnPreviewLeftUp;
         MouseLeftButtonDown += OnLeftDown;
         MouseMove += OnMove;
         MouseLeftButtonUp += OnLeftUp;
-        LostMouseCapture += (_, _) => _panning = false;
+        LostMouseCapture += (_, _) =>
+        {
+            _panning = false;
+            EndResize();
+        };
+        PreviewMouseWheel += OnPreviewWheel;
         MouseWheel += OnWheel;
         MouseRightButtonUp += (_, e) =>
         {
@@ -166,6 +173,11 @@ internal sealed class PinWindow : Window
         if (_text is not null)
         {
             _text.FontSize = _controller.FontSizeOf(pin);
+        }
+
+        if (_editor is not null)
+        {
+            _editor.FontSize = _controller.FontSizeOf(pin);
         }
 
         if (kind == PinChangeKind.Options && _image is not null && (Math.Abs(old.Zoom - pin.Zoom) > 0.001))
@@ -327,6 +339,114 @@ internal sealed class PinWindow : Window
         }
     }
 
+    // ------------------------------------------------------------------ resizing (P2-5-Fix 2)
+
+    private PinEdge _resizeEdge;
+    private PixelRect _resizeStart;
+    private PixelPoint _resizeCursor;
+
+    private bool CanResize => !Pin.Locked && (!Pin.ClickThrough || _usable);
+
+    private int BorderPixels => (int)Math.Round(PinResize.Border * Scale);
+
+    /// <summary>A press at an edge or corner starts resizing – before anything inside (text box, image, drag) sees it.</summary>
+    private void OnPreviewLeftDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!CanResize || e.ClickCount > 1 || PhysicalBounds is not { } bounds || MonitorService.CursorPosition() is not { } cursor)
+        {
+            return;
+        }
+
+        var edge = PinResize.EdgeAt(bounds, cursor, BorderPixels);
+        if (edge == PinEdge.None)
+        {
+            return;
+        }
+
+        _resizeEdge = edge;
+        _resizeStart = bounds;
+        _resizeCursor = cursor;
+        _controller.Touch(this);
+        CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void OnPreviewMove(object sender, MouseEventArgs e)
+    {
+        if (MonitorService.CursorPosition() is not { } cursor)
+        {
+            return;
+        }
+
+        if (_resizeEdge != PinEdge.None)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed)
+            {
+                EndResize();
+                return;
+            }
+
+            var text = Pin.Kind == PinKind.Text;
+            var minWidth = (int)Math.Round((text ? PinResize.TextMinWidth : PinGeometry.MinSize) * Scale);
+            var minHeight = (int)Math.Round((text ? PinResize.TextMinHeight : PinGeometry.MinSize) * Scale);
+            var rect = PinResize.Resize(_resizeStart, _resizeEdge, cursor.X - _resizeCursor.X, cursor.Y - _resizeCursor.Y, minWidth, minHeight);
+            rect = _controller.SnapResize(
+                rect,
+                left: _resizeEdge.HasFlag(PinEdge.Left),
+                top: _resizeEdge.HasFlag(PinEdge.Top),
+                right: _resizeEdge.HasFlag(PinEdge.Right),
+                bottom: _resizeEdge.HasFlag(PinEdge.Bottom),
+                minimum: Math.Min(minWidth, minHeight));
+            Place(rect);
+            e.Handled = true;
+            return;
+        }
+
+        if (_panning)
+        {
+            return;
+        }
+
+        // Show where the window can be resized.
+        var edge = CanResize && PhysicalBounds is { } bounds ? PinResize.EdgeAt(bounds, cursor, BorderPixels) : PinEdge.None;
+        Cursor = edge switch
+        {
+            PinEdge.Left or PinEdge.Right => Cursors.SizeWE,
+            PinEdge.Top or PinEdge.Bottom => Cursors.SizeNS,
+            PinEdge.Left | PinEdge.Top or PinEdge.Right | PinEdge.Bottom => Cursors.SizeNWSE,
+            PinEdge.Right | PinEdge.Top or PinEdge.Left | PinEdge.Bottom => Cursors.SizeNESW,
+            _ => null,
+        };
+    }
+
+    private void OnPreviewLeftUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_resizeEdge == PinEdge.None)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        EndResize();
+    }
+
+    /// <summary>Resizing ends: keep the size (saved per monitor, also after a restart).</summary>
+    private void EndResize()
+    {
+        if (_resizeEdge == PinEdge.None)
+        {
+            return;
+        }
+
+        _resizeEdge = PinEdge.None;
+        if (IsMouseCaptured)
+        {
+            ReleaseMouseCapture();
+        }
+
+        _controller.SavePlacement(this);
+    }
+
     // ------------------------------------------------------------------ mouse
 
     private void OnLeftDown(object sender, MouseButtonEventArgs e)
@@ -405,6 +525,22 @@ internal sealed class PinWindow : Window
         SaveZoom();
     }
 
+    /// <summary>
+    /// P2-5-Fix 2: Ctrl + mouse wheel over a text pin = font size. Must run before the scroll viewer, which
+    /// takes every wheel turn for itself – that is why it never worked. Without Ctrl the text scrolls.
+    /// </summary>
+    private void OnPreviewWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (Pin.Kind != PinKind.Text || !Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+        {
+            return;
+        }
+
+        e.Handled = true;
+        _controller.Touch(this);
+        _controller.ChangeFontSize(Pin.Id, e.Delta > 0 ? 1 : -1);
+    }
+
     private void OnWheel(object sender, MouseWheelEventArgs e)
     {
         _controller.Touch(this);
@@ -415,13 +551,6 @@ internal sealed class PinWindow : Window
             var target = Math.Clamp(_zoom.ScaleX * factor, 1, 16);
             ZoomAround(e.GetPosition(_content), target);
             SaveZoom();
-            return;
-        }
-
-        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-        {
-            e.Handled = true;
-            _controller.ChangeFontSize(Pin.Id, e.Delta > 0 ? 1 : -1);
         }
     }
 
@@ -540,19 +669,6 @@ internal sealed class PinWindow : Window
                 handled = true;
                 return new IntPtr(Win32.MA_NOACTIVATE);
 
-            case PinInterop.WM_NCHITTEST when !Pin.Locked && (!Pin.ClickThrough || _usable) && !IsEditing:
-            {
-                var x = unchecked((short)(lParam.ToInt64() & 0xFFFF));
-                var y = unchecked((short)((lParam.ToInt64() >> 16) & 0xFFFF));
-                if (HitEdge(x, y) is { } edge)
-                {
-                    handled = true;
-                    return new IntPtr(edge);
-                }
-
-                break;
-            }
-
             case PinInterop.WM_MOVING:
             {
                 var rect = System.Runtime.InteropServices.Marshal.PtrToStructure<Win32.RECT>(lParam);
@@ -587,32 +703,6 @@ internal sealed class PinWindow : Window
     }
 
     private double Scale => VisualTreeHelper.GetDpi(this).DpiScaleX;
-
-    private int? HitEdge(int x, int y)
-    {
-        if (PhysicalBounds is not { } b)
-        {
-            return null;
-        }
-
-        var border = (int)Math.Round(ResizeBorder * Scale);
-        var left = x < b.X + border;
-        var right = x >= b.Right - border;
-        var top = y < b.Y + border;
-        var bottom = y >= b.Bottom - border;
-        return (left, top, right, bottom) switch
-        {
-            (true, true, _, _) => PinInterop.HTTOPLEFT,
-            (_, true, true, _) => PinInterop.HTTOPRIGHT,
-            (true, _, _, true) => PinInterop.HTBOTTOMLEFT,
-            (_, _, true, true) => PinInterop.HTBOTTOMRIGHT,
-            (true, _, _, _) => PinInterop.HTLEFT,
-            (_, _, true, _) => PinInterop.HTRIGHT,
-            (_, true, _, _) => PinInterop.HTTOP,
-            (_, _, _, true) => PinInterop.HTBOTTOM,
-            _ => null,
-        };
-    }
 
     private static void WriteRect(IntPtr target, PixelRect rect) =>
         System.Runtime.InteropServices.Marshal.StructureToPtr(new Win32.RECT { Left = rect.X, Top = rect.Y, Right = rect.Right, Bottom = rect.Bottom }, target, false);

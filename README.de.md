@@ -41,9 +41,11 @@ Abschreiben, während du in einem anderen Fenster arbeitest.
 - **Anlegen:** `pin <Text>` in der Schnellsuche oder im Assist, **Notiz anpinnen** in der Pin-Liste der
   Bar (Pin-Symbol im Panel), ein Screenshot ([Screenshot-Plugin](plugins/Screenshot/README.de.md),
   `Win + Alt + S`) – und jedes Plugin über das SDK.
-- **Bedienen:** ziehen = verschieben (rastet an den Bildschirmrändern ein), am Rand ziehen = Größe.
-  Bilder: Mausrad = Zoom, gezoomtes Bild ziehen = verschieben, Doppelklick = einpassen. Text:
-  Doppelklick = bearbeiten, `Strg` + Mausrad = Schriftgröße.
+- **Bedienen:** ziehen = verschieben (rastet an den Bildschirmrändern ein). **Größe ändern** an jedem
+  Rand und jeder Ecke (der Mauszeiger zeigt, wo); die Größe bleibt, auch nach einem Neustart. Bilder:
+  Mausrad = Zoom, gezoomtes Bild ziehen = verschieben, Doppelklick = einpassen. Text: bricht in der
+  Breite des Pins um, das Mausrad scrollt längeren Text, **`Strg` + Mausrad** = Schriftgröße (bleibt
+  ebenfalls), Doppelklick = bearbeiten.
 - **Rechtsklick:** Kopieren · Speichern unter (Bild) · Deckkraft (Regler ziehen) · Position sperren ·
   **Klicks durchlassen** (der Pin bleibt sichtbar, du arbeitest „durch ihn hindurch“) · Ausblenden ·
   Schließen.

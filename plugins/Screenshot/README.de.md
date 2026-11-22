@@ -59,6 +59,29 @@ ausgelöst hast (**Einstellungen → Benachrichtigungen → Rückmeldungen**, St
 
 ![Ein Screenshot und sein erkannter Text als Pins](images/screenshot-pins.png)
 
+## Absätze und Textformat
+
+Windows erkennt Zeilen. Die ue Bar gewinnt die Absätze daraus zurück, wo die Zeilen auf dem Bildschirm
+stehen:
+
+- Ein deutlich größerer Abstand als der übliche Zeilenabstand, eine Überschrift in größerer Schrift oder
+  eine andere Einrückung beginnt einen neuen Absatz – dazwischen steht eine Leerzeile.
+- Zeilen mit Aufzählungszeichen oder Nummer (`•`, `-`, `*`, `1.`, `a)`) beginnen immer eine neue Zeile;
+  eine Liste bleibt zusammen.
+- Zwei Spalten nebeneinander werden nacheinander gelesen.
+
+**Format des erkannten Texts** (Einstellung) – für Kopieren und Text-Pins gleich:
+
+- **Fließtext** (Standard): Die Zeilen eines Absatzes werden zusammengefügt, ein Trennstrich am
+  Zeilenende fällt weg („Unter-“ + „nehmen“ → „Unternehmen“, „E-“ + „Mail“ bleibt „E-Mail“). Zeilen, die
+  wie eine Tabelle oder Vokabelliste aufgebaut sind („to achieve - erreichen“), und Zeilen, die bewusst
+  früher enden, bleiben Zeilen.
+- **Zeilen wie im Bild:** Jede erkannte Zeile bleibt eine Zeile.
+
+Grenzen: Tabellen mit vielen Spalten, Text, der um Bilder fließt, und eine Überschrift über zwei Spalten
+werden nicht genau nachgebaut – dann „Zeilen wie im Bild“ wählen oder eine Spalte nach der anderen
+aufnehmen.
+
 ## Sprachen der Texterkennung
 
 Windows erkennt die Sprachen, für die das Paket „Optische Zeichenerkennung“ installiert ist – meist
@@ -75,6 +98,7 @@ Sprache → Sprache und Region → … neben der Sprache → Sprachoptionen → 
 | Nach der Aufnahme | Fragen (die kleine Leiste) |
 | Ordner für gespeicherte Screenshots | `Bilder\Screenshots\ue Bar` |
 | Erkannter Text | In die Zwischenablage kopieren |
+| Format des erkannten Texts | Fließtext |
 | Erkennungssprache | Automatisch |
 
 ## Datenschutz

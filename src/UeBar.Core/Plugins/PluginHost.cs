@@ -108,8 +108,12 @@ public sealed class PluginHostOptions
     /// <summary>Contract version of this app.</summary>
     public Version ApiVersion { get; init; } = CoreApiVersion.Version;
 
-    /// <summary>A plugin that does not finish loading (constructor) within this time counts as failed.</summary>
-    public TimeSpan LoadTimeout { get; init; } = TimeSpan.FromSeconds(15);
+    /// <summary>
+    /// A plugin that does not finish loading (constructor) within this time counts as failed. P2-5-Fix 2: 45 s
+    /// instead of 15 s – loading maps the plugin's DLLs, and the virus scanner's cloud check of a DLL alone can
+    /// take 15 s; a plugin must not fail because of that.
+    /// </summary>
+    public TimeSpan LoadTimeout { get; init; } = TimeSpan.FromSeconds(45);
 
     /// <summary>Checksums of unchanged files from the last start (P2-5-Fix 1); none = every file is hashed.</summary>
     public PluginHashCache HashCache { get; init; } = PluginHashCache.None;
@@ -242,24 +246,30 @@ public sealed class PluginHost
     public IReadOnlyList<PluginInfo> Discover()
     {
         var started = System.Diagnostics.Stopwatch.GetTimestamp();
-        PluginInstaller.ApplyPending(_options.UserDirectory, _log);
-        _options.HashCache.Load();
+
+        // P2-5-Fix 2: if discovering takes long, say which step it is in (once after 3 s, once after 10 s).
+        using var busy = new Timer(_ => _log.Info(null, $"Startup: plugin discovery still busy after {System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalSeconds:0} s – now: {Volatile.Read(ref _currentStep)}"), null, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(7));
+        Step(null, "pending removals and updates", () => PluginInstaller.ApplyPending(_options.UserDirectory, _log));
+        Step(null, "checksum cache read", _options.HashCache.Load);
 
         var found = new List<PluginInfo>();
-        foreach (var directory in BundledFolders())
+        var bundled = Step(null, "bundled folders listed", () => BundledFolders().ToList());
+        foreach (var directory in bundled)
         {
             found.Add(Timed(directory, () => Inspect(directory, PluginOrigin.Bundled, found)));
         }
 
-        foreach (var directory in Folders(_options.UserDirectory).OrderBy(d => Path.GetFileName(d), StringComparer.OrdinalIgnoreCase))
+        var installed = Step(null, "user plugin folders listed", () => Folders(_options.UserDirectory).OrderBy(d => Path.GetFileName(d), StringComparer.OrdinalIgnoreCase).ToList());
+        foreach (var directory in installed)
         {
             found.Add(Timed(directory, () => Inspect(directory, PluginOrigin.Installed, found)));
         }
 
-        _sharedVerified = VerifyShared();
-        _options.HashCache.Save();
+        _sharedVerified = Step(null, "shared assemblies checked", VerifyShared);
+        Step(null, "checksum cache saved", _options.HashCache.Save);
+        busy.Change(Timeout.Infinite, Timeout.Infinite);
         var (hits, misses) = _options.HashCache.Stats;
-        _log.Debug(null, $"Startup: plugins discovered in {System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds:0} ms (checksums: {hits} from the cache, {misses} computed)");
+        _log.Debug(null, $"Startup: plugins discovered in {System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds:0} ms (checksums and checks: {hits} from the cache, {misses} done again)");
 
         _plugins = found;
         foreach (var plugin in found)
@@ -367,6 +377,13 @@ public sealed class PluginHost
     // ------------------------------------------------------------------ internal
 
     private string? _sharedVerified;
+    private string _currentStep = "";
+
+    /// <summary>Note in the checksum cache: the entry assembly passed <see cref="PluginInspector.Check"/> (value: its SDK version).</summary>
+    private const string EntryCheckNote = "sdk";
+
+    /// <summary>A step of discovering longer than this is written to the log also without Debug (P2-5-Fix 2).</summary>
+    private static readonly TimeSpan SlowStep = TimeSpan.FromSeconds(1);
 
     private PluginInfo Timed(string directory, Func<PluginInfo> inspect)
     {
@@ -375,6 +392,36 @@ public sealed class PluginHost
         _log.Debug(null, $"Startup: plugin folder {Path.GetFileName(directory)} checked in {System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds:0} ms");
         return plugin;
     }
+
+    /// <summary>One measured step of discovering: Debug always, Info when slow – with the plugin and the step.</summary>
+    private T Step<T>(string? plugin, string step, Func<T> work)
+    {
+        var name = plugin is null ? step : $"{plugin}: {step}";
+        Volatile.Write(ref _currentStep, name);
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+        try
+        {
+            return work();
+        }
+        finally
+        {
+            var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(started);
+            if (elapsed >= SlowStep)
+            {
+                _log.Info(null, $"Startup: slow step – {name} took {elapsed.TotalMilliseconds:0} ms");
+            }
+            else
+            {
+                _log.Debug(null, $"Startup: {name} in {elapsed.TotalMilliseconds:0} ms");
+            }
+        }
+    }
+
+    private void Step(string? plugin, string step, Action work) => Step(plugin, step, () =>
+    {
+        work();
+        return 0;
+    });
 
     /// <summary>
     /// The shared folder of the bundled plugins (<see cref="PluginHash.SharedFolder"/>): used only if every code
@@ -445,9 +492,10 @@ public sealed class PluginHost
         PluginManifest? manifest = null;
         string? problem = null;
         var incompatible = false;
+        var folder = Path.GetFileName(directory);
         try
         {
-            manifest = PluginManifest.Load(directory);
+            manifest = Step(folder, "plugin.json read", () => PluginManifest.Load(directory));
         }
         catch (PluginException ex)
         {
@@ -480,7 +528,20 @@ public sealed class PluginHost
                 }
 
                 PluginInspector.ThrowIfIncompatible(manifest.SdkVersion, _options.ApiVersion);
-                PluginInspector.Check(entry, _options.ApiVersion);
+
+                // P2-5-Fix 2: an unchanged entry assembly that passed before is not opened again – every
+                // opened DLL may make the virus scanner look at it once more (its cloud check takes up to 15 s).
+                var checkedBefore = _options.HashCache.NoteOf(entry, EntryCheckNote);
+                if (checkedBefore is not null && Version.TryParse(checkedBefore, out var sdk))
+                {
+                    PluginInspector.ThrowIfIncompatible(sdk, _options.ApiVersion);
+                    _log.Debug(null, $"Startup: {folder}: entry assembly unchanged, check from the cache");
+                }
+                else
+                {
+                    var checkedSdk = Step(folder, "entry assembly checked", () => PluginInspector.Check(entry, _options.ApiVersion));
+                    _options.HashCache.SetNote(entry, EntryCheckNote, $"{checkedSdk.Major}.{checkedSdk.Minor}");
+                }
             }
             catch (PluginException ex)
             {
@@ -492,7 +553,7 @@ public sealed class PluginHost
         IReadOnlyDictionary<string, string> files = new Dictionary<string, string>();
         try
         {
-            files = PluginHash.Files(directory, _options.HashCache);
+            files = Step(folder, "checksums", () => PluginHash.Files(directory, _options.HashCache));
             plugin.Hash = PluginHash.Combine(files);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -521,7 +582,7 @@ public sealed class PluginHost
         }
 
         plugin.FilesChanged = origin == PluginOrigin.Bundled || _trust.HasOtherDecision(plugin.Id, plugin.Hash);
-        plugin.State = _trust.Check(plugin.Id, plugin.Hash) switch
+        plugin.State = Step(folder, "trust", () => _trust.Check(plugin.Id, plugin.Hash)) switch
         {
             PluginTrust.Allowed => PluginState.Pending,
             PluginTrust.Denied => PluginState.Refused,

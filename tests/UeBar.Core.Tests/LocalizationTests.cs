@@ -194,6 +194,12 @@ public sealed class HardcodedTextTests
         ("HaMobileApp.cs", "ß"), // slugify like Home Assistant (ß → ss)
         ("Loc.cs", "Deutsch"), // language names are always shown in their own language
         ("SettingsWindow.cs", "Deutsch"),
+        // P2-5-Fix 2: German conjunctions after a hyphen at the line end ("Ein- und Ausgang") – data, not UI text
+        ("OcrLayout.cs", "und"),
+        ("OcrLayout.cs", "oder"),
+        ("OcrLayout.cs", "bis"),
+        ("OcrLayout.cs", "sowie"),
+        ("OcrLayout.cs", "bzw."),
     ];
 
     private static readonly Regex Literal = new(@"(?<![A-Za-z0-9_])\$?@?""((?:[^""\\]|\\.)*)""", RegexOptions.Compiled);

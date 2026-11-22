@@ -56,6 +56,26 @@ The answer appears for a few seconds where the bar was – "233 characters recog
 
 ![A screenshot and its recognized text as pins](images/screenshot-pins.png)
 
+## Paragraphs and the text format
+
+Windows recognizes lines. ue Bar gets the paragraphs back from where the lines are on the screen:
+
+- A clearly larger gap than the usual line spacing, a heading in larger letters or another indent starts
+  a new paragraph – an empty line in between.
+- Lines starting with a bullet or a number (`•`, `-`, `*`, `1.`, `a)`) always start a new line; a list
+  stays together.
+- Two columns side by side are read one after the other.
+
+**Format of the recognized text** (setting) – the same for copying and for text pins:
+
+- **Running text** (default): the lines of a paragraph are joined, a hyphen at a line end is removed
+  ("devel-" + "opment" → "development", but "E-" + "Mail" stays "E-Mail"). Lines that are built like a
+  table or a vocabulary list ("to achieve - erreichen") and lines that end on purpose stay lines.
+- **Lines as in the image:** every recognized line stays a line.
+
+Limits: tables with many columns, text flowing around pictures and a heading across two columns are not
+rebuilt exactly – pick "Lines as in the image" or capture one column at a time.
+
 ## Text recognition languages
 
 Windows recognizes the languages whose "Optical character recognition" package is installed – usually
@@ -72,6 +92,7 @@ installed, ue Bar says so and how to add one: **Windows settings → Time & lang
 | After capturing | Ask (the small bar) |
 | Folder for saved screenshots | `Pictures\Screenshots\ue Bar` |
 | Recognized text | Copy to the clipboard |
+| Format of the recognized text | Running text |
 | Recognition language | Automatic |
 
 ## Privacy

@@ -40,9 +40,10 @@ you work in another window.
 - **Create:** `pin <text>` in the quick search or Assist, **Pin note** in the pin list of the bar
   (pin icon in the panel), a screenshot ([Screenshot plugin](plugins/Screenshot/README.md),
   `Win + Alt + S`) – and any plugin through the SDK.
-- **Use:** drag to move (edges snap to the screen), drag the border to resize. Images: mouse wheel =
-  zoom, drag a zoomed image to pan, double click = fit. Text: double click = edit, `Ctrl` + mouse
-  wheel = font size.
+- **Use:** drag to move (edges snap to the screen). **Resize** at every edge and corner (the mouse
+  pointer shows where); the size is kept, also after a restart. Images: mouse wheel = zoom, drag a
+  zoomed image to pan, double click = fit. Text: it wraps to the width of the pin, the mouse wheel
+  scrolls longer text, **`Ctrl` + mouse wheel** = font size (kept as well), double click = edit.
 - **Right click:** copy · save as (images) · opacity (drag the slider) · lock position · **let clicks
   through** (the pin stays visible, you work "through" it) · hide · close.
 - **Use a click-through pin again:** hold `Ctrl` while the mouse is over it – a thin frame shows it can
