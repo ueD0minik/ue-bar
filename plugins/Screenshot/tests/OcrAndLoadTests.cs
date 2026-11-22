@@ -43,10 +43,11 @@ public sealed class WindowsOcrTests
     public async Task German_text_is_recognized_with_umlauts_when_german_is_installed()
     {
         var german = Ocr.Languages.FirstOrDefault(l => l.Tag.StartsWith("de", StringComparison.OrdinalIgnoreCase)).Tag;
-        var outcome = await Ocr.RecognizeAsync(Image("ocr-de.png"), german, default);
+        var outcome = await Ocr.RecognizeAsync(Image("ocr-de.png"), german ?? "de-DE", default);
         if (german is null)
         {
-            Assert.Equal(OcrProblem.NoLanguage, outcome.Problem); // asked for automatic → handled in the other test
+            // No German package on this PC (e.g. the build server): asked for German, it must say so.
+            Assert.Equal(OcrProblem.NoLanguage, outcome.Problem);
             return;
         }
 
