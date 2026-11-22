@@ -43,8 +43,11 @@ you work in another window.
 - **Use:** drag to move (edges snap to the screen), drag the border to resize. Images: mouse wheel =
   zoom, drag a zoomed image to pan, double click = fit. Text: double click = edit, `Ctrl` + mouse
   wheel = font size.
-- **Right click:** copy · save as (images) · opacity · lock position · **let clicks through** (the pin
-  stays visible, you work "through" it) · hide · close.
+- **Right click:** copy · save as (images) · opacity (drag the slider) · lock position · **let clicks
+  through** (the pin stays visible, you work "through" it) · hide · close.
+- **Use a click-through pin again:** hold `Ctrl` while the mouse is over it – a thin frame shows it can
+  be used, the right click works; release `Ctrl` and clicks go through again. Also: the pin list in the
+  bar, or **Make all pins clickable again** in the tray menu.
 - **All at once:** `Win + Alt + P` hides or shows all pins (changeable under **Settings → Pins**);
   showing all also makes click-through pins clickable again. The pin list in the bar shows, hides
   and closes single pins or all.
@@ -53,6 +56,12 @@ you work in another window.
   adjustable under **Settings → Pins**.
 - Pins survive a restart (content, size, place – per monitor; a missing monitor means the primary
   one). They are stored on this PC only (`%APPDATA%\ueBar\pins`), never in the synced layout.
+
+**Where is what?** An open pin lies in `%APPDATA%\ueBar\pins` (`pins.json` plus one image file per image
+pin). **Closing a pin deletes it together with its image**; files without an entry are removed when ue
+Bar starts. **Settings → Pins** shows how many pins are stored and how much space they take, and opens
+the folder. A pin is never a saved screenshot – to keep an image, use **Save as …** in its menu (or
+"Save" in the [Screenshot plugin](plugins/Screenshot/README.md)).
 
 ![A screenshot and its recognized text as pins](plugins/Screenshot/images/screenshot-pins.png)
 

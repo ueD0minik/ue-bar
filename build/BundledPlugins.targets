@@ -46,6 +46,25 @@
     <MSBuild Projects="@(BundledPlugin)" Targets="GetPluginId" Properties="Configuration=$(Configuration)" RemoveProperties="$(_BundledPluginRemoveProperties)">
       <Output TaskParameter="TargetOutputs" ItemName="_BundledPluginId" />
     </MSBuild>
+
+    <!-- P2-5-Fix 1: the WinRT projection (25 MB) once for all bundled plugins in plugins\.shared\ instead of a
+         copy per plugin. The core loads it once per process anyway (ProcessWideAssemblies) and checks it
+         against bundled.sha256. All copies must be the same file – otherwise the build stops. -->
+    <ItemGroup>
+      <_SharedPluginAssembly Remove="@(_SharedPluginAssembly)" />
+      <_SharedPluginAssembly Include="$(_BundledPluginStage)*\Microsoft.Windows.SDK.NET.dll;$(_BundledPluginStage)*\WinRT.Runtime.dll" />
+    </ItemGroup>
+    <GetFileHash Files="@(_SharedPluginAssembly)" Algorithm="SHA256" HashEncoding="hex" Condition="'@(_SharedPluginAssembly)' != ''">
+      <Output TaskParameter="Items" ItemName="_SharedPluginAssemblyHashed" />
+    </GetFileHash>
+    <ItemGroup>
+      <_SharedPluginAssemblyKey Include="@(_SharedPluginAssemblyHashed->'%(Filename)%(Extension)|%(FileHash)'->Distinct())" />
+      <_SharedPluginAssemblyName Include="@(_SharedPluginAssemblyHashed->'%(Filename)%(Extension)'->Distinct())" />
+    </ItemGroup>
+    <Error Condition="'@(_SharedPluginAssemblyKey->Count())' != '@(_SharedPluginAssemblyName->Count())'" Text="Bundled plugins bring different copies of the WinRT projection: @(_SharedPluginAssemblyKey). Use the same Windows SDK version in all of them." />
+    <Copy SourceFiles="%(_SharedPluginAssemblyHashed.FullPath)" DestinationFolder="$(_BundledPluginStage)$([System.String]::Copy('.shared'))" Condition="'@(_SharedPluginAssemblyHashed)' != ''" SkipUnchangedFiles="true" />
+    <Delete Files="@(_SharedPluginAssembly)" />
+
     <ItemGroup>
       <_BundledPluginFile Remove="@(_BundledPluginFile)" />
       <_BundledPluginFile Include="$(_BundledPluginStage)**\*" />

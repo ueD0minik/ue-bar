@@ -34,6 +34,9 @@ internal sealed class PinWindow : Window
     private readonly Border _dim = new() { Background = Brushes.Black, Opacity = 0, IsHitTestVisible = false, CornerRadius = new CornerRadius(Radius) };
     private readonly Grid _content = new();
     private readonly StackPanel _tools = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 6, 6, 0), Visibility = Visibility.Collapsed };
+    private readonly Border _frame = new() { BorderThickness = new Thickness(1.5), CornerRadius = new CornerRadius(Radius), IsHitTestVisible = false, Visibility = Visibility.Collapsed };
+    private readonly TextBlock _hintText = new() { FontSize = 12, Foreground = Brushes.White, TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center };
+    private readonly Border _hint = new() { CornerRadius = new CornerRadius(10), Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(8), Background = new SolidColorBrush(Color.FromArgb(0xE6, 0x12, 0x14, 0x18)), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
     private readonly ScaleTransform _zoom = new();
     private readonly TranslateTransform _pan = new();
     private Image? _image;
@@ -75,6 +78,10 @@ internal sealed class PinWindow : Window
         _shell.Child = _content;
         root.Children.Add(_dim);
         root.Children.Add(_tools);
+        _frame.SetResourceReference(Border.BorderBrushProperty, "AccentBrush");
+        root.Children.Add(_frame);
+        _hint.Child = _hintText;
+        root.Children.Add(_hint);
         Content = root;
         BuildTools();
         ShowContent();
@@ -166,6 +173,9 @@ internal sealed class PinWindow : Window
             ApplyZoom(pin.Zoom, pin.PanX, pin.PanY);
         }
     }
+
+    /// <summary>While the opacity slider is dragged: show the value at once (saved on release).</summary>
+    public void PreviewOpacity(double opacity) => Opacity = Math.Clamp(opacity, 0.2, 1);
 
     /// <summary>Darker (OLED) or bright again; the brightness while dimmed comes from the settings.</summary>
     public void SetDimmed(bool dimmed, double level, bool animate)
@@ -469,15 +479,57 @@ internal sealed class PinWindow : Window
 
     private void ApplyClickThrough()
     {
-        if (_hwnd != IntPtr.Zero)
+        if (!Pin.ClickThrough)
         {
-            PinInterop.SetExStyle(_hwnd, Pin.ClickThrough ? PinInterop.WS_EX_TRANSPARENT : 0, Pin.ClickThrough ? 0 : PinInterop.WS_EX_TRANSPARENT);
+            _usable = false;
+            _frame.Visibility = Visibility.Collapsed;
         }
 
-        if (Pin.ClickThrough)
+        var through = Pin.ClickThrough && !_usable;
+        if (_hwnd != IntPtr.Zero)
+        {
+            PinInterop.SetExStyle(_hwnd, through ? PinInterop.WS_EX_TRANSPARENT : 0, through ? 0 : PinInterop.WS_EX_TRANSPARENT);
+        }
+
+        if (through)
         {
             _tools.Visibility = Visibility.Collapsed;
         }
+    }
+
+    private bool _usable;
+
+    /// <summary>
+    /// P2-5-Fix 1: Ctrl held over a pin that lets clicks through – usable for a moment (thin frame, the right-click
+    /// menu works). Off again when Ctrl is released or the mouse leaves.
+    /// </summary>
+    public void SetTemporarilyUsable(bool usable)
+    {
+        if (!Pin.ClickThrough)
+        {
+            usable = false;
+        }
+
+        if (_usable == usable)
+        {
+            return;
+        }
+
+        _usable = usable;
+        _frame.Visibility = usable ? Visibility.Visible : Visibility.Collapsed;
+        ApplyClickThrough();
+    }
+
+    /// <summary>A short hint right at the pin (P2-5-Fix 1: how to get a click-through pin back) – no notification.</summary>
+    public void ShowHint(string text)
+    {
+        _hintText.Text = text;
+        _hint.BeginAnimation(OpacityProperty, null);
+        _hint.Opacity = 1;
+        _hint.Visibility = Visibility.Visible;
+        var fade = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(600)) { BeginTime = TimeSpan.FromSeconds(3.5) };
+        fade.Completed += (_, _) => _hint.Visibility = Visibility.Collapsed;
+        _hint.BeginAnimation(OpacityProperty, fade);
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -488,7 +540,7 @@ internal sealed class PinWindow : Window
                 handled = true;
                 return new IntPtr(Win32.MA_NOACTIVATE);
 
-            case PinInterop.WM_NCHITTEST when !Pin.Locked && !Pin.ClickThrough && !IsEditing:
+            case PinInterop.WM_NCHITTEST when !Pin.Locked && (!Pin.ClickThrough || _usable) && !IsEditing:
             {
                 var x = unchecked((short)(lParam.ToInt64() & 0xFFFF));
                 var y = unchecked((short)((lParam.ToInt64() >> 16) & 0xFFFF));

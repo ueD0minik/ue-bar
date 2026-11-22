@@ -29,7 +29,7 @@ Der Bildschirm friert ein und wird abgedunkelt:
 
 ## Nach der Aufnahme
 
-Am Bereich erscheint eine kleine Leiste: **Anpinnen · Kopieren · Speichern · Text erkennen**
+Am Bereich erscheint eine kleine Leiste: **Anpinnen · Kopieren · Speichern ˅ · Text erkennen**
 (`Enter` = Anpinnen). In den Einstellungen lässt sich eine davon als Standard wählen – dann entfällt
 die Leiste.
 
@@ -38,8 +38,24 @@ die Leiste.
 - **Kopieren:** in die Zwischenablage (als Bild und PNG).
 - **Speichern:** nach `Bilder\Screenshots\ue Bar` (änderbar), Name `Screenshot 2026-11-20 14-03-05.png`;
   überschrieben wird nie etwas.
+- **Speichern unter …** (der kleine Pfeil neben „Speichern“): der Windows-Dialog – beliebiger Ordner,
+  beliebiger Name. Er startet im zuletzt gewählten Ordner (auf diesem PC gemerkt).
 - **Text erkennen:** Windows liest den Text (OCR) – in die Zwischenablage, als Text-Pin oder beides
   (Einstellung). Die Meldung bietet das jeweils andere als Knopf an.
+
+Die Rückmeldung erscheint für ein paar Sekunden dort, wo die Leiste war – „233 Zeichen erkannt und
+kopiert · Anpinnen“, „Screenshot gespeichert“ – auch bei Windows-„Nicht stören“, weil du es gerade selbst
+ausgelöst hast (**Einstellungen → Benachrichtigungen → Rückmeldungen**, Standard an).
+
+## Wo liegt was?
+
+- **Die Aufnahme** gibt es nur im Arbeitsspeicher. Kopieren und Text erkennen schreiben keine Datei –
+  auch keine temporäre.
+- **Speichern / Speichern unter …** sind die einzigen Wege, auf denen ein Screenshot auf die Platte
+  kommt – in den Screenshot-Ordner oder wohin du willst. Die Dateien bleiben dort; die ue Bar löscht in
+  diesem Ordner nie etwas.
+- **Pin:** Das Bild liegt in `%APPDATA%\ueBar\pins`, solange der Pin offen ist, und wird beim Schließen
+  des Pins gelöscht. Anpinnen schreibt nie in den Screenshot-Ordner.
 
 ![Ein Screenshot und sein erkannter Text als Pins](images/screenshot-pins.png)
 
@@ -73,7 +89,7 @@ Andere Plugins dürfen mit deiner Freigabe (**Einstellungen → Plugins → … 
 
 | Art | ID | Inhalt |
 |---|---|---|
-| Aktion | `screenshot.capture` | `{ "mode"?: "region" \| "window" \| "screen", "action"?: "pin" \| "copy" \| "save" \| "ocr" }` → `{ "started": true }` – den Bereich wählt trotzdem der Nutzer |
+| Aktion | `screenshot.capture` | `{ "mode"?: "region" \| "window" \| "screen", "action"?: "pin" \| "copy" \| "save" \| "saveas" \| "ocr" }` → `{ "started": true }` – den Bereich wählt trotzdem der Nutzer |
 | Ereignis | `screenshot.taken` | `{ "mode", "action", "width", "height", "monitors" }` – nur Metadaten, nie das Bild |
 
 ## Technik

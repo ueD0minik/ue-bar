@@ -70,6 +70,28 @@ public sealed class WindowsOcrTests
     }
 
     [Fact]
+    public async Task The_real_recognition_writes_no_temporary_file()
+    {
+        // P2-5-Fix 1: the image goes to Windows OCR from memory – nothing lands on the disk.
+        var temp = Path.Combine(Path.GetTempPath(), "uebar-ocr-temp", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temp);
+        var (tmp, tempVar) = (Environment.GetEnvironmentVariable("TMP"), Environment.GetEnvironmentVariable("TEMP"));
+        try
+        {
+            Environment.SetEnvironmentVariable("TMP", temp);
+            Environment.SetEnvironmentVariable("TEMP", temp);
+            await Ocr.RecognizeAsync(Image("ocr-en.png"), null, default);
+            Assert.Empty(Directory.EnumerateFileSystemEntries(temp, "*", SearchOption.AllDirectories));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("TMP", tmp);
+            Environment.SetEnvironmentVariable("TEMP", tempVar);
+            Directory.Delete(temp, recursive: true);
+        }
+    }
+
+    [Fact]
     public async Task Not_an_image_fails_cleanly()
     {
         if (Ocr.Languages.Count == 0)

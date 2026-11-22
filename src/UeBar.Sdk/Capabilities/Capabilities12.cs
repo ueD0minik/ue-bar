@@ -131,7 +131,14 @@ public enum ScreenAreaMode
 }
 
 /// <summary>A button of the small bar shown at the picked area (<see cref="ScreenAreaRequest.Actions"/>).</summary>
-public sealed record ScreenAreaAction(string Id, string Label, string? Icon = null);
+public sealed record ScreenAreaAction(string Id, string Label, string? Icon = null)
+{
+    /// <summary>
+    /// Only a small icon right after the previous button, the label as tooltip (contract 1.5) – e.g. the little
+    /// arrow "Save as …" next to "Save".
+    /// </summary>
+    public bool Compact { get; init; }
+}
 
 /// <summary>How to pick a screen area.</summary>
 public sealed record ScreenAreaRequest(ScreenAreaMode Mode = ScreenAreaMode.Region)
@@ -186,6 +193,33 @@ public interface IClipboardAccess
 
     /// <summary>An image (PNG) – as image and as PNG, so every app can paste it.</summary>
     Task<bool> SetImageAsync(byte[] png, CancellationToken cancellationToken);
+}
+
+/// <summary>What the Windows "Save as" dialog should offer (<see cref="IFileSaveDialog"/>).</summary>
+/// <param name="SuggestedName">File name proposed in the dialog (with extension).</param>
+public sealed record SaveFileRequest(string SuggestedName)
+{
+    /// <summary>Window title; null = the Windows default.</summary>
+    public string? Title { get; init; }
+
+    /// <summary>Extension with dot, e.g. ".png" – added when the user types a name without one.</summary>
+    public string Extension { get; init; } = ".png";
+
+    /// <summary>Name of the file type in the dialog, e.g. "PNG image".</summary>
+    public string? TypeName { get; init; }
+
+    /// <summary>Folder to start in when the user has not picked one before (otherwise the last one is used).</summary>
+    public string? InitialFolder { get; init; }
+}
+
+/// <summary>
+/// The Windows "Save as" dialog, shown by the core (contract 1.5), offered on the <see cref="IModuleContext"/>
+/// (<c>context as IFileSaveDialog</c>). It starts in the folder the user picked last time for this module
+/// (remembered per PC). Returns the chosen path, or null if cancelled; the module writes the file itself.
+/// </summary>
+public interface IFileSaveDialog
+{
+    Task<string?> AskSavePathAsync(SaveFileRequest request, CancellationToken cancellationToken);
 }
 
 /// <summary>

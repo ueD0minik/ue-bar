@@ -1136,7 +1136,7 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
     <value>Klicks durchlassen</value>
   </data>
   <data name="Pin_ClickThrough_Tip" xml:space="preserve">
-    <value>Der Pin bleibt sichtbar, du arbeitest „durch ihn hindurch“. Aufheben: Pin-Liste in der Bar oder zweimal {0} (alle aus- und wieder einblenden).</value>
+    <value>Der Pin bleibt sichtbar, du arbeitest „durch ihn hindurch“. Wieder bedienen: Strg halten, solange die Maus über dem Pin ist. Ganz aufheben: Rechtsklick mit Strg, Pin-Liste in der Bar, Tray-Menü oder zweimal {0}.</value>
   </data>
   <data name="Pin_Close" xml:space="preserve">
     <value>Schließen</value>
@@ -1171,9 +1171,6 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Pin_SaveAs" xml:space="preserve">
     <value>Speichern unter …</value>
   </data>
-  <data name="Pin_SaveFilter" xml:space="preserve">
-    <value>PNG-Bild|*.png</value>
-  </data>
   <data name="Pin_ZoomReset" xml:space="preserve">
     <value>Bild einpassen</value>
   </data>
@@ -1204,11 +1201,8 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Pins_Empty" xml:space="preserve">
     <value>Noch keine Pins. Hier eine Notiz anpinnen, „pin &lt;Text&gt;“ in der Schnellsuche oder ein Screenshot.</value>
   </data>
-  <data name="Pins_Folder" xml:space="preserve">
-    <value>Speicherort</value>
-  </data>
   <data name="Pins_Folder_Hint" xml:space="preserve">
-    <value>Pins bleiben nur auf diesem Gerät (nie im synchronisierten Layout).</value>
+    <value>Nur auf diesem Gerät, nie im synchronisierten Layout. Ein Pin liegt hier, solange er offen ist – Schließen löscht ihn samt Bild.</value>
   </data>
   <data name="Pins_FontSize" xml:space="preserve">
     <value>Schriftgröße neuer Notizen</value>
@@ -1302,5 +1296,26 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   </data>
   <data name="Settings_Pins" xml:space="preserve">
     <value>Pins</value>
+  </data>
+  <data name="Notify_Feedback" xml:space="preserve">
+    <value>Rückmeldungen</value>
+  </data>
+  <data name="Notify_FeedbackDnd" xml:space="preserve">
+    <value>Rückmeldungen auf eigene Aktionen auch bei „Nicht stören“ anzeigen</value>
+  </data>
+  <data name="Notify_FeedbackDnd_Hint" xml:space="preserve">
+    <value>Etwa „233 Zeichen erkannt und kopiert · Anpinnen“ nach einer Bildschirmaufnahme: als kleine Meldung an der Stelle der Aktion, für ein paar Sekunden. Aus = wie jede andere Benachrichtigung.</value>
+  </data>
+  <data name="Tray_PinsClickable" xml:space="preserve">
+    <value>Alle Pins wieder anklickbar machen</value>
+  </data>
+  <data name="Pin_ClickThroughHint" xml:space="preserve">
+    <value>Strg halten, um den Pin wieder zu bedienen</value>
+  </data>
+  <data name="Pin_SaveType" xml:space="preserve">
+    <value>PNG-Bild</value>
+  </data>
+  <data name="Pins_Stored" xml:space="preserve">
+    <value>Gespeicherte Pins: {0} ({1})</value>
   </data>
 </root>

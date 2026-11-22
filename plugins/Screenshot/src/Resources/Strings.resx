@@ -115,16 +115,16 @@
     <value>No text found</value>
   </data>
   <data name="Shot_OcrDone" xml:space="preserve">
-    <value>Text recognized</value>
+    <value>{0} characters recognized</value>
   </data>
   <data name="Shot_OcrCopied" xml:space="preserve">
-    <value>Text recognized and copied</value>
+    <value>{0} characters recognized and copied</value>
   </data>
   <data name="Shot_OcrPinned" xml:space="preserve">
-    <value>Text recognized and pinned</value>
+    <value>{0} characters recognized and pinned</value>
   </data>
   <data name="Shot_OcrCopiedPinned" xml:space="preserve">
-    <value>Text recognized, copied and pinned</value>
+    <value>{0} characters recognized, copied and pinned</value>
   </data>
   <data name="Shot_OcrPinButton" xml:space="preserve">
     <value>Pin</value>
@@ -176,5 +176,14 @@
   </data>
   <data name="Shot_BusEvent" xml:space="preserve">
     <value>A screenshot was taken: { mode, action, width, height, monitors } – no image</value>
+  </data>
+  <data name="Shot_ActionSaveAs" xml:space="preserve">
+    <value>Save as …</value>
+  </data>
+  <data name="Shot_SaveAsTitle" xml:space="preserve">
+    <value>Save screenshot as</value>
+  </data>
+  <data name="Shot_SaveType" xml:space="preserve">
+    <value>PNG image</value>
   </data>
 </root>

@@ -16,6 +16,9 @@ internal enum ShotAction
     Copy,
     Save,
     Ocr,
+
+    /// <summary>Windows "Save as" dialog – free folder and name (P2-5-Fix 1).</summary>
+    SaveAs,
 }
 
 /// <summary>What happens with recognized text.</summary>
@@ -72,6 +75,7 @@ internal sealed record ShotOptions(
         "pin" => ShotAction.Pin,
         "copy" => ShotAction.Copy,
         "save" => ShotAction.Save,
+        "saveas" or "save-as" => ShotAction.SaveAs,
         "ocr" or "text" => ShotAction.Ocr,
         _ => null,
     };
@@ -101,6 +105,7 @@ internal sealed record ShotOptions(
             new("pin", T["Shot_ActionPin"]),
             new("copy", T["Shot_ActionCopy"]),
             new("save", T["Shot_ActionSave"]),
+            new("saveas", T["Shot_ActionSaveAs"]),
             new("ocr", T["Shot_ActionOcr"]),
         ]),
         new(FolderKey, T["Shot_SettingFolder"], SettingFieldKind.Folder, null, T.Format("Shot_SettingFolder_Hint", ShotFiles.DefaultFolder))
@@ -141,6 +146,20 @@ internal static class ShotFiles
         }
 
         return path;
+    }
+
+    /// <summary>Writes the image to the path the user chose ("Save as", may replace – the dialog asked).</summary>
+    public static string? SaveTo(string path, byte[] png)
+    {
+        try
+        {
+            File.WriteAllBytes(path, png);
+            return null;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            return ex.Message;
+        }
     }
 
     /// <summary>Writes the image; returns the path or the reason it failed.</summary>

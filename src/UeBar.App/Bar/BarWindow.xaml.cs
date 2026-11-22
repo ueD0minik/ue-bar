@@ -124,7 +124,55 @@ internal sealed partial class BarWindow : Window
     }
 
     /// <summary>P2-5: invisible for a moment while a screen area is picked (the screenshot must not show the bar).</summary>
-    public void SetCaptureHidden(bool hidden) => Root.Opacity = hidden ? 0 : 1;
+    public void SetCaptureHidden(bool hidden)
+    {
+        IsCaptureHidden = hidden;
+        Root.Opacity = hidden ? 0 : 1;
+    }
+
+    /// <summary>A capture is running – invisible on purpose (the visibility check leaves it alone).</summary>
+    public bool IsCaptureHidden { get; private set; }
+
+    /// <summary>What Windows really shows of the bar window (P2-5-Fix 1).</summary>
+    public BarWindowFacts Facts()
+    {
+        if (_hwnd == IntPtr.Zero)
+        {
+            return new BarWindowFacts(false, false, Root.Opacity, false, false);
+        }
+
+        var ex = (long)Win32.GetWindowLongPtr(_hwnd, Win32.GWL_EXSTYLE);
+        var affinity = PinInterop.GetWindowDisplayAffinity(_hwnd, out var value) && value != 0;
+        return new BarWindowFacts(PinInterop.IsWindowVisible(_hwnd), PinInterop.IsCloaked(_hwnd), Root.Opacity, (ex & Win32.WS_EX_TOPMOST) != 0, affinity);
+    }
+
+    /// <summary>
+    /// Everything that could keep the window out of sight back to normal (P2-5-Fix 1, also part of "Reset bar"):
+    /// opacity, cloaking, display affinity, topmost – and shown again if the state wants it shown.
+    /// </summary>
+    public void RepairVisibility(bool show)
+    {
+        Root.BeginAnimation(OpacityProperty, null);
+        Root.Opacity = 1;
+        IsCaptureHidden = false;
+        if (_hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var off = 0;
+        _ = PinInterop.DwmSetWindowAttribute(_hwnd, PinInterop.DWMWA_CLOAK, ref off, sizeof(int));
+        _ = PinInterop.SetWindowDisplayAffinity(_hwnd, 0);
+        if (show && !IsVisible)
+        {
+            Show();
+        }
+
+        if (IsVisible)
+        {
+            Place(_rect);
+        }
+    }
 
     /// <summary>Create the window handle (without showing), set styles, listen to messages.</summary>
     public void EnsureCreated()
@@ -227,6 +275,7 @@ internal sealed partial class BarWindow : Window
         _previousForeground = IntPtr.Zero;
         _pinned = false;
         _pinOffset = null;
+        RepairVisibility(show: false); // P2-5-Fix 1: the emergency exit also undoes whatever made the window invisible
         FinishHide();
     }
 

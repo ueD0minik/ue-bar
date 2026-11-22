@@ -42,6 +42,12 @@ internal sealed class CursorPoller : IDisposable
 
     public void SetBarVisible(bool visible) => _barVisible = visible;
 
+    /// <summary>Extra areas watched on the same poll (P2-5-Fix 1, pins that let clicks through).</summary>
+    public PointerWatch Watch { get; } = new();
+
+    /// <summary>Raised on the polling thread when the mouse/Ctrl state over a watched area changed.</summary>
+    public event Action<PointerChange>? WatchChanged;
+
     /// <summary>Call from the UI thread after processing a tick (prevents a backlog).</summary>
     public void TickHandled() => Interlocked.Exchange(ref _tickPending, 0);
 
@@ -126,6 +132,12 @@ internal sealed class CursorPoller : IDisposable
                 inZone = true;
                 break;
             }
+        }
+
+        // P2-5-Fix 1: pins that let clicks through – only while there are any (the watch reports changes only).
+        if (Watch.IsActive && Watch.Check(p, PinInterop.IsCtrlDown()) is { } change)
+        {
+            WatchChanged?.Invoke(change);
         }
 
         var needed = _barVisible || inZone || _lastInZone;

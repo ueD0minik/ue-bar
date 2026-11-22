@@ -59,6 +59,13 @@ public sealed class BarSettings
     /// <summary>Important notifications come out even during Windows "Do not disturb".</summary>
     public bool ImportantDuringDoNotDisturb { get; set; } = true;
 
+    /// <summary>
+    /// P2-5-Fix 1: the answer to something the user just did (text recognized, copied, saved) is shown by the app
+    /// itself as a small message at the place of the action – also during Windows "Do not disturb" ("it is a
+    /// wanted action"). Off = such answers are normal notifications.
+    /// </summary>
+    public bool ActionFeedbackDuringDoNotDisturb { get; set; } = true;
+
     /// <summary>Important notifications come out even over fullscreen apps (despite <see cref="BlockInFullscreen"/>).</summary>
     public bool ImportantInFullscreen { get; set; } = true;
 

@@ -71,8 +71,14 @@ Loading (`PluginHost` in the core), only at start-up:
    types. The plugin's own dependencies and language files come from its folder. Exception (1.4.0):
    the C#/WinRT runtime and projection (`WinRT.Runtime`, `Microsoft.Windows.SDK.NET`) register
    process-wide state and may exist only once – the highest version any plugin brings is loaded into
-   the app's context and shared (`ProcessWideAssemblies`). The module class is created on the thread
-   pool with a time limit.
+   the app's context and shared (`ProcessWideAssemblies`). The bundled plugins bring them only once,
+   in `plugins\.shared\` (listed in `bundled.sha256`; used only if every file matches). The module
+   class is created on the thread pool with a time limit.
+
+Discovering runs off the UI thread. Checksums of unchanged files (same full path, size, last-write and
+creation time) are kept between starts in `%APPDATA%\ueBar\plugin-hashes.json`; a changed file is always
+hashed again, and the checksum itself is still compared with `bundled.sha256` or the trust store. With
+`UEBAR_LOG_LEVEL=Debug` the log shows every start step with its duration.
 4. **Register**: loaded modules go to the module registry. Plugins that are off, not allowed,
    incompatible or broken are registered as "not loaded" with the reason, so their tiles keep a
    fitting placeholder.
@@ -158,6 +164,18 @@ Contract 1.5 (1.4.0) – pins and screenshots, all generic:
   overlay window per monitor showing its part of the frozen image. The mouse is read in physical pixels;
   each overlay maps them to its own device-independent pixels from its real size (`ScreenSelection`),
   so rectangles across monitors with different scaling are right. Optional action bar at the area.
+  Hiding the bar goes through `CaptureSafety` (`UeBar.Bar`): whatever happens (action, Esc, error,
+  exception) the bar is restored afterwards and the overlays are closed. Every switch to pill/panel checks
+  with `BarWindowHealth` that Windows really shows the bar (visible, not cloaked, opacity, topmost, no
+  display affinity) and repairs it with a warning otherwise; "Reset bar" restores all of it.
+- **Pins that let clicks through** get no mouse events. The existing mouse polling watches them
+  (`PointerWatch`, only while such pins exist): over one it lights up, with Ctrl held it can be used for a
+  moment.
+- **Feedback on the user's own action** (`UeNotification.IsActionFeedback`): `NotificationGate` lets it pass
+  "Do not disturb" (setting), the app shows it as a small window where the action bar was
+  (`ActionFeedbackToast`).
+- **"Save as"** (`IFileSaveDialog`): the Windows dialog on the UI thread; the last folder per owner is a
+  local setting (`SaveFolders`).
 - **Clipboard** (`IClipboardAccess`): write only, on the UI thread.
 - **Hotkeys of plugins**: `SettingFieldKind.Hotkey` + `IHotkeyHandler`; the app registers them while the
   plugin runs (`PluginHotkeys`, `GlobalHotkeys` with its own message window, logic in `HotkeySet`). The

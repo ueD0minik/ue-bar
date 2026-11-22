@@ -100,6 +100,13 @@ public sealed record UeNotification(
     /// Prefer this over <see cref="IgnoreDoNotDisturb"/>/<see cref="ShowInFullscreen"/> (still honored).
     /// </summary>
     public NotificationPriority Priority { get; init; }
+
+    /// <summary>
+    /// The answer to something the user just did with this module (contract 1.5): "text recognized and copied",
+    /// "saved". The app shows it itself as a small message at the place of the action – also during Windows
+    /// "Do not disturb" (a user setting, on by default). Not for anything that comes on its own.
+    /// </summary>
+    public bool IsActionFeedback { get; init; }
 }
 
 /// <summary>Delivers notifications to the core; the core shows them.</summary>

@@ -9,7 +9,7 @@ using UeBar.Core.Logging;
 namespace UeBar.Core.Modules;
 
 /// <summary>Context of a running module. Each start gets a new context with its own token.</summary>
-internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo, IUiLanguageInfo, IDeviceBatteryCatalog, IPinService, IScreenAreaPicker, IClipboardAccess, IDisposable
+internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo, IUiLanguageInfo, IDeviceBatteryCatalog, IPinService, IScreenAreaPicker, IClipboardAccess, IFileSaveDialog, IDisposable
 {
     private readonly ModuleGuard _guard;
     private readonly string _dataRoot;
@@ -135,6 +135,20 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
 
     public Task<bool> SetImageAsync(byte[] png, CancellationToken cancellationToken) =>
         _host.Clipboard is { } clipboard && png is { Length: > 0 } ? clipboard.SetImageAsync(png, cancellationToken) : Task.FromResult(false);
+
+    // ------------------------------------------------------------------ "Save as" (P2-5-Fix 1)
+
+    public async Task<string?> AskSavePathAsync(SaveFileRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        if (_host.SaveDialog is not { } dialog || Stopping.IsCancellationRequested)
+        {
+            return null;
+        }
+
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, Stopping);
+        return await dialog(ModuleId, request, linked.Token).ConfigureAwait(false);
+    }
 
     public void RunBackground(string name, Func<CancellationToken, Task> work)
     {

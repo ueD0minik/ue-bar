@@ -115,16 +115,16 @@
     <value>Kein Text gefunden</value>
   </data>
   <data name="Shot_OcrDone" xml:space="preserve">
-    <value>Text erkannt</value>
+    <value>{0} Zeichen erkannt</value>
   </data>
   <data name="Shot_OcrCopied" xml:space="preserve">
-    <value>Text erkannt und kopiert</value>
+    <value>{0} Zeichen erkannt und kopiert</value>
   </data>
   <data name="Shot_OcrPinned" xml:space="preserve">
-    <value>Text erkannt und angepinnt</value>
+    <value>{0} Zeichen erkannt und angepinnt</value>
   </data>
   <data name="Shot_OcrCopiedPinned" xml:space="preserve">
-    <value>Text erkannt, kopiert und angepinnt</value>
+    <value>{0} Zeichen erkannt, kopiert und angepinnt</value>
   </data>
   <data name="Shot_OcrPinButton" xml:space="preserve">
     <value>Anpinnen</value>
@@ -176,5 +176,14 @@
   </data>
   <data name="Shot_BusEvent" xml:space="preserve">
     <value>Ein Screenshot wurde aufgenommen: { mode, action, width, height, monitors } – kein Bild</value>
+  </data>
+  <data name="Shot_ActionSaveAs" xml:space="preserve">
+    <value>Speichern unter …</value>
+  </data>
+  <data name="Shot_SaveAsTitle" xml:space="preserve">
+    <value>Screenshot speichern unter</value>
+  </data>
+  <data name="Shot_SaveType" xml:space="preserve">
+    <value>PNG-Bild</value>
   </data>
 </root>

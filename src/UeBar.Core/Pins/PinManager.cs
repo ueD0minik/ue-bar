@@ -67,6 +67,31 @@ public sealed class PinManager
         }
     }
 
+    /// <summary>
+    /// What the pins take on disk right now (P2-5-Fix 1, settings page): number of pins and the bytes of
+    /// <c>pins.json</c> plus the image files. Only open pins lie here – closing deletes a pin with its image.
+    /// </summary>
+    public (int Pins, long Bytes) StorageUse()
+    {
+        long bytes = 0;
+        try
+        {
+            if (System.IO.Directory.Exists(_directory))
+            {
+                foreach (var file in new DirectoryInfo(_directory).EnumerateFiles())
+                {
+                    bytes += file.Length;
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _log.Debug(null, $"Pins: size not read: {ex.Message}");
+        }
+
+        return (Count, bytes);
+    }
+
     public PinRecord? Find(string id)
     {
         lock (_lock)
@@ -191,12 +216,19 @@ public sealed class PinManager
             }
 
             var used = new HashSet<string>(pins.Select(p => p.ImageFile ?? "").Where(f => f.Length > 0), StringComparer.OrdinalIgnoreCase);
-            foreach (var file in System.IO.Directory.EnumerateFiles(_directory, "pin-*.*"))
+            var removed = 0;
+            foreach (var file in System.IO.Directory.EnumerateFiles(_directory, "pin-*.*").Concat(System.IO.Directory.EnumerateFiles(_directory, "*.tmp")).ToList())
             {
                 if (!used.Contains(Path.GetFileName(file)))
                 {
                     File.Delete(file);
+                    removed++;
                 }
+            }
+
+            if (removed > 0)
+            {
+                _log.Info(null, $"Pins: {removed} orphaned file(s) without an entry deleted");
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using UeBar.App.Bar;
 using UeBar.App.Infrastructure;
 using UeBar.App.Interop;
 using UeBar.App.Localization;
@@ -180,8 +181,75 @@ internal sealed class PinController : IDisposable
     /// <summary>Quick note from the bar.</summary>
     public bool CreateNote(string text) => _pins.CreateText(text, fontSize: null) is not null;
 
-    /// <summary>Click-through off again (the only way back besides the hotkey).</summary>
-    public void SetClickThrough(string id, bool on) => _pins.Update(id, PinChangeKind.Options, p => p.ClickThrough = on);
+    /// <summary>Click-through on/off. Switching it on shows once, at the pin, how to get it back (Ctrl).</summary>
+    public void SetClickThrough(string id, bool on)
+    {
+        _pins.Update(id, PinChangeKind.Options, p => p.ClickThrough = on);
+        if (on && _windows.TryGetValue(id, out var window))
+        {
+            window.ShowHint(Loc.Get("Pin_ClickThroughHint"));
+        }
+    }
+
+    /// <summary>Tray "Make all pins clickable again" (P2-5-Fix 1).</summary>
+    public int ReleaseAllClickThrough()
+    {
+        var through = _pins.Pins.Where(p => p.ClickThrough).Select(p => p.Id).ToList();
+        foreach (var id in through)
+        {
+            _pins.Update(id, PinChangeKind.Options, p => p.ClickThrough = false);
+        }
+
+        _log.Info(null, $"Pins clickable again: {through.Count}");
+        return through.Count;
+    }
+
+    public bool AnyClickThrough => _pins.Pins.Any(p => p.ClickThrough);
+
+    // ------------------------------------------------------------------ click-through pins and the mouse (P2-5-Fix 1)
+
+    private BarController? _pointer;
+
+    /// <summary>
+    /// The core's mouse polling watches the pins that let clicks through: over one it becomes bright, with Ctrl
+    /// held it is usable for a moment (thin frame, right click works); Ctrl released or mouse gone → through again.
+    /// No timer of its own; the watch is only active while such pins are visible.
+    /// </summary>
+    public void AttachPointer(BarController bar)
+    {
+        _pointer = bar;
+        bar.WatchedPointerChanged += OnPointer;
+        RefreshWatch();
+    }
+
+    private void RefreshWatch()
+    {
+        if (_pointer is null || _disposed)
+        {
+            return;
+        }
+
+        var areas = _windows.Values
+            .Where(w => w.Pin.ClickThrough && w.IsVisible && w.PhysicalBounds is not null)
+            .Select(w => (w.Id, w.PhysicalBounds!.Value))
+            .ToList();
+        _pointer.SetWatchedAreas(areas);
+    }
+
+    private void OnPointer(PointerChange change)
+    {
+        if (change.Left is { } left && _windows.TryGetValue(left, out var gone))
+        {
+            gone.SetTemporarilyUsable(false);
+            Hover(gone, inside: false);
+        }
+
+        if (change.Over is { } over && _windows.TryGetValue(over, out var window) && window.Pin.ClickThrough)
+        {
+            Hover(window, inside: true);
+            window.SetTemporarilyUsable(change.Ctrl);
+        }
+    }
 
     private void OnManagerChanged(object? sender, PinChangedEventArgs e)
     {
@@ -228,6 +296,7 @@ internal sealed class PinController : IDisposable
         }
 
         UpdateTimers();
+        RefreshWatch();
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -300,6 +369,7 @@ internal sealed class PinController : IDisposable
             }
         }
 
+        RefreshWatch();
         _log.Info(null, $"Pins: displays changed ({_monitors.Count} monitors)");
     });
 
@@ -314,6 +384,7 @@ internal sealed class PinController : IDisposable
         var placement = PinGeometry.ToPlacement(Unshifted(rect), _monitors);
         _pins.Update(window.Id, PinChangeKind.Placement, p => p.Placement = placement);
         Touch(window);
+        RefreshWatch();
     }
 
     private int SnapThreshold(PixelRect rect) =>
@@ -348,6 +419,8 @@ internal sealed class PinController : IDisposable
                 window.Place(b with { X = b.X + dx, Y = b.Y + dy });
             }
         }
+
+        RefreshWatch();
     }
 
     // ------------------------------------------------------------------ dimming (OLED)
@@ -469,6 +542,8 @@ internal sealed class PinController : IDisposable
                 window.Show();
             }
         }
+
+        RefreshWatch();
     }
 
     // ------------------------------------------------------------------ content and menu
@@ -572,7 +647,7 @@ internal sealed class PinController : IDisposable
         }
 
         Separator();
-        menu.Items.Add(OpacityItem(pin));
+        menu.Items.Add(OpacityItem(window, pin));
         Item(Loc.Get("Pin_Lock"), "", () => _pins.Update(pin.Id, PinChangeKind.Options, p => p.Locked = !p.Locked), pin.Locked);
         Item(Loc.Get("Pin_ClickThrough"), "", () => SetClickThrough(pin.Id, !pin.ClickThrough), pin.ClickThrough)
             .ToolTip = Loc.F("Pin_ClickThrough_Tip", Hotkey.TryParse(_options.Hotkey)?.DisplayText ?? Loc.Get("Pins_PanelName"));
@@ -582,25 +657,36 @@ internal sealed class PinController : IDisposable
         menu.IsOpen = true;
     }
 
-    private MenuItem OpacityItem(PinRecord pin)
+    /// <summary>
+    /// Opacity in the menu: the same slider as everywhere (<see cref="OneUiSliderInput"/>) – drag with a live
+    /// preview on the pin, saved once on release (P2-5-Fix 1). No fixed stops.
+    /// </summary>
+    private MenuItem OpacityItem(PinWindow window, PinRecord pin)
     {
         var slider = new Slider
         {
             Minimum = 20,
             Maximum = 100,
+            SmallChange = 1,
             Value = Math.Round(pin.Opacity * 100),
-            Width = 140,
+            Width = 160,
             Style = (Style)Application.Current.FindResource("OneUiSlider"),
             Margin = new Thickness(0, 6, 0, 2),
-            IsMoveToPointEnabled = true,
         };
         slider.SetResourceReference(Control.ForegroundProperty, "AccentBrush");
         var label = new TextBlock { Text = Loc.F("Pin_Opacity", (int)slider.Value) };
-        slider.ValueChanged += (_, e) =>
-        {
-            label.Text = Loc.F("Pin_Opacity", (int)e.NewValue);
-            _pins.Update(pin.Id, PinChangeKind.Options, p => p.Opacity = e.NewValue / 100);
-        };
+        OneUiSliderInput.Attach(
+            slider,
+            live: value =>
+            {
+                label.Text = Loc.F("Pin_Opacity", (int)Math.Round(value));
+                window.PreviewOpacity(value / 100);
+            },
+            commit: value =>
+            {
+                label.Text = Loc.F("Pin_Opacity", (int)Math.Round(value));
+                _pins.Update(pin.Id, PinChangeKind.Options, p => p.Opacity = value / 100);
+            });
         var content = new StackPanel();
         content.Children.Add(label);
         content.Children.Add(slider);
@@ -621,31 +707,30 @@ internal sealed class PinController : IDisposable
         _log.Info(null, $"Pin copied: {ok}");
     }
 
+    /// <summary>The shared "Save as" dialog (last folder remembered per PC, P2-5-Fix 1).</summary>
+    public SaveDialog? SaveDialog { get; set; }
+
     private void SaveAs(PinWindow window)
     {
-        if (PinWindow.Png(window.ImageSource) is not { } png)
+        if (PinWindow.Png(window.ImageSource) is not { } png || SaveDialog is not { } dialog)
         {
             return;
         }
 
         var name = string.Concat(window.Pin.Title.Split(Path.GetInvalidFileNameChars())).Trim();
-        var dialog = new SaveFileDialog
+        var path = dialog.Ask(PinManager.HostId, new SaveFileRequest((name.Length > 0 ? name : "Pin") + ".png")
         {
             Title = Loc.Get("Pin_SaveAs"),
-            Filter = Loc.Get("Pin_SaveFilter"),
-            FileName = (name.Length > 0 ? name : "Pin") + ".png",
-            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
-            AddExtension = true,
-            DefaultExt = ".png",
-        };
-        if (dialog.ShowDialog() != true)
+            TypeName = Loc.Get("Pin_SaveType"),
+        });
+        if (path is null)
         {
             return;
         }
 
         try
         {
-            File.WriteAllBytes(dialog.FileName, png);
+            File.WriteAllBytes(path, png);
             _log.Info(null, "Pin image saved");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -660,6 +745,12 @@ internal sealed class PinController : IDisposable
         if (_disposed)
         {
             return;
+        }
+
+        _pointer?.SetWatchedAreas([]);
+        if (_pointer is not null)
+        {
+            _pointer.WatchedPointerChanged -= OnPointer;
         }
 
         _disposed = true;

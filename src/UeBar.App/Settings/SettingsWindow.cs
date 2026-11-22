@@ -595,6 +595,9 @@ internal sealed partial class SettingsWindow : Window
             SwitchRow(Loc.Get("Notify_ImportantPaused"), Loc.Get("Notify_ImportantPaused_Hint"), s.ImportantWhenPaused, v => _host.Bar.Update(b => b.ImportantWhenPaused = v)),
             SwitchRow(Loc.Get("Notify_ImportantDnd"), null, s.ImportantDuringDoNotDisturb, v => _host.Bar.Update(b => b.ImportantDuringDoNotDisturb = v)),
             SwitchRow(Loc.Get("Notify_ImportantFullscreen"), null, s.ImportantInFullscreen, v => _host.Bar.Update(b => b.ImportantInFullscreen = v))));
+        page.Children.Add(SubHeading(Loc.Get("Notify_Feedback")));
+        page.Children.Add(Card(
+            SwitchRow(Loc.Get("Notify_FeedbackDnd"), Loc.Get("Notify_FeedbackDnd_Hint"), s.ActionFeedbackDuringDoNotDisturb, v => _host.Bar.Update(b => b.ActionFeedbackDuringDoNotDisturb = v))));
         _onRefresh = UpdateCount;
     }
 

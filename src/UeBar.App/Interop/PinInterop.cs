@@ -43,6 +43,24 @@ internal static class PinInterop
     public const int CAPTUREBLT = 0x40000000;
 
     public const int DWMWA_CLOAKED = 14;
+    public const int DWMWA_CLOAK = 13;
+    public const int VK_CONTROL = 0x11;
+
+    [DllImport("user32.dll")]
+    public static extern short GetAsyncKeyState(int key);
+
+    public static bool IsCtrlDown() => (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+
+    [DllImport("dwmapi.dll")]
+    public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool GetWindowDisplayAffinity(IntPtr hwnd, out uint affinity);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint affinity);
 
     [DllImport("user32.dll")]
     public static extern IntPtr GetDC(IntPtr hwnd);

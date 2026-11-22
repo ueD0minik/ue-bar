@@ -43,7 +43,21 @@ internal sealed partial class SettingsWindow
         page.Children.Add(Card(
             Row(Loc.Get("Pins_FontSize"), Loc.Get("Pins_FontSize_Hint"),
                 Slider(10, 32, 1, pins.FontSizeOf(new UeBar.Core.Pins.PinRecord()), v => string.Create(CultureInfo.CurrentCulture, $"{v:0} px"), v => pins.UpdateOptions(p => p.FontSize = v))),
-            Row(Loc.Get("Pins_Folder"), Loc.Get("Pins_Folder_Hint"),
+            Row(StoredText(pins.Manager), Loc.Get("Pins_Folder_Hint"),
                 Button(Loc.Get("Pins_OpenFolder"), () => OpenFolder(pins.Manager.Directory), icon: "\uE838"))));
     }
+
+    /// <summary>"Stored pins: 3 (1.2 MB)" - what lies in the pins folder right now (P2-5-Fix 1).</summary>
+    private static string StoredText(UeBar.Core.Pins.PinManager manager)
+    {
+        var (count, bytes) = manager.StorageUse();
+        return Loc.F("Pins_Stored", count, SizeText(bytes));
+    }
+
+    private static string SizeText(long bytes) => bytes switch
+    {
+        < 1024 => string.Create(CultureInfo.CurrentCulture, $"{bytes} B"),
+        < 1024 * 1024 => string.Create(CultureInfo.CurrentCulture, $"{bytes / 1024.0:0} KB"),
+        _ => string.Create(CultureInfo.CurrentCulture, $"{bytes / 1024.0 / 1024.0:0.0} MB"),
+    };
 }

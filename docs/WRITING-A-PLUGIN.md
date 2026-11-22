@@ -291,6 +291,12 @@ if (context is IClipboardAccess clipboard)
 {
     await clipboard.SetTextAsync("…", ct);
 }
+
+if (context is IFileSaveDialog dialog)
+{
+    var path = await dialog.AskSavePathAsync(new SaveFileRequest("Screenshot.png") { TypeName = "PNG image" }, ct);
+    if (path is not null) File.WriteAllBytes(path, pngBytes); // null = cancelled
+}
 ```
 
 - **Pins** are drawn by the core: always on top, movable, resizable, dimmed after a while, kept across
@@ -300,7 +306,11 @@ if (context is IClipboardAccess clipboard)
   a monitor, Esc cancels (`null`). Coordinates are physical pixels of the virtual desktop
   (`ScreenRect`), right with any scaling; `result.MainMonitor` is the monitor with most of the area.
   One pick at a time – a second call while one is open returns `null`.
+  An action with `Compact = true` is drawn as a small icon right after the previous button, its label as
+  tooltip (the arrow "Save as …" next to "Save").
 - The clipboard can only be **written**.
+- **"Save as"** (`IFileSaveDialog`) is the Windows dialog, shown by the core. It starts in the folder the
+  user picked last time for your plugin (remembered per PC); your plugin writes the file itself.
 
 ### Entries of a settings list as tiles (1.5)
 
@@ -317,6 +327,11 @@ come out while the bar is paused, during "Do not disturb" and over fullscreen ap
 default). Everything else follows the bar. The flags `IgnoreDoNotDisturb`/`ShowInFullscreen` of 1.2
 still work, but prefer the priority.
 
+`UeNotification.IsActionFeedback = true` (1.5) marks the answer to something the user just did with your
+plugin ("text recognized and copied", "saved"). ue Bar shows it itself as a small message at the place of
+the action – also during "Do not disturb" (a user setting, on by default). Never use it for anything that
+comes on its own.
+
 ### Drag and drop
 
 In edit mode the user can drop files, folders, shortcuts (`.lnk`, `.url`) and links on the panel.
@@ -327,7 +342,12 @@ ue Bar asks the running plugins with `IDropHandler` one after another
 On the module context ue Bar offers more: `context as IHostInfo` (device name),
 `context as IModuleSecrets` (small encrypted secrets), `context as IUiLanguageInfo` (UI language
 and its change event), `context as IDeviceBatteryCatalog` (device batteries reported by other
-plugins, 1.1), and from 1.5 `IPinService`, `IScreenAreaPicker` and `IClipboardAccess` (above).
+plugins, 1.1), and from 1.5 `IPinService`, `IScreenAreaPicker`, `IClipboardAccess` and
+`IFileSaveDialog` (above).
+
+Plugins that use Windows APIs (C#/WinRT) may bring `WinRT.Runtime.dll` and `Microsoft.Windows.SDK.NET.dll`
+as usual: ue Bar loads these two once per process and shares them (the highest version wins). The
+plugins that come with ue Bar share one copy in `plugins\.shared\`.
 
 The host's own actions on the module bus have the provider ID `pins`: `pins.create_text`
 `{ "text", "title"? }` → `{ "id" }` creates a text pin that belongs to the calling plugin (with the

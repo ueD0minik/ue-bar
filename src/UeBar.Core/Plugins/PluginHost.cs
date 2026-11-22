@@ -110,6 +110,9 @@ public sealed class PluginHostOptions
 
     /// <summary>A plugin that does not finish loading (constructor) within this time counts as failed.</summary>
     public TimeSpan LoadTimeout { get; init; } = TimeSpan.FromSeconds(15);
+
+    /// <summary>Checksums of unchanged files from the last start (P2-5-Fix 1); none = every file is hashed.</summary>
+    public PluginHashCache HashCache { get; init; } = PluginHashCache.None;
 }
 
 /// <summary>
@@ -238,18 +241,25 @@ public sealed class PluginHost
     /// </summary>
     public IReadOnlyList<PluginInfo> Discover()
     {
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
         PluginInstaller.ApplyPending(_options.UserDirectory, _log);
+        _options.HashCache.Load();
 
         var found = new List<PluginInfo>();
         foreach (var directory in BundledFolders())
         {
-            found.Add(Inspect(directory, PluginOrigin.Bundled, found));
+            found.Add(Timed(directory, () => Inspect(directory, PluginOrigin.Bundled, found)));
         }
 
         foreach (var directory in Folders(_options.UserDirectory).OrderBy(d => Path.GetFileName(d), StringComparer.OrdinalIgnoreCase))
         {
-            found.Add(Inspect(directory, PluginOrigin.Installed, found));
+            found.Add(Timed(directory, () => Inspect(directory, PluginOrigin.Installed, found)));
         }
+
+        _sharedVerified = VerifyShared();
+        _options.HashCache.Save();
+        var (hits, misses) = _options.HashCache.Stats;
+        _log.Debug(null, $"Startup: plugins discovered in {System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds:0} ms (checksums: {hits} from the cache, {misses} computed)");
 
         _plugins = found;
         foreach (var plugin in found)
@@ -287,6 +297,12 @@ public sealed class PluginHost
     public async Task LoadAsync()
     {
         // P2-5: copies of assemblies that may exist only once per process – the highest version is shared.
+        // P2-5-Fix 1: the bundled plugins bring them once, in plugins\.shared (only if they match the list).
+        if (_sharedVerified is { } shared)
+        {
+            ProcessWideAssemblies.Offer(shared);
+        }
+
         foreach (var plugin in _plugins.Where(p => p.State == PluginState.Pending))
         {
             ProcessWideAssemblies.Offer(plugin.Directory);
@@ -349,6 +365,52 @@ public sealed class PluginHost
     }
 
     // ------------------------------------------------------------------ internal
+
+    private string? _sharedVerified;
+
+    private PluginInfo Timed(string directory, Func<PluginInfo> inspect)
+    {
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+        var plugin = inspect();
+        _log.Debug(null, $"Startup: plugin folder {Path.GetFileName(directory)} checked in {System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds:0} ms");
+        return plugin;
+    }
+
+    /// <summary>
+    /// The shared folder of the bundled plugins (<see cref="PluginHash.SharedFolder"/>): used only if every code
+    /// file in it is in <c>bundled.sha256</c> with the same checksum – otherwise ignored (with a warning).
+    /// </summary>
+    private string? VerifyShared()
+    {
+        if (_options.BundledDirectory is not { Length: > 0 } root)
+        {
+            return null;
+        }
+
+        var shared = Path.Combine(root, PluginHash.SharedFolder);
+        if (!Directory.Exists(shared))
+        {
+            return null;
+        }
+
+        try
+        {
+            var files = PluginHash.Files(shared, _options.HashCache);
+            var bad = files.Where(f => !string.Equals(_options.BundledList.HashOf(PluginHash.SharedFolder, f.Key), f.Value, StringComparison.OrdinalIgnoreCase)).Select(f => f.Key).ToList();
+            if (files.Count == 0 || bad.Count > 0)
+            {
+                _log.Warn(null, $"Shared plugin assemblies not used – they do not match the bundled list: {string.Join(", ", bad)}");
+                return null;
+            }
+
+            return shared;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _log.Warn(null, $"Shared plugin assemblies not readable: {ex.Message}");
+            return null;
+        }
+    }
 
     private IEnumerable<string> BundledFolders()
     {
@@ -430,7 +492,7 @@ public sealed class PluginHost
         IReadOnlyDictionary<string, string> files = new Dictionary<string, string>();
         try
         {
-            files = PluginHash.Files(directory);
+            files = PluginHash.Files(directory, _options.HashCache);
             plugin.Hash = PluginHash.Combine(files);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

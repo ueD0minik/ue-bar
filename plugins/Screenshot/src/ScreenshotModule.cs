@@ -333,6 +333,7 @@ public sealed class ScreenshotModule :
         new("pin", T["Shot_ActionPin"], "U+E718"),
         new("copy", T["Shot_ActionCopy"], "U+E8C8"),
         new("save", T["Shot_ActionSave"], "U+E74E"),
+        new("saveas", T["Shot_ActionSaveAs"], "U+E70D") { Compact = true }, // the small arrow at "Save"
         new("ocr", T["Shot_ActionOcr"], "U+E8D2"),
     ];
 
@@ -359,6 +360,10 @@ public sealed class ScreenshotModule :
 
                 break;
 
+            case ShotAction.SaveAs:
+                await SaveAsAsync(png, options, cancellationToken).ConfigureAwait(false);
+                break;
+
             case ShotAction.Ocr:
                 await RecognizeAsync(png, options, cancellationToken).ConfigureAwait(false);
                 break;
@@ -373,6 +378,41 @@ public sealed class ScreenshotModule :
 
                 break;
         }
+    }
+
+    /// <summary>
+    /// "Save as …" (P2-5-Fix 1): the Windows dialog of the core (starts in the folder picked last time, remembered
+    /// per PC), then written where the user chose. Cancelled = nothing is written anywhere.
+    /// </summary>
+    internal async Task<string?> SaveAsAsync(byte[] png, ShotOptions options, CancellationToken cancellationToken)
+    {
+        if (_context is not IFileSaveDialog dialog)
+        {
+            Notify(T["Shot_SaveFailed"], T["Shot_NotAvailable"], "Error");
+            return null;
+        }
+
+        var path = await dialog.AskSavePathAsync(new SaveFileRequest(ShotFiles.FileName(_time.GetLocalNow()))
+        {
+            Title = T["Shot_SaveAsTitle"],
+            TypeName = T["Shot_SaveType"],
+            InitialFolder = options.Folder,
+        }, cancellationToken).ConfigureAwait(false);
+        if (path is null)
+        {
+            _context?.Log.Info("Save as: cancelled");
+            return null;
+        }
+
+        if (ShotFiles.SaveTo(path, png) is { } error)
+        {
+            _context?.Log.Warn($"Screenshot not saved: {error}");
+            Notify(T["Shot_SaveFailed"], error, "Error");
+            return null;
+        }
+
+        Notify(T["Shot_Saved"], Path.GetFileName(path), "U+E74E", TimeSpan.FromSeconds(4));
+        return path;
     }
 
     // ------------------------------------------------------------------ text recognition
@@ -422,13 +462,13 @@ public sealed class ScreenshotModule :
             buttons.Add(new NotificationAction("copy", T["Shot_OcrCopyButton"], "U+E8C8"));
         }
 
-        var title = (copied, pinned) switch
+        var title = T.Format((copied, pinned) switch
         {
-            (true, true) => T["Shot_OcrCopiedPinned"],
-            (true, false) => T["Shot_OcrCopied"],
-            (false, true) => T["Shot_OcrPinned"],
-            _ => T["Shot_OcrDone"],
-        };
+            (true, true) => "Shot_OcrCopiedPinned",
+            (true, false) => "Shot_OcrCopied",
+            (false, true) => "Shot_OcrPinned",
+            _ => "Shot_OcrDone",
+        }, text.Length);
         Notify(title, Preview(text), "U+E8D2", TimeSpan.FromSeconds(8), id, buttons);
         return outcome;
     }
@@ -464,6 +504,15 @@ public sealed class ScreenshotModule :
         return joined.Length > 120 ? joined[..119] + "…" : joined;
     }
 
+    /// <summary>
+    /// Every message of this plugin answers something the user just did – marked as such (P2-5-Fix 1), so the
+    /// app shows it at the place of the action, also during "Do not disturb" (user setting).
+    /// </summary>
     private void Notify(string title, string message, string icon, TimeSpan? duration = null, string? id = null, IReadOnlyList<NotificationAction>? actions = null) =>
-        NotificationReceived?.Invoke(this, new UeNotification(title, message, icon, duration ?? TimeSpan.FromSeconds(6)) { Id = id, Actions = actions is { Count: > 0 } ? actions : null });
+        NotificationReceived?.Invoke(this, new UeNotification(title, message, icon, duration ?? TimeSpan.FromSeconds(6))
+        {
+            Id = id,
+            Actions = actions is { Count: > 0 } ? actions : null,
+            IsActionFeedback = true,
+        });
 }

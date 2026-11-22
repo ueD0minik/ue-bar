@@ -1136,7 +1136,7 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
     <value>Let clicks through</value>
   </data>
   <data name="Pin_ClickThrough_Tip" xml:space="preserve">
-    <value>The pin stays visible, you work “through” it. Undo: pin list in the bar, or {0} twice (hide and show all).</value>
+    <value>The pin stays visible, you work “through” it. Use it again: hold Ctrl while the mouse is over the pin. Turn it off: right click with Ctrl, pin list in the bar, tray menu, or {0} twice.</value>
   </data>
   <data name="Pin_Close" xml:space="preserve">
     <value>Close</value>
@@ -1171,9 +1171,6 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Pin_SaveAs" xml:space="preserve">
     <value>Save as …</value>
   </data>
-  <data name="Pin_SaveFilter" xml:space="preserve">
-    <value>PNG image|*.png</value>
-  </data>
   <data name="Pin_ZoomReset" xml:space="preserve">
     <value>Fit image</value>
   </data>
@@ -1204,11 +1201,8 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Pins_Empty" xml:space="preserve">
     <value>No pins yet. Pin a note here, “pin &lt;text&gt;” in the quick search, or a screenshot.</value>
   </data>
-  <data name="Pins_Folder" xml:space="preserve">
-    <value>Storage</value>
-  </data>
   <data name="Pins_Folder_Hint" xml:space="preserve">
-    <value>Pins stay on this device only (never in the synchronized layout).</value>
+    <value>On this device only, never in the synchronized layout. A pin lies here while it is open – closing deletes it with its image.</value>
   </data>
   <data name="Pins_FontSize" xml:space="preserve">
     <value>Font size of new notes</value>
@@ -1302,5 +1296,26 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   </data>
   <data name="Settings_Pins" xml:space="preserve">
     <value>Pins</value>
+  </data>
+  <data name="Notify_Feedback" xml:space="preserve">
+    <value>Feedback</value>
+  </data>
+  <data name="Notify_FeedbackDnd" xml:space="preserve">
+    <value>Show feedback on your own actions also during “Do not disturb”</value>
+  </data>
+  <data name="Notify_FeedbackDnd_Hint" xml:space="preserve">
+    <value>For example “233 characters recognized and copied · Pin” after a screen capture: a small message at the place of the action, for a few seconds. Off = like any other notification.</value>
+  </data>
+  <data name="Tray_PinsClickable" xml:space="preserve">
+    <value>Make all pins clickable again</value>
+  </data>
+  <data name="Pin_ClickThroughHint" xml:space="preserve">
+    <value>Hold Ctrl to use the pin again</value>
+  </data>
+  <data name="Pin_SaveType" xml:space="preserve">
+    <value>PNG image</value>
+  </data>
+  <data name="Pins_Stored" xml:space="preserve">
+    <value>Stored pins: {0} ({1})</value>
   </data>
 </root>

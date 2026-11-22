@@ -72,6 +72,12 @@ internal sealed class TrayIcon : IDisposable
     /// <summary>Tray → "Reset bar" (M6-Fix 1, emergency exit without restart).</summary>
     public Func<Task>? ResetBar { get; set; }
 
+    /// <summary>Tray → "Make all pins clickable again" (P2-5-Fix 1).</summary>
+    public Action? ReleasePins { get; set; }
+
+    /// <summary>Is there a pin that lets clicks through? (otherwise the entry is greyed out)</summary>
+    public Func<bool>? AnyClickThroughPins { get; set; }
+
     /// <summary>Tray → Layout → "Export …".</summary>
     public Action? ExportLayout { get; set; }
 
@@ -132,6 +138,11 @@ internal sealed class TrayIcon : IDisposable
         var reset = new Forms.ToolStripMenuItem(Loc.Get("Tray_Reset")) { ToolTipText = Loc.Get("Tray_Reset_Tip") };
         reset.Click += (_, _) => _dispatcher.BeginInvoke(() => _ = ResetBar?.Invoke());
         _menu.Items.Add(reset);
+
+        // P2-5-Fix 1: the way back for pins that let clicks through (also without the bar).
+        var release = new Forms.ToolStripMenuItem(Loc.Get("Tray_PinsClickable")) { Enabled = AnyClickThroughPins?.Invoke() ?? false };
+        release.Click += (_, _) => _dispatcher.BeginInvoke(() => ReleasePins?.Invoke());
+        _menu.Items.Add(release);
 
         _menu.Items.Add(BuildLayoutMenu());
 

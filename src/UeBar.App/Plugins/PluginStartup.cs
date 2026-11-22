@@ -29,6 +29,9 @@ internal static class PluginStartup
             BundledDirectory = directory,
             BundledList = list,
             UserDirectory = paths.Plugins,
+
+            // P2-5-Fix 1: checksums of unchanged files (path, size, times) from the last start.
+            HashCache = new PluginHashCache(Path.Combine(paths.Root, "plugin-hashes.json"), log),
         };
         return new PluginHost(options, settings, new PluginTrustStore(paths.PluginTrustFile, log), log);
     }

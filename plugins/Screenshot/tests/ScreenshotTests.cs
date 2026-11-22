@@ -10,7 +10,7 @@ namespace UeBar.Modules.Screenshot.Tests;
 public sealed class ScreenshotTests
 {
     [Fact]
-    public async Task Asking_offers_four_buttons_and_pin_puts_the_image_exactly_over_the_area()
+    public async Task Asking_offers_the_bar_and_pin_puts_the_image_exactly_over_the_area()
     {
         await using var env = await new ShotEnv().StartAsync();
 
@@ -19,7 +19,8 @@ public sealed class ScreenshotTests
         Assert.Equal(ShotAction.Pin, done);
         var request = Assert.Single(env.Picker.Requests);
         Assert.Equal(ScreenAreaMode.Region, request.Mode);
-        Assert.Equal(["pin", "copy", "save", "ocr"], request.Actions.Select(a => a.Id));
+        Assert.Equal(["pin", "copy", "save", "saveas", "ocr"], request.Actions.Select(a => a.Id));
+        Assert.Equal(["saveas"], request.Actions.Where(a => a.Compact).Select(a => a.Id)); // the small arrow at "Save"
         var pin = Assert.Single(env.Pins.Pins);
         Assert.Equal((PinKind.Image, ScreenshotModule.ModuleId), (pin.Kind, pin.Owner));
         Assert.Equal(new UeBar.Core.Pins.PinScreenArea(1800, 200, 400, 300), pin.Source); // where it was on the screen
@@ -132,7 +133,8 @@ public sealed class ScreenshotTests
         Assert.Equal("Hallo Welt\nZeile zwei", Assert.Single(env.Clipboard.Texts));
         Assert.Null(env.Ocr.AskedLanguage); // automatic: the Windows languages
         var note = env.Notifications.Last();
-        Assert.Equal("Text erkannt und kopiert", note.Title);
+        Assert.Equal("21 Zeichen erkannt und kopiert", note.Title);
+        Assert.True(note.IsActionFeedback); // shown by the app at the place of the action, also during "Do not disturb"
         Assert.Equal("Hallo Welt · Zeile zwei", note.Message);
         Assert.Equal(["pin"], note.Actions!.Select(a => a.Id));
 
@@ -209,7 +211,7 @@ public sealed class ScreenshotTests
         }));
         var request = env.Picker.Requests[0];
         Assert.Equal(mode ?? ScreenAreaMode.Region, request.Mode);
-        Assert.Equal(action is null ? 4 : 0, request.Actions.Count); // a given action needs no bar
+        Assert.Equal(action is null ? 5 : 0, request.Actions.Count); // a given action needs no bar
         Assert.True(await Wait.UntilAsync(() => action == ShotAction.Pin ? env.Pins.Count == 1 : action == ShotAction.Ocr ? env.Clipboard.Texts.Count == 1 : env.Clipboard.Images.Count == 1));
         var command = Assert.Single(env.Module.QuickCommands);
         Assert.Equal(("shot", true), (command.Prefix, command.ArgumentOptional));

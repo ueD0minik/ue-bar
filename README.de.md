@@ -44,8 +44,12 @@ Abschreiben, während du in einem anderen Fenster arbeitest.
 - **Bedienen:** ziehen = verschieben (rastet an den Bildschirmrändern ein), am Rand ziehen = Größe.
   Bilder: Mausrad = Zoom, gezoomtes Bild ziehen = verschieben, Doppelklick = einpassen. Text:
   Doppelklick = bearbeiten, `Strg` + Mausrad = Schriftgröße.
-- **Rechtsklick:** Kopieren · Speichern unter (Bild) · Deckkraft · Position sperren · **Klicks
-  durchlassen** (der Pin bleibt sichtbar, du arbeitest „durch ihn hindurch“) · Ausblenden · Schließen.
+- **Rechtsklick:** Kopieren · Speichern unter (Bild) · Deckkraft (Regler ziehen) · Position sperren ·
+  **Klicks durchlassen** (der Pin bleibt sichtbar, du arbeitest „durch ihn hindurch“) · Ausblenden ·
+  Schließen.
+- **Durchlässigen Pin wieder bedienen:** `Strg` halten, solange die Maus über dem Pin ist – ein dünner
+  Rahmen zeigt, dass er bedienbar ist, der Rechtsklick funktioniert; `Strg` loslassen, und Klicks gehen
+  wieder durch. Außerdem: Pin-Liste in der Bar oder **Alle Pins wieder anklickbar machen** im Tray-Menü.
 - **Alle auf einmal:** `Win + Alt + P` blendet alle Pins aus oder ein (änderbar unter
   **Einstellungen → Pins**); beim Einblenden werden durchlässige Pins wieder anklickbar. Die
   Pin-Liste in der Bar zeigt, versteckt und schließt einzelne oder alle.
@@ -55,6 +59,12 @@ Abschreiben, während du in einem anderen Fenster arbeitest.
 - Pins überstehen einen Neustart (Inhalt, Größe, Platz – pro Monitor; fehlt der Monitor, kommt der
   Pin auf den Hauptbildschirm). Sie liegen nur auf diesem PC (`%APPDATA%\ueBar\pins`), nie im
   synchronisierten Layout.
+
+**Wo liegt was?** Ein offener Pin liegt in `%APPDATA%\ueBar\pins` (`pins.json` und je Bild-Pin eine
+Bilddatei). **Schließen löscht den Pin samt Bild**; Dateien ohne Eintrag räumt ue Bar beim Start weg.
+**Einstellungen → Pins** zeigt, wie viele Pins gespeichert sind und wie viel Platz sie brauchen, und
+öffnet den Ordner. Ein Pin ist nie ein gespeicherter Screenshot – wer ein Bild behalten will, nimmt
+**Speichern unter …** im Menü des Pins (oder „Speichern“ im [Screenshot-Plugin](plugins/Screenshot/README.de.md)).
 
 ![Ein Screenshot und sein erkannter Text als Pins](plugins/Screenshot/images/screenshot-pins.png)
 

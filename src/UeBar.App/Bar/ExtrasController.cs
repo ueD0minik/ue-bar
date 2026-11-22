@@ -185,8 +185,26 @@ internal sealed class ExtrasController
         var settings = _bar.Settings;
         var duration = notification.Duration ?? TimeSpan.FromSeconds(Math.Clamp(settings.NotificationSeconds, 2, 60));
         // P2-4: one decision for all (paused, locked, fullscreen, "Do not disturb") – important ones may pass.
-        var request = new NotificationRequest(notification.Priority == NotificationPriority.Important, notification.IgnoreDoNotDisturb, notification.ShowInFullscreen);
+        var request = new NotificationRequest(notification.Priority == NotificationPriority.Important, notification.IgnoreDoNotDisturb, notification.ShowInFullscreen)
+        {
+            ActionFeedback = notification.IsActionFeedback,
+        };
         var decision = NotificationGate.Decide(request, _bar.CurrentAnnounceConditions(settings.RespectDoNotDisturb && ExtrasInterop.IsDoNotDisturbActive()), settings);
+        var actions = (notification.Actions ?? []).Where(a => a is not null).Select(a => (a.Id, a.Label)).ToList();
+        if (decision.AsActionFeedback && FeedbackToast is { } toast)
+        {
+            // P2-5-Fix 1: the answer to the user's own action – the app shows it itself (also during "Do not disturb").
+            _log.Info(notification.Source, "Notification as action feedback at the place of the action");
+            _queue.Enqueue(new BarNotification(notification.Title, notification.Message, notification.Icon, duration, notification.Timestamp, notification.Source)
+            {
+                Id = notification.Id,
+                Actions = actions,
+            }, suppress: true);
+            _viewModel.SetHistory(_queue.History);
+            toast.Show(notification.Title, notification.Message, duration, actions, actionId => RunModuleAction(notification.Source, notification.Id, actionId));
+            return;
+        }
+
         var suppress = !decision.Show;
         var reason = decision.Reason;
         if (decision.OverridesPause)
@@ -236,7 +254,16 @@ internal sealed class ExtrasController
     private void RunNotificationAction(BarNotification notification, string actionId)
     {
         DismissNotification(notification);
-        if (notification.Source is not { } moduleId || notification.Id is not { } id)
+        RunModuleAction(notification.Source, notification.Id, actionId);
+    }
+
+    /// <summary>P2-5-Fix 1: the app's own message for the answer to an action (set by the app; null = none).</summary>
+    public Capture.ActionFeedbackToast? FeedbackToast { get; set; }
+
+    /// <summary>A notification button: the module that sent it handles it.</summary>
+    private void RunModuleAction(string? source, string? notificationId, string actionId)
+    {
+        if (source is not { } moduleId || notificationId is not { } id)
         {
             return;
         }

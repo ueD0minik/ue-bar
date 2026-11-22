@@ -183,28 +183,34 @@ internal sealed class AreaOverlay : Window
         foreach (var action in actions)
         {
             var content = new StackPanel { Orientation = Orientation.Horizontal };
+            var compact = action.Compact && !first; // P2-5-Fix 1: a small icon right at the previous button ("Save as …")
             if (!string.IsNullOrWhiteSpace(action.Icon))
             {
                 content.Children.Add(new TextBlock
                 {
                     Text = Bar.Converters.IconGlyphs.Get(action.Icon),
                     Style = (Style)Application.Current.FindResource("IconText"),
-                    FontSize = 14,
-                    Margin = new Thickness(0, 0, 8, 0),
+                    FontSize = compact ? 11 : 14,
+                    Margin = new Thickness(0, 0, compact ? 0 : 8, 0),
                     VerticalAlignment = VerticalAlignment.Center,
                 });
             }
 
-            content.Children.Add(new TextBlock { Text = action.Label, FontSize = 13, VerticalAlignment = VerticalAlignment.Center });
+            if (!compact || string.IsNullOrWhiteSpace(action.Icon))
+            {
+                content.Children.Add(new TextBlock { Text = action.Label, FontSize = 13, VerticalAlignment = VerticalAlignment.Center });
+            }
+
             var button = new Button
             {
                 Style = (Style)Application.Current.FindResource("BarButton"),
                 Content = content,
                 Height = 36,
-                Padding = new Thickness(14, 0, 14, 0),
-                Margin = new Thickness(first ? 0 : 6, 0, 0, 0),
+                Padding = compact ? new Thickness(7, 0, 7, 0) : new Thickness(14, 0, 14, 0),
+                Margin = new Thickness(first ? 0 : compact ? 2 : 6, 0, 0, 0),
                 Cursor = Cursors.Hand,
                 Focusable = true,
+                ToolTip = compact ? action.Label : null,
             };
             if (first)
             {

@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+﻿<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- Copyright (C) 2026 Dominik Poschinger -->
 <UserControl x:Class="UeBar.App.Bar.Views.SliderElementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -12,12 +12,7 @@
                 Minimum="{Binding Min}"
                 Maximum="{Binding Max}"
                 SmallChange="{Binding Step}"
-                Value="{Binding Value, Mode=OneWay}"
-                PreviewMouseLeftButtonDown="OnMouseDown"
-                PreviewMouseMove="OnMouseMove"
-                PreviewMouseLeftButtonUp="OnMouseUp"
-                LostMouseCapture="OnLostCapture"
-                PreviewMouseWheel="OnWheel" />
+                Value="{Binding Value, Mode=OneWay}" />
         <TextBlock Margin="12,0" VerticalAlignment="Center" IsHitTestVisible="False" FontSize="12">
             <Run Text="{Binding Label, Mode=OneWay}" />
             <Run Text="{Binding Value, ElementName=Slider, Mode=OneWay, StringFormat={}{0:0}}" /><Run Text="{Binding Unit, Mode=OneWay}" />

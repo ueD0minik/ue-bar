@@ -13,11 +13,19 @@ loading. SDK package `UeBar.Sdk 1.5.0`.
   - **Pin list in the bar** (pin icon in the panel): show/hide single pins or all, close all, "Pin
     note". Hotkey **Win + Alt + P** shows/hides all pins (changeable); showing all also ends "let
     clicks through".
+  - **Let clicks through, and back:** hold **Ctrl** while the mouse is over such a pin – it can be used
+    for a moment (thin frame, right click works); release Ctrl and it lets clicks through again. A short
+    hint at the pin says so when the option is switched on. Tray: "Make all pins clickable again".
+    Done through the existing mouse polling, only while such pins exist – no timer of its own. A dimmed
+    click-through pin also lights up under the mouse.
+  - **Opacity** in the pin menu is the same slider as everywhere (drag with a live preview, no steps).
   - **OLED:** a pin dims after 60 s without the mouse (to 35 %) and lights up at once when the mouse
     comes; pixel shift every few minutes; hidden over fullscreen apps (all adjustable under Settings →
     Pins).
   - Kept across restarts in `%APPDATA%\ueBar\pins` – content, size and place per monitor (a missing
-    monitor means the primary one). Never in the synced layout.
+    monitor means the primary one). Never in the synced layout. **Closing a pin deletes it with its
+    image;** files without an entry are removed at the start. Settings → Pins shows "Stored pins: 3
+    (1.2 MB)" and opens the folder.
   - Quick command `pin <text>` (quick search and Assist), bus action `pins.create_text` (provider
     `pins`, with permission).
 - **Screenshot plugin** (`plugins/Screenshot`, plugin ID `screenshot`, comes with ue Bar and is on):
@@ -26,6 +34,14 @@ loading. SDK package `UeBar.Sdk 1.5.0`.
   (`Pictures\Screenshots\ue Bar`, dated names) or recognize text (Windows OCR, offline; copied or
   pinned). A default action skips the bar. Missing recognition language → a hint how to add one.
   Bus: event `screenshot.taken` (metadata only), action `screenshot.capture`.
+  - **Save as …** (small arrow next to "Save"): the Windows dialog with a free folder and name; it
+    starts in the folder picked last time (remembered per PC). "Save" still saves straight into the
+    default folder.
+  - The capture stays in memory: copying and recognizing text write no file, not even a temporary
+    one; pinning never writes into the screenshot folder; ue Bar never deletes anything there.
+  - **Feedback on your own action** ("233 characters recognized and copied · Pin", "Saved") is shown
+    by ue Bar itself as a small message where the action bar was – also during Windows "Do not
+    disturb" (Settings → Notifications, on by default). Other notifications are unchanged.
 - **Picking a screen area** as a core function: the screen freezes, one overlay per monitor, drag a
   rectangle, click a window or a monitor, Esc/right click cancels.
 - **Quick access settings** are easier: a hint at the top (tiles are made in the bar), "Also add as
@@ -34,7 +50,23 @@ loading. SDK package `UeBar.Sdk 1.5.0`.
 - **SDK 1.5:** `IPinService`, `IScreenAreaPicker` (+ `ScreenRect`, `ScreenMonitor`,
   `ScreenAreaRequest/Result`), `IClipboardAccess` (write only), settings field kinds `Hotkey` (with
   `IHotkeyHandler`: plugins get global hotkeys, recorded like the quick search's) and `Info`,
-  `ISettingListTiles` + `SettingListRow.CanAddTile`.
+  `ISettingListTiles` + `SettingListRow.CanAddTile`, `IFileSaveDialog` (the core's "Save as"
+  dialog), `UeNotification.IsActionFeedback`, `ScreenAreaAction.Compact`.
+
+### Fixed before the release
+- **After the first screen capture the bar no longer showed.** Hiding it for the capture set its
+  opacity to 0 also when the bar was collapsed, but the restore only ran when it had been visible –
+  so it stayed invisible (the state machine kept working, "Reset bar" did not help). Now everything
+  changed for a capture is restored in every case (action, Esc, error, exception), the overlay windows
+  are closed for real, "Reset bar" also restores opacity, cloaking, display affinity and topmost, and
+  every switch to pill/panel checks that Windows really shows the window (warning in the log and
+  repaired otherwise).
+- **Start took 15–50 s** with the UI thread blocked (start-up hang warning, once a dump). Every start step
+  is logged with its duration (Debug); the plugin folders are checked off the UI thread; checksums of
+  unchanged files (path, size, times) are kept in `plugin-hashes.json`. Warm start now about 1–2 s.
+- **WinRT projection only once:** the bundled plugins share one copy in `plugins\.shared\` (checked
+  against `bundled.sha256` like every bundled file) instead of one per plugin – the installer is small
+  again.
 
 ### Changed
 - The hotkey recording field is shared by the quick search, the pins and plugin hotkey fields; while
@@ -50,7 +82,11 @@ loading. SDK package `UeBar.Sdk 1.5.0`.
   monitor and scaling, missing monitor, snapping, fullscreen hiding, dimming and pixel shift, picking
   across monitors, several hotkeys), Screenshot +30 (actions, file names, events with metadata only,
   OCR with German/English test images and a missing language, quick command, hotkey, bus, plugin
-  load), Quick access +1. Total 691.
+  load), Quick access +1. Before the release (the fixes above): Bar +30 (every way a capture can end
+  leaves the bar visible, slider dragging, Ctrl over click-through pins, feedback during "Do not
+  disturb", last folder of "Save as"), Core +6 (checksum cache, shared folder checked against the list,
+  pin files deleted on close and orphans at the start), Screenshot +6 (no file at all for copy and
+  OCR – also with the real OCR –, pinning never writes into the screenshot folder, "Save as"). Total 733.
 
 ## 1.3.3 – Collections edited in the bar, compact settings lists
 

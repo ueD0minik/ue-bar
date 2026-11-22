@@ -24,9 +24,20 @@ public static class PluginHash
             || string.Equals(name, PluginManifest.FileName, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Folder next to the bundled plugins with assemblies they share (P2-5-Fix 1): the WinRT projection comes with
+    /// ue Bar once instead of once per plugin. Starts with a dot, so it is never taken for a plugin. Its files
+    /// are listed in <c>bundled.sha256</c> like a plugin's.
+    /// </summary>
+    public const string SharedFolder = ".shared";
+
     /// <summary>SHA-256 (lower-case hex) of every code file in the folder, by relative path.</summary>
-    public static SortedDictionary<string, string> Files(string directory)
+    public static SortedDictionary<string, string> Files(string directory) => Files(directory, PluginHashCache.None);
+
+    /// <summary>Same, with known checksums of unchanged files taken from <paramref name="cache"/> (P2-5-Fix 1).</summary>
+    public static SortedDictionary<string, string> Files(string directory, PluginHashCache cache)
     {
+        ArgumentNullException.ThrowIfNull(cache);
         var result = new SortedDictionary<string, string>(StringComparer.Ordinal);
         var root = Path.GetFullPath(directory);
         foreach (var file in Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories))
@@ -34,8 +45,7 @@ public static class PluginHash
             var relative = Normalize(Path.GetRelativePath(root, file));
             if (IsCodeFile(relative))
             {
-                using var stream = File.OpenRead(file);
-                result[relative] = Convert.ToHexStringLower(SHA256.HashData(stream));
+                result[relative] = cache.HashOf(file);
             }
         }
 
@@ -122,7 +132,7 @@ public sealed class BundledPluginList
             {
                 files = new Dictionary<string, string>(StringComparer.Ordinal);
                 list._plugins[id] = files;
-                if (!list._order.Contains(id, StringComparer.OrdinalIgnoreCase))
+                if (!id.StartsWith('.') && !list._order.Contains(id, StringComparer.OrdinalIgnoreCase))
                 {
                     list._order.Add(id);
                 }
@@ -145,6 +155,10 @@ public sealed class BundledPluginList
             return Empty;
         }
     }
+
+    /// <summary>The checksum listed for one file of a folder (e.g. <c>.shared/winrt.runtime.dll</c>), or null.</summary>
+    public string? HashOf(string id, string relativeFile) =>
+        _plugins.TryGetValue(id, out var files) && files.TryGetValue(PluginHash.Normalize(relativeFile), out var hash) ? hash : null;
 
     /// <summary>
     /// Do the code files of the folder match the list exactly – nothing changed, nothing added,

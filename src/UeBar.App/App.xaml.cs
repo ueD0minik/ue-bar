@@ -108,6 +108,21 @@ public partial class App : Application
         _watchdog = new UiWatchdog(Dispatcher, _log, paths.Logs);
         _watchdog.Start();
 
+        // P2-5-Fix 1: every start step with its duration (Debug) – to see where a slow start goes.
+        var stepClock = System.Diagnostics.Stopwatch.StartNew();
+        var stepLog = _log;
+        var steps = new List<string>
+        {
+            // Time between the process start and the first line of our code (runtime, WPF, virus scanner).
+            $"before the app code {(DateTime.Now - System.Diagnostics.Process.GetCurrentProcess().StartTime).TotalMilliseconds - stepClock.ElapsedMilliseconds:0} ms",
+        };
+        void Step(string name)
+        {
+            stepLog.Debug(null, $"Startup: {name} in {stepClock.ElapsedMilliseconds} ms");
+            steps.Add($"{name} {stepClock.ElapsedMilliseconds} ms");
+            stepClock.Restart();
+        }
+
         try
         {
             System.Windows.Forms.Application.EnableVisualStyles();
@@ -152,13 +167,20 @@ public partial class App : Application
             _hotkeys = new GlobalHotkeys(_log);
             _registry.Host.Pins = pinManager;
             _registry.Host.Clipboard = clipboard;
-            _registry.Host.ScreenAreaPicker = new UeBar.App.Capture.ScreenAreaPicker(Dispatcher, _log, hidden => _bar?.SetCaptureHidden(hidden) ?? false);
+            var picker = new UeBar.App.Capture.ScreenAreaPicker(Dispatcher, _log, () => _bar?.CaptureTarget);
+            _registry.Host.ScreenAreaPicker = picker;
+            var saveDialog = new SaveDialog(Dispatcher, settings, _log);
+            _registry.Host.SaveDialog = saveDialog.AskAsync;
 
             // Plugins (SPEC 4.4): find them, ask for every one that does not come with ue Bar (first time
             // and whenever its files changed), load them, hand their modules to the registry. A broken
             // plugin only gets a status – the app starts anyway.
             var plugins = PluginStartup.CreateHost(paths, settings, _log);
-            plugins.Discover();
+            Step("core, settings, pins");
+
+            // P2-5-Fix 1: reading and checking the plugin folders is file work – not on the UI thread.
+            await Task.Run(plugins.Discover);
+            Step("plugins discovered");
             foreach (var plugin in plugins.Plugins.Where(p => p.State == PluginState.NeedsApproval).ToList())
             {
                 plugins.Decide(plugin, PluginTrustDialog.Ask(null, PluginTrustRequest.From(plugin)));
@@ -166,9 +188,11 @@ public partial class App : Application
 
             await plugins.LoadAsync();
             plugins.RegisterAll(_registry);
+            Step("plugins loaded");
 
             _tiles = new TileHost(_registry, _log);
             await _registry.StartAllAsync();
+            Step("modules started");
 
             // Layout levels (SPEC 9): base in a module's store (e.g. Home Assistant, per user)
             // with layout.json as a local copy – without such a module local only. Device always in device.json.
@@ -178,6 +202,7 @@ public partial class App : Application
             var manager = new LayoutManager(_layoutStore, new DeviceLayoutStore(paths.DeviceFile, _log), _log, general.Current.EffectiveDeviceName(Environment.MachineName));
             _layout = new LayoutCoordinator(manager, _layoutStore, _registry, _tiles, _log, Dispatcher);
             await _layout.ReloadAsync();
+            Step("layout loaded");
 
             var location = new LocationService(_registry, _log);
             UeBar.App.Bar.Media.ModuleImageLoader.Current = new UeBar.App.Bar.Media.ModuleImageLoader(_registry, _log);
@@ -186,6 +211,7 @@ public partial class App : Application
             var window = new BarWindow();
             _bar = new BarController(window, viewModel, settings, _log, Dispatcher);
             _bar.Start();
+            Step("bar started");
 
             // Extras (M6): notifications, Now Playing, Assist, quick search – through core services.
             var quickCommands = new QuickCommandService(_registry, _log)
@@ -194,7 +220,9 @@ public partial class App : Application
             };
             UeBar.Core.Pins.PinCommands.Register(pinManager, quickCommands, bus);
             _pins = new UeBar.App.Pins.PinController(pinManager, settings, _hotkeys, clipboard, Dispatcher, _log);
+            _pins.SaveDialog = saveDialog;
             _pins.Start();
+            _pins.AttachPointer(_bar);
             viewModel.Pins = new PinsViewModel(_pins);
             var pluginHotkeys = new PluginHotkeys(_registry, settings, _hotkeys, Dispatcher, _log);
             pluginHotkeys.Start();
@@ -212,6 +240,7 @@ public partial class App : Application
                 _log,
                 Dispatcher);
             var extras = _extras;
+            extras.FeedbackToast = new UeBar.App.Capture.ActionFeedbackToast(Dispatcher, () => picker.LastPick);
             window.EscapePressed += (_, _) => extras.OnEscape();
             window.Panel.AssistInputRequested += (_, _) => extras.BeginInput();
             extras.QuickSearchOpened += (_, _) => window.Panel.FocusQuickSearch();
@@ -231,6 +260,9 @@ public partial class App : Application
             var layoutStore = _layoutStore;
             _tray.LayoutStatus = () => layoutStore.Status;
             _tray.OpenQuickSearch = extras.OpenQuickSearch;
+            var pinController = _pins;
+            _tray.ReleasePins = () => pinController.ReleaseAllClickThrough();
+            _tray.AnyClickThroughPins = () => pinController.AnyClickThrough;
             _tray.ResetBar = async () =>
             {
                 // Emergency exit (M6-Fix 1) – without an app restart. Editing is finished with saving first.
@@ -349,7 +381,8 @@ public partial class App : Application
 
             _heartbeat = new Heartbeat(_registry, _log, location);
             _heartbeat.Start();
-            _log.Info(null, $"Start finished (ue Bar {AppInfo.Version}{(AppInfo.IsPortable ? ", portable" : "")})");
+            Step("extras, settings, tray");
+            _log.Info(null, $"Start finished (ue Bar {AppInfo.Version}{(AppInfo.IsPortable ? ", portable" : "")}) after {(DateTime.Now - System.Diagnostics.Process.GetCurrentProcess().StartTime).TotalSeconds:0.0} s: {string.Join(", ", steps)}");
 
 #if DEBUG
             // Debug only: deliberately trigger a hang to check the UI watchdog.

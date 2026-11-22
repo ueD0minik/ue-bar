@@ -170,27 +170,8 @@ internal static class SettingsUi
         };
         slider.SetResourceReference(Control.ForegroundProperty, "AccentBrush");
 
-        // The One UI slider has no thumb: value directly from the mouse position (click and drag).
-        void SetFrom(MouseEventArgs e)
-        {
-            var ratio = slider.ActualWidth > 0 ? Math.Clamp(e.GetPosition(slider).X / slider.ActualWidth, 0, 1) : 0;
-            slider.Value = Math.Clamp(min + (Math.Round((max - min) * ratio / step) * step), min, max);
-        }
-
-        slider.PreviewMouseLeftButtonDown += (_, e) =>
-        {
-            slider.CaptureMouse();
-            SetFrom(e);
-            e.Handled = true;
-        };
-        slider.PreviewMouseMove += (_, e) =>
-        {
-            if (slider.IsMouseCaptured)
-            {
-                SetFrom(e);
-            }
-        };
-        slider.PreviewMouseLeftButtonUp += (_, _) => slider.ReleaseMouseCapture();
+        // The One UI slider has no thumb: value directly from the mouse position (click and drag) – the app's one slider behaviour.
+        UeBar.App.Infrastructure.OneUiSliderInput.Attach(slider, live: null, commit: null);
         var debounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(350) };
         debounce.Tick += (_, _) =>
         {

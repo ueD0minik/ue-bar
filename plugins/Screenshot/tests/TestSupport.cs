@@ -126,6 +126,20 @@ internal sealed class FakeClipboard : IClipboardAccess
     }
 }
 
+/// <summary>Stands in for the core's "Save as" dialog: answers with a prepared path (null = cancelled).</summary>
+internal sealed class FakeSaveDialog
+{
+    public List<(string Owner, SaveFileRequest Request)> Asked { get; } = [];
+
+    public string? Answer { get; set; }
+
+    public Task<string?> AskAsync(string owner, SaveFileRequest request, CancellationToken cancellationToken)
+    {
+        Asked.Add((owner, request));
+        return Task.FromResult(Answer);
+    }
+}
+
 internal sealed class FakeOcr : IShotOcr
 {
     public OcrOutcome Outcome { get; set; } = new("Hallo Welt\nZeile zwei", "de-DE");
@@ -192,6 +206,7 @@ internal sealed class ShotEnv : IAsyncDisposable
         Registry.Host.Pins = Pins;
         Registry.Host.ScreenAreaPicker = Picker;
         Registry.Host.Clipboard = Clipboard;
+        Registry.Host.SaveDialog = SaveDialog.AskAsync;
         Module = new ScreenshotModule(Ocr, Time);
         Module.NotificationReceived += (_, n) =>
         {
@@ -224,6 +239,8 @@ internal sealed class ShotEnv : IAsyncDisposable
     public FakeClipboard Clipboard { get; } = new();
 
     public FakeOcr Ocr { get; } = new();
+
+    public FakeSaveDialog SaveDialog { get; } = new();
 
     public ScreenshotModule Module { get; }
 

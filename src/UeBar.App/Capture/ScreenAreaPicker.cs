@@ -19,9 +19,12 @@ namespace UeBar.App.Capture;
 /// across monitors), click a window or a monitor; Esc or a right click cancels. With actions a small bar
 /// appears at the area. The result carries the area as PNG from the frozen screen. One pick at a time.
 /// </summary>
-internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Func<bool, bool> hideBar) : IScreenAreaPicker
+internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Func<ICaptureHideTarget?> barTarget) : IScreenAreaPicker
 {
     private bool _busy;
+
+    /// <summary>The last picked area and when (P2-5-Fix 1: the answer to the action appears there).</summary>
+    public (PixelRect Area, DateTimeOffset At)? LastPick { get; private set; }
 
     public Task<ScreenAreaResult?> PickScreenAreaAsync(ScreenAreaRequest request, CancellationToken cancellationToken)
     {
@@ -38,10 +41,24 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
         }
 
         _busy = true;
-        var barWasVisible = false;
         try
         {
-            barWasVisible = hideBar(true);
+            // P2-5-Fix 1: the bar comes back in every case (action, Esc, error, exception).
+            return barTarget() is { } bar
+                ? await CaptureSafety.RunWithBarHiddenAsync(bar, wasVisible => PickHiddenAsync(request, wasVisible, cancellationToken))
+                : await PickHiddenAsync(request, false, cancellationToken);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task<ScreenAreaResult?> PickHiddenAsync(ScreenAreaRequest request, bool barWasVisible, CancellationToken cancellationToken)
+    {
+        PickSession? session = null;
+        try
+        {
             if (barWasVisible)
             {
                 await Task.Delay(60, CancellationToken.None);
@@ -59,9 +76,14 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
             var frozen = ScreenGrab.Capture(desktop);
             var windows = WindowFinder.Snapshot([]);
             log.Info(null, $"Screen area: {request.Mode}, {monitors.Count} monitor(s) {desktop.Width}×{desktop.Height}, captured in {Environment.TickCount64 - started} ms");
-            var session = new PickSession(request, monitors, desktop, frozen, windows, log);
+            session = new PickSession(request, monitors, desktop, frozen, windows, log);
             using var registration = cancellationToken.Register(() => dispatcher.BeginInvoke(() => session.Cancel()));
             var result = await session.RunAsync();
+            if (result is not null)
+            {
+                LastPick = (ScreenSelection.FromSdk(result.Bounds), DateTimeOffset.UtcNow);
+            }
+
             log.Info(null, result is null ? "Screen area: cancelled" : $"Screen area: {result.Bounds.Width}×{result.Bounds.Height}{(result.ActionId is { } a ? $", action {a}" : "")}");
             return result;
         }
@@ -72,12 +94,8 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
         }
         finally
         {
-            if (barWasVisible)
-            {
-                hideBar(false);
-            }
-
-            _busy = false;
+            // Whatever happened: no overlay may stay behind (it would catch the mouse and cover the bar).
+            session?.Close();
         }
     }
 
@@ -347,13 +365,17 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
             Close();
         }
 
-        private void Close()
+        /// <summary>Close every overlay for real (not only made transparent) – safe to call twice.</summary>
+        public void Close()
         {
             foreach (var overlay in _overlays.ToList())
             {
                 _overlays.Remove(overlay);
+                overlay.Hide();
                 overlay.Close();
             }
+
+            _done.TrySetResult(null);
         }
 
         private static long Overlap(PixelRect a, PixelRect b)

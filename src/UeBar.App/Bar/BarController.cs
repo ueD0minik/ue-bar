@@ -46,6 +46,7 @@ internal sealed class BarController : IDisposable
         _dispatcher = dispatcher;
         _fullscreen = new FullscreenDetector(() => _window.Handle);
         _poller = new CursorPoller(p => _dispatcher.BeginInvoke(DispatcherPriority.Input, () => OnTick(p)), log);
+        _poller.WatchChanged += change => _dispatcher.BeginInvoke(DispatcherPriority.Input, () => WatchedPointerChanged?.Invoke(change));
     }
 
     /// <summary>Settings or state changed (for the tray menu).</summary>
@@ -115,14 +116,65 @@ internal sealed class BarController : IDisposable
     // ------------------------------------------------------------------ Settings (M7)
 
     /// <summary>
-    /// P2-5: hide the bar at once while a screen area is picked (true = it was visible). The state stays as it
-    /// is; afterwards it comes back or hides as usual.
+    /// P2-5: hide the bar at once while a screen area is picked. The state stays as it is; afterwards it comes
+    /// back or hides as usual. P2-5-Fix 1: <see cref="CaptureSafety"/> always restores – also when the bar was
+    /// collapsed (before the fix the opacity stayed 0 then, and the bar never showed again).
     /// </summary>
-    public bool SetCaptureHidden(bool hidden)
+    public ICaptureHideTarget CaptureTarget => new CaptureHide(this);
+
+    /// <summary>
+    /// P2-5-Fix 1: let the mouse polling also watch these areas (pins that let clicks through). Empty = off; the
+    /// polling then does nothing extra. While areas are watched the polling also runs when the bar is paused.
+    /// </summary>
+    public void SetWatchedAreas(IReadOnlyList<(string Id, PixelRect Rect)> areas)
     {
-        var visible = _window.IsVisible;
-        _window.SetCaptureHidden(hidden);
-        return visible;
+        if (_poller.Watch.SetAreas(areas))
+        {
+            _log.Info(null, areas.Count > 0 ? $"Mouse polling also watches {areas.Count} pin(s) that let clicks through" : "Mouse polling: no pins to watch any more");
+            UpdatePollerPause();
+        }
+    }
+
+    /// <summary>The mouse/Ctrl state over a watched area changed (UI thread).</summary>
+    public event Action<PointerChange>? WatchedPointerChanged;
+
+    public bool IsWatchingAreas => _poller.Watch.IsActive;
+
+    private sealed class CaptureHide(BarController owner) : ICaptureHideTarget
+    {
+        public bool HideForCapture()
+        {
+            var visible = owner._window.IsVisible;
+            owner._window.SetCaptureHidden(true);
+            return visible;
+        }
+
+        public void RestoreAfterCapture()
+        {
+            owner._window.SetCaptureHidden(false);
+            owner.CheckWindow("after capture", owner._machine.State);
+        }
+    }
+
+    /// <summary>
+    /// P2-5-Fix 1: does Windows really show the bar when the state says so? Cheap (a few window queries), only
+    /// on a state switch. If not: a warning in the log and repaired at once.
+    /// </summary>
+    private void CheckWindow(string when, BarState state)
+    {
+        if (state == BarState.Hidden || _window.IsCaptureHidden || _window.Handle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var problems = BarWindowHealth.Problems(_window.Facts());
+        if (problems.Count == 0)
+        {
+            return;
+        }
+
+        _log.Warn(null, $"Bar window not visible {when} ({state}): {string.Join(", ", problems)} – repaired");
+        _window.RepairVisibility(show: true);
     }
 
     /// <summary>Change a bar setting: takes effect right away and is saved.</summary>
@@ -604,6 +656,11 @@ internal sealed class BarController : IDisposable
             _log.Warn(null, $"Bar window does not match the state: {e.NewState}, window shows {_window.Shows} – \"Reset bar\" in the tray helps");
         }
 
+        if (expected is not null && e.OldState != e.NewState)
+        {
+            CheckWindow("on switch", e.NewState);
+        }
+
         _poller.SetBarVisible(e.NewState != BarState.Hidden);
         _viewModel.IsPanelVisible = e.NewState is BarState.Open or BarState.Pinned;
         _viewModel.IsBarVisible = e.NewState != BarState.Hidden;
@@ -676,7 +733,7 @@ internal sealed class BarController : IDisposable
 
     private void UpdatePollerPause()
     {
-        var paused = (_settings.Paused && !_machine.IsOverridingPause) || _sessionLocked || _displayOff;
+        var paused = (_settings.Paused && !_machine.IsOverridingPause && !_poller.Watch.IsActive) || _sessionLocked || _displayOff;
         if (paused != _pollerPaused)
         {
             _pollerPaused = paused;
