@@ -54,6 +54,15 @@ internal sealed class SettingsHost
     /// <summary>Plugins found at the start, and adding/removing them (SPEC 4.4).</summary>
     public required PluginHost Plugins { get; init; }
 
+    /// <summary>Pins on the screen (P2-5).</summary>
+    public UeBar.App.Pins.PinController? Pins { get; init; }
+
+    /// <summary>Global hotkeys besides the quick search (P2-5) – paused while recording.</summary>
+    public Infrastructure.GlobalHotkeys? Hotkeys { get; init; }
+
+    /// <summary>Hotkeys of plugins (P2-5).</summary>
+    public UeBar.App.Plugins.PluginHotkeys? PluginHotkeys { get; init; }
+
     /// <summary>Ends this process and starts ue Bar again (plugin changes need it).</summary>
     public required Func<Task> Restart { get; init; }
 
@@ -137,7 +146,7 @@ internal sealed partial class SettingsWindow : Window
             _host.Registry.ModuleStatusChanged -= OnModuleStatusChanged;
             _host.Settings.BusPolicy.RequestsChanged -= OnBusRequestsChanged;
             UiCultureSource.Shared.Changed -= OnLanguageChanged;
-            _host.Bar.SuspendHotkey(false);
+            SuspendAllHotkeys(false);
             _open = null;
         };
     }
@@ -198,6 +207,7 @@ internal sealed partial class SettingsWindow : Window
         Nav("bar", Loc.Get("Settings_Bar"), "");
         Nav("oled", Loc.Get("Settings_Oled"), "");
         Nav("notifications", Loc.Get("Settings_Notifications"), "");
+        Nav("pins", Loc.Get("Settings_Pins"), "");
         Nav("layout", Loc.Get("Settings_Layout"), "");
         Nav("plugins", Loc.Get("Settings_Plugins"), "");
         foreach (var module in _host.Registry.Modules.Where(m => m.IsLoaded))
@@ -242,10 +252,7 @@ internal sealed partial class SettingsWindow : Window
     {
         _currentPage = key;
         _onRefresh = null;
-        if (key != "bar")
-        {
-            _host.Bar.SuspendHotkey(false);
-        }
+        SuspendAllHotkeys(false); // a recording on the previous page ends here
 
         foreach (var (k, b) in _navButtons)
         {
@@ -275,6 +282,9 @@ internal sealed partial class SettingsWindow : Window
                     break;
                 case "notifications":
                     BuildNotifications(page);
+                    break;
+                case "pins":
+                    BuildPins(page);
                     break;
                 case "layout":
                     BuildLayout(page);
@@ -525,226 +535,18 @@ internal sealed partial class SettingsWindow : Window
 
     private static string DefaultHotkeyText => Hotkey.TryParse(HotkeyRecording.DefaultHotkey)?.DisplayText ?? HotkeyRecording.DefaultHotkey;
 
-    /// <summary>
-    /// Recording field for the hotkey (M7-Fix 1). A button instead of a focusable border:
-    /// the border did get the focus on click, but the surrounding ScrollViewer took it back in the
-    /// same click – recording ended right away, no key arrived. The button handles the
-    /// click itself. Alt comes as <see cref="Key.System"/> (→ <c>SystemKey</c>), Win is counted by itself,
-    /// the own global hotkey is unregistered during recording. Next to it "Manual" as a fallback.
-    /// </summary>
-    private FrameworkElement HotkeyRecorder()
+    /// <summary>The quick search's hotkey (M7-Fix 1) through the shared recording field.</summary>
+    private FrameworkElement HotkeyRecorder() => HotkeyRecorderUi.Create(this, new HotkeyBinding(
+        () => _host.Bar.Settings.QuickSearchHotkey,
+        () => _host.Bar.HotkeyStatus,
+        text => _host.Bar.ChangeHotkey(text),
+        HotkeyRecording.DefaultHotkey), SuspendAllHotkeys, _host.Log);
+
+    /// <summary>While recording: release every own global hotkey, otherwise Windows catches it before the window does.</summary>
+    private void SuspendAllHotkeys(bool suspend)
     {
-        var panel = new StackPanel();
-        var status = Hint("");
-        var text = new TextBlock { FontSize = 14, Width = 270, TextTrimming = TextTrimming.CharacterEllipsis };
-        var box = new Button
-        {
-            Style = StyleOf("BarButton"),
-            Content = text,
-            Height = 38,
-            Width = 300,
-            Padding = new Thickness(14, 0, 14, 0),
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Background = Res("ControlBrush"),
-            BorderThickness = new Thickness(0),
-            Focusable = true,
-            ToolTip = Loc.F("Hotkey_Tip", DefaultHotkeyText),
-        };
-        KeyboardNavigation.SetIsTabStop(box, true);
-        var recording = false;
-        var log = _host.Log;
-
-        void ShowCurrent()
-        {
-            var current = Hotkey.TryParse(_host.Bar.Settings.QuickSearchHotkey);
-            text.Text = current?.DisplayText ?? _host.Bar.Settings.QuickSearchHotkey;
-            text.Foreground = Res("TextBrush");
-            var (result, message) = _host.Bar.HotkeyStatus;
-            status.Text = result == HotkeyRegistration.Registered ? Loc.Get("Hotkey_Active") : message;
-            status.Foreground = Res("SubTextBrush");
-        }
-
-        void StopRecording(string reason)
-        {
-            if (!recording)
-            {
-                return;
-            }
-
-            recording = false;
-            box.Background = Res("ControlBrush");
-            _host.Bar.SuspendHotkey(false); // register the old hotkey again
-            log.Info(null, $"Hotkey recording ended ({reason})");
-            ShowCurrent();
-        }
-
-        void Apply(Hotkey hotkey, string how)
-        {
-            recording = false;
-            box.Background = Res("ControlBrush");
-            var (result, _) = _host.Bar.ChangeHotkey(hotkey.Text);
-            log.Info(null, $"Hotkey recording: {how} {hotkey.Text} → {result}");
-            ShowCurrent();
-            if (result != HotkeyRegistration.Registered)
-            {
-                status.Text = result == HotkeyRegistration.InUse
-                    ? Loc.F("Hotkey_InUse", hotkey.DisplayText)
-                    : Loc.F("Hotkey_Invalid", hotkey.DisplayText);
-                status.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x60));
-            }
-            else
-            {
-                status.Text = Loc.F("Hotkey_ActiveWith", hotkey.DisplayText);
-            }
-        }
-
-        box.Click += (_, _) =>
-        {
-            if (recording)
-            {
-                return;
-            }
-
-            recording = true;
-            box.SetResourceReference(BackgroundProperty, "AccentBrush");
-            text.Text = Loc.Get("Hotkey_PressNow");
-            text.Foreground = Res("OnAccentTextBrush");
-            status.Text = Loc.Get("Hotkey_RecordingHint");
-            status.Foreground = Res("SubTextBrush");
-            _host.Bar.SuspendHotkey(true); // otherwise Windows catches the old hotkey before it arrives here
-            box.Focus();
-            Keyboard.Focus(box);
-            log.Info(null, $"Hotkey recording started (focus in field: {box.IsKeyboardFocused}, window active: {IsActive})");
-        };
-        box.GotKeyboardFocus += (_, _) => log.Debug(null, "Hotkey recording: field has the keyboard focus");
-        box.LostKeyboardFocus += (_, e) =>
-        {
-            log.Info(null, $"Hotkey recording: focus lost to {e.NewFocus?.GetType().Name ?? "nobody"}");
-            StopRecording("focus lost");
-        };
-        Deactivated += (_, _) => StopRecording("window no longer active");
-
-        box.PreviewKeyDown += (_, e) =>
-        {
-            if (!recording)
-            {
-                return;
-            }
-
-            e.Handled = true; // also Alt/F10 (otherwise window menu) and Space/Enter (otherwise "click")
-            var key = e.Key == Key.System ? e.SystemKey : e.Key;
-            var modifiers = HotkeyModifiers.None;
-            if (Keyboard.IsKeyDown(Key.LWin) || Keyboard.IsKeyDown(Key.RWin))
-            {
-                modifiers |= HotkeyModifiers.Win; // Keyboard.Modifiers does not report Win reliably
-            }
-
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-            {
-                modifiers |= HotkeyModifiers.Control;
-            }
-
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
-            {
-                modifiers |= HotkeyModifiers.Alt;
-            }
-
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
-            {
-                modifiers |= HotkeyModifiers.Shift;
-            }
-
-            var vk = KeyInterop.VirtualKeyFromKey(key);
-            var result = HotkeyRecording.Evaluate(vk, modifiers);
-            log.Info(null, $"Hotkey recording: key {e.Key}, SystemKey {e.SystemKey}, modifiers {Keyboard.Modifiers}, Win {modifiers.HasFlag(HotkeyModifiers.Win)} → {result.Outcome} {result.Hotkey?.Text}");
-            switch (result.Outcome)
-            {
-                case HotkeyRecordOutcome.Cancel:
-                    StopRecording("Esc");
-                    break;
-                case HotkeyRecordOutcome.ResetToDefault:
-                    Apply(result.Hotkey!, "default");
-                    break;
-                case HotkeyRecordOutcome.Complete:
-                    text.Text = result.Display;
-                    Apply(result.Hotkey!, "new");
-                    break;
-                default:
-                    text.Text = result.Display;
-                    break;
-            }
-        };
-        box.PreviewKeyUp += (_, e) =>
-        {
-            if (recording)
-            {
-                e.Handled = true; // releasing Alt must not open the window menu
-            }
-        };
-
-        ShowCurrent();
-        panel.Children.Add(box);
-        status.Margin = new Thickness(2, 6, 0, 0);
-        panel.Children.Add(status);
-        panel.Children.Add(ManualHotkey(hotkey => Apply(hotkey, "manual")));
-        return panel;
-    }
-
-    /// <summary>
-    /// Fallback (M7-Fix 1): some combinations Windows does not let through to the app at all (e.g.
-    /// Win+L, or another program already has them). Then pick checkboxes + key.
-    /// </summary>
-    private FrameworkElement ManualHotkey(Action<Hotkey> apply)
-    {
-        var outer = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
-        var content = new StackPanel { Visibility = Visibility.Collapsed, Margin = new Thickness(0, 8, 0, 0) };
-        var toggle = Button(Loc.Get("Hotkey_Manual"), () =>
-            content.Visibility = content.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible, icon: "");
-        outer.Children.Add(toggle);
-
-        var current = Hotkey.TryParse(_host.Bar.Settings.QuickSearchHotkey);
-        var mods = current?.Modifiers ?? HotkeyModifiers.None;
-        var vk = current?.VirtualKey ?? 0x20;
-        var row = new WrapPanel();
-        foreach (var (label, flag) in new[] { ("Win", HotkeyModifiers.Win), (Loc.KeyName("Ctrl"), HotkeyModifiers.Control), ("Alt", HotkeyModifiers.Alt), (Loc.KeyName("Shift"), HotkeyModifiers.Shift) })
-        {
-            var box = new CheckBox
-            {
-                Style = StyleOf("OneUiSwitch"),
-                Content = new TextBlock { Text = label, FontSize = 13 },
-                IsChecked = mods.HasFlag(flag),
-                Margin = new Thickness(0, 0, 18, 8),
-                Focusable = true,
-            };
-            box.Checked += (_, _) => mods |= flag;
-            box.Unchecked += (_, _) => mods &= ~flag;
-            row.Children.Add(box);
-        }
-
-        content.Children.Add(row);
-        var keyRow = new StackPanel { Orientation = Orientation.Horizontal };
-        var keys = HotkeyRecording.SelectableKeys;
-        keyRow.Children.Add(Combo(keys.Select(k => (k.Label, k.VirtualKey)), vk, v => vk = v, width: 180));
-        var result = Hint("");
-        var take = Button(Loc.Get("Common_Apply"), () =>
-        {
-            if (Hotkey.FromKeys(mods, vk) is { } hotkey)
-            {
-                apply(hotkey);
-                result.Text = "";
-            }
-            else
-            {
-                result.Text = Loc.F("Hotkey_NeedModifier", Loc.KeyName("Ctrl"), Loc.KeyName("Shift"));
-            }
-        }, accent: true);
-        take.Margin = new Thickness(10, 0, 0, 0);
-        keyRow.Children.Add(take);
-        content.Children.Add(keyRow);
-        result.Margin = new Thickness(2, 6, 0, 0);
-        content.Children.Add(result);
-        outer.Children.Add(content);
-        return outer;
+        _host.Bar.SuspendHotkey(suspend);
+        _host.Hotkeys?.Set.Suspend(suspend);
     }
 
     // ------------------------------------------------------------------ OLED
@@ -910,7 +712,12 @@ internal sealed partial class SettingsWindow : Window
                 Task.FromResult(m is IModuleSettings s ? s.SettingFields : (IReadOnlyList<SettingField>)[]));
             if (fields is { Succeeded: true, Value: { Count: > 0 } list })
             {
-                var editor = new ModuleFieldEditor(_host.Registry, _host.Settings, _host.Log, module, list, this);
+                var editor = new ModuleFieldEditor(_host.Registry, _host.Settings, _host.Log, module, list, this)
+                {
+                    Hotkeys = _host.PluginHotkeys,
+                    SuspendHotkeys = SuspendAllHotkeys,
+                    Layout = _host.Layout,
+                };
                 page.Children.Add(editor.Build());
             }
             else if (!fields.Succeeded)

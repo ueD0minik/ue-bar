@@ -69,7 +69,11 @@ public interface ITileItemEditor
 /// <param name="Icon">Icon name (Segoe Fluent Icons or "U+XXXX").</param>
 /// <param name="Group">Heading the row is shown under (rows of a group in the given order).</param>
 /// <param name="EntryId">The <c>"id"</c> of the list entry – it opens its fields on a click; null = shown only (e.g. lives in the layout).</param>
-public sealed record SettingListRow(string Title, string? Detail = null, string? Icon = null, string? Group = null, string? EntryId = null);
+public sealed record SettingListRow(string Title, string? Detail = null, string? Icon = null, string? Group = null, string? EntryId = null)
+{
+    /// <summary>The row gets an "Add as tile" button (contract 1.5, needs <see cref="ISettingListTiles"/>), e.g. for entries on no tile yet.</summary>
+    public bool CanAddTile { get; init; }
+}
 
 /// <summary>
 /// The module decides how a <see cref="SettingFieldKind.List"/> is shown (contract 1.4): one compact row

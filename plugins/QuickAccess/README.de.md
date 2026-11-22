@@ -59,10 +59,21 @@ mit Name, Art und Ziel (Datei und Ordner mit „Durchsuchen …“). Sie erschei
 zum Anlegen von Kacheln und Sammlungs-Einträgen – und andere Plugins können sie über ihre ID öffnen
 (Modul-Bus, unten).
 
+Kacheln und Sammlungen legst du am einfachsten direkt in der Bar an (Bearbeiten → Kachel
+hinzufügen); die Seite ist für Einträge, die nur auf diesem PC gelten, z. B. eigene Befehle – ein
+Hinweis oben sagt das.
+
 Die Seite ist kompakt: eine Zeile pro Eintrag (Symbol, Name, Art, gekürztes Ziel), ein Klick klappt die
 Felder auf, ein Suchfeld filtert. Gruppiert nach Verwendung: **Einzelne Kacheln**, je **Sammlung**,
-**Nicht verwendet**. Was nur im Layout liegt (ein auf die Sammlung gezogener Ordner), steht mit dabei,
-markiert mit „in der Bar bearbeiten“.
+**Noch auf keiner Kachel**. Was nur im Layout liegt (ein auf die Sammlung gezogener Ordner), steht mit
+dabei, markiert mit „in der Bar bearbeiten“.
+
+- Ein **neuer Eintrag** wird auch Kachel: **Auch als Kachel hinzufügen** ist standardmäßig an, mit dem
+  Tab, in den sie kommt (Standard: der Tab, den die Bar gerade zeigt). Die Kachel entsteht, sobald du
+  den Eintrag zuklappst (oder den nächsten anlegst oder die Seite verlässt). Ausschalten, wenn der
+  Eintrag nur in die Suche soll.
+- Jeder Eintrag **auf noch keiner Kachel** hat einen Knopf **Als Kachel hinzufügen** (in den Tab, den die
+  Bar gerade zeigt).
 
 ![Einstellungen des Schnellzugriff-Plugins](images/quickaccess-settings.png)
 

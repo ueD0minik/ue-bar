@@ -7,8 +7,10 @@ kleine Pill erscheint und mit ihr deine Kacheln, eine Statuszeile, Benachrichtig
 Schnellsuche. Vorbild ist die „Now Bar“ von Samsung One UI. Was die Kacheln zeigen, kommt aus
 **Plugins** – [Home Assistant](plugins/HomeAssistant/README.de.md), [Windows](plugins/Windows/README.de.md)
 (Lautstärke, Medien, WLAN, Bluetooth, Akkus, Systemwerte dieses PCs), [Timer](plugins/Timer/README.de.md)
-(Timer, Stoppuhr, Pomodoro) und [Schnellzugriff](plugins/QuickAccess/README.de.md) (Apps, Dateien,
-Ordner, Webseiten als Kacheln) werden mitgeliefert; weitere kommen dazu, ohne die App neu zu bauen.
+(Timer, Stoppuhr, Pomodoro), [Schnellzugriff](plugins/QuickAccess/README.de.md) (Apps, Dateien,
+Ordner, Webseiten als Kacheln) und [Screenshot](plugins/Screenshot/README.de.md) (aufnehmen, anpinnen,
+Text erkennen) werden mitgeliefert; weitere kommen dazu, ohne die App neu zu bauen. Notizen und
+Screenshots lassen sich als kleine Fenster, die immer obenauf bleiben, auf dem Bildschirm **anpinnen**.
 
 ![Panel mit Kacheln eines Beispiel-Zuhauses](docs/images/panel.png)
 
@@ -26,9 +28,35 @@ Ordner, Webseiten als Kacheln) werden mitgeliefert; weitere kommen dazu, ohne di
 - **Statuszeile** mit kleinen Werten im Panel und in der Pill, **Now Playing** in der Pill.
 - **Benachrichtigungen** im Panel, mit Verlauf.
 - **Schnellsuche** mit globalem Tastenkürzel (Standard `Win + Alt + Leertaste`).
+- **Pins**: Notizen und Screenshots als kleine Fenster über allem (siehe unten).
 - **Deutsch und Englisch**, im laufenden Betrieb umschaltbar. Zahlen und Uhrzeiten nach der
   Windows-Region.
 - OLED-Schutz (Abdunkeln, Pixel-Shift), eingeklappt sparsam mit Ressourcen.
+
+## Pins
+
+Ein Pin ist ein kleines Fenster, das über allem bleibt – eine Notiz oder ein Screenshot zum
+Abschreiben, während du in einem anderen Fenster arbeitest.
+
+- **Anlegen:** `pin <Text>` in der Schnellsuche oder im Assist, **Notiz anpinnen** in der Pin-Liste der
+  Bar (Pin-Symbol im Panel), ein Screenshot ([Screenshot-Plugin](plugins/Screenshot/README.de.md),
+  `Win + Alt + S`) – und jedes Plugin über das SDK.
+- **Bedienen:** ziehen = verschieben (rastet an den Bildschirmrändern ein), am Rand ziehen = Größe.
+  Bilder: Mausrad = Zoom, gezoomtes Bild ziehen = verschieben, Doppelklick = einpassen. Text:
+  Doppelklick = bearbeiten, `Strg` + Mausrad = Schriftgröße.
+- **Rechtsklick:** Kopieren · Speichern unter (Bild) · Deckkraft · Position sperren · **Klicks
+  durchlassen** (der Pin bleibt sichtbar, du arbeitest „durch ihn hindurch“) · Ausblenden · Schließen.
+- **Alle auf einmal:** `Win + Alt + P` blendet alle Pins aus oder ein (änderbar unter
+  **Einstellungen → Pins**); beim Einblenden werden durchlässige Pins wieder anklickbar. Die
+  Pin-Liste in der Bar zeigt, versteckt und schließt einzelne oder alle.
+- **OLED-freundlich:** Nach 60 s ohne Maus wird ein Pin auf 35 % abgedunkelt und ist sofort wieder
+  hell, wenn die Maus kommt; alle Pins wandern alle paar Minuten um ein, zwei Pixel; über Vollbild-Apps
+  sind sie ausgeblendet. Alles unter **Einstellungen → Pins** einstellbar.
+- Pins überstehen einen Neustart (Inhalt, Größe, Platz – pro Monitor; fehlt der Monitor, kommt der
+  Pin auf den Hauptbildschirm). Sie liegen nur auf diesem PC (`%APPDATA%\ueBar\pins`), nie im
+  synchronisierten Layout.
+
+![Ein Screenshot und sein erkannter Text als Pins](plugins/Screenshot/images/screenshot-pins.png)
 
 ## Voraussetzungen
 
@@ -80,6 +108,7 @@ Quelle und eine deutliche Warnung) und wieder, wenn sich seine Dateien ändern. 
 | [Windows](plugins/Windows/README.de.md) | Dieser PC: Lautstärke und Ausgabegerät, App-Lautstärke, Medien aller Apps (auch als Now Playing), WLAN, Bluetooth, Geräte-Akkus, Akku, CPU, Arbeitsspeicher, Datenträger, Helligkeit, Sperren/Energiesparen | ja |
 | [Timer](plugins/Timer/README.de.md) | Timer mit Voreinstellungen und Namen, Stoppuhr, Pomodoro (kann Aktionen anderer Plugins auslösen); `t 10` in der Schnellsuche, Restzeit in der Pill | ja |
 | [Schnellzugriff](plugins/QuickAccess/README.de.md) | Startmenü-Apps, Dateien, Office-Vorlagen (neues Dokument), Ordner, Webseiten und eigene Befehle als Kacheln mit echten Symbolen – auch bis zu sechs in einer Kachel; Ziehen und Ablegen, Schnellsuche | ja |
+| [Screenshot](plugins/Screenshot/README.de.md) | Bereich, Fenster oder Bildschirm aufnehmen (`Win + Alt + S`), dann anpinnen, kopieren, speichern oder Text erkennen (Windows-OCR, offline) | ja |
 | [Test-Modul](plugins/Dummy/README.de.md) | Simulierte Geräte zum Entwickeln und Testen von ue Bar | nein – Debug-Builds und eigenes ZIP |
 | [Hallo](samples/HelloPlugin) | Beispiel-Plugin: eine Zähler-Kachel, Ausgangspunkt für eigene | nein – Beispiel im Quellcode |
 

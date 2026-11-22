@@ -7,8 +7,10 @@ edge: a small pill appears, and with it your tiles, a status line, notifications
 search. Inspired by the "Now Bar" of Samsung One UI. What the tiles show comes from
 **plugins** – [Home Assistant](plugins/HomeAssistant/README.md), [Windows](plugins/Windows/README.md)
 (volume, media, Wi-Fi, Bluetooth, batteries, system values of this PC), [Timer](plugins/Timer/README.md)
-(timers, stopwatch, Pomodoro) and [Quick access](plugins/QuickAccess/README.md) (apps, files,
-folders, web pages as tiles) come with ue Bar; more can be added without rebuilding the app.
+(timers, stopwatch, Pomodoro), [Quick access](plugins/QuickAccess/README.md) (apps, files,
+folders, web pages as tiles) and [Screenshot](plugins/Screenshot/README.md) (capture, pin, recognize
+text) come with ue Bar; more can be added without rebuilding the app. Notes and screenshots can be
+**pinned** on the screen as small windows that stay on top.
 
 ![Panel with tiles of an example home](docs/images/panel.png)
 
@@ -26,8 +28,33 @@ folders, web pages as tiles) come with ue Bar; more can be added without rebuild
 - **Status line** with small values in the panel and the pill, **Now Playing** in the pill.
 - **Notifications** in the panel, with a history.
 - **Quick search** with a global hotkey (default `Win + Alt + Space`).
+- **Pins**: notes and screenshots as small windows on top of everything (see below).
 - **German and English**, switchable at runtime. Numbers and times follow your Windows region.
 - OLED protection (dimming, pixel shift), light on resources when collapsed.
+
+## Pins
+
+A pin is a small window that stays on top of everything – a note or a screenshot to copy from while
+you work in another window.
+
+- **Create:** `pin <text>` in the quick search or Assist, **Pin note** in the pin list of the bar
+  (pin icon in the panel), a screenshot ([Screenshot plugin](plugins/Screenshot/README.md),
+  `Win + Alt + S`) – and any plugin through the SDK.
+- **Use:** drag to move (edges snap to the screen), drag the border to resize. Images: mouse wheel =
+  zoom, drag a zoomed image to pan, double click = fit. Text: double click = edit, `Ctrl` + mouse
+  wheel = font size.
+- **Right click:** copy · save as (images) · opacity · lock position · **let clicks through** (the pin
+  stays visible, you work "through" it) · hide · close.
+- **All at once:** `Win + Alt + P` hides or shows all pins (changeable under **Settings → Pins**);
+  showing all also makes click-through pins clickable again. The pin list in the bar shows, hides
+  and closes single pins or all.
+- **OLED-friendly:** after 60 s without the mouse a pin dims to 35 % and lights up as soon as the mouse
+  comes; all pins move by a pixel or two every few minutes; over fullscreen apps they are hidden. All
+  adjustable under **Settings → Pins**.
+- Pins survive a restart (content, size, place – per monitor; a missing monitor means the primary
+  one). They are stored on this PC only (`%APPDATA%\ueBar\pins`), never in the synced layout.
+
+![A screenshot and its recognized text as pins](plugins/Screenshot/images/screenshot-pins.png)
 
 ## Requirements
 
@@ -79,6 +106,7 @@ as a ZIP with **Settings → Plugins → Add plugin …**.
 | [Windows](plugins/Windows/README.md) | This PC: volume and output device, app volume, media of all apps (also as Now Playing), Wi-Fi, Bluetooth, device batteries, battery, CPU, memory, disk, brightness, lock/sleep | yes |
 | [Timer](plugins/Timer/README.md) | Timers with presets and names, stopwatch, Pomodoro (can start actions of other plugins); `t 10` in the quick search, time left in the pill | yes |
 | [Quick access](plugins/QuickAccess/README.md) | Start menu apps, files, Office templates (new document), folders, web pages and own commands as tiles with their real icons – also up to six in one tile; drag and drop, quick search | yes |
+| [Screenshot](plugins/Screenshot/README.md) | Capture an area, window or screen (`Win + Alt + S`), then pin, copy, save or recognize the text (Windows OCR, offline) | yes |
 | [Test module](plugins/Dummy/README.md) | Simulated devices for developing and testing ue Bar | no – debug builds and a separate ZIP |
 | [Hello](samples/HelloPlugin) | Sample plugin: a counter tile, the starting point for your own | no – sample in the source |
 

@@ -227,6 +227,27 @@ public partial class PanelView : UserControl
         }
     }
 
+    /// <summary>P2-5: the quick note field of the pin list needs the keyboard like the Assist field.</summary>
+    private void OnPinNoteMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        AssistInputRequested?.Invoke(this, EventArgs.Empty);
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input, () =>
+        {
+            PinNoteBox.Focus();
+            Keyboard.Focus(PinNoteBox);
+        });
+    }
+
+    private void OnPinNoteKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && DataContext is BarViewModel { Pins: { } pins })
+        {
+            PinNoteBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+            pins.AddNoteCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
     private void OnAssistMouseDown(object sender, MouseButtonEventArgs e)
     {
         AssistInputRequested?.Invoke(this, EventArgs.Empty);

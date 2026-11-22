@@ -43,6 +43,8 @@ public partial class App : Application
     private Heartbeat? _heartbeat;
     private UiWatchdog? _watchdog;
     private ExtrasController? _extras;
+    private GlobalHotkeys? _hotkeys;
+    private UeBar.App.Pins.PinController? _pins;
     private bool _exiting;
     private long? _exitStarted;
     private volatile string _exitStage = "not started";
@@ -143,6 +145,15 @@ public partial class App : Application
                 DeviceName = () => general.Current.DeviceName,
             };
 
+            // Pins (P2-5): kept by the core, drawn by the app; picking a screen area and the clipboard for plugins.
+            var pinManager = new UeBar.Core.Pins.PinManager(paths.Pins, _log);
+            pinManager.Load();
+            var clipboard = new ClipboardAccess(Dispatcher, _log);
+            _hotkeys = new GlobalHotkeys(_log);
+            _registry.Host.Pins = pinManager;
+            _registry.Host.Clipboard = clipboard;
+            _registry.Host.ScreenAreaPicker = new UeBar.App.Capture.ScreenAreaPicker(Dispatcher, _log, hidden => _bar?.SetCaptureHidden(hidden) ?? false);
+
             // Plugins (SPEC 4.4): find them, ask for every one that does not come with ue Bar (first time
             // and whenever its files changed), load them, hand their modules to the registry. A broken
             // plugin only gets a status – the app starts anyway.
@@ -177,7 +188,16 @@ public partial class App : Application
             _bar.Start();
 
             // Extras (M6): notifications, Now Playing, Assist, quick search – through core services.
-            var quickCommands = new QuickCommandService(_registry, _log);
+            var quickCommands = new QuickCommandService(_registry, _log)
+            {
+                HostDisplayName = id => id == UeBar.Core.Pins.PinManager.HostId ? Loc.Get("Pins_PanelName") : null,
+            };
+            UeBar.Core.Pins.PinCommands.Register(pinManager, quickCommands, bus);
+            _pins = new UeBar.App.Pins.PinController(pinManager, settings, _hotkeys, clipboard, Dispatcher, _log);
+            _pins.Start();
+            viewModel.Pins = new PinsViewModel(_pins);
+            var pluginHotkeys = new PluginHotkeys(_registry, settings, _hotkeys, Dispatcher, _log);
+            pluginHotkeys.Start();
             var settingsForExtras = settings;
             _extras = new ExtrasController(
                 viewModel,
@@ -268,6 +288,9 @@ public partial class App : Application
                 Paths = paths,
                 Log = log,
                 Plugins = plugins,
+                Pins = _pins,
+                Hotkeys = _hotkeys,
+                PluginHotkeys = pluginHotkeys,
                 Restart = async () =>
                 {
                     if (layout.IsEditing)
@@ -598,6 +621,10 @@ public partial class App : Application
             })
             .Add("bar", () =>
             {
+                _pins?.Dispose();
+                _pins = null;
+                _hotkeys?.Dispose();
+                _hotkeys = null;
                 _bar?.Dispose();
                 _bar = null;
             })

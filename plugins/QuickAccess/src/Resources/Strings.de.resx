@@ -130,6 +130,9 @@
     <value>Sammlung „{0}“</value>
   </data>
   <data name="Qa_GroupUnused" xml:space="preserve">
-    <value>Nicht verwendet</value>
+    <value>Noch auf keiner Kachel</value>
+  </data>
+  <data name="Qa_SettingIntro" xml:space="preserve">
+    <value>Kacheln und Sammlungen legst du am einfachsten direkt in der Bar an (Bearbeiten → Kachel hinzufügen). Hier verwaltest du Einträge, die nur auf diesem Gerät gelten, z. B. eigene Befehle.</value>
   </data>
 </root>

@@ -342,4 +342,66 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+    <!-- P2-5: dark context menu (pins). Flat list, no submenus. -->
+    <Style x:Key="DarkContextMenu" TargetType="ContextMenu">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource BarFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HasDropShadow" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="#FA1A1D22" CornerRadius="14" Padding="6" BorderBrush="#26FFFFFF" BorderThickness="1" MinWidth="220">
+                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="DarkMenuItem" TargetType="MenuItem">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="Bg" Background="Transparent" CornerRadius="9" Padding="10,7" Margin="0,1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="26" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="Glyph" Style="{StaticResource IconText}" FontSize="13" VerticalAlignment="Center"
+                                       Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <TextBlock x:Name="Check" Style="{StaticResource IconText}" FontSize="12" VerticalAlignment="Center" Text="&#xE73E;" Visibility="Collapsed" Foreground="{DynamicResource AccentBrush}" />
+                            <ContentPresenter Grid.Column="1" ContentSource="Header" VerticalAlignment="Center" RecognizesAccessKey="False" />
+                            <TextBlock Grid.Column="2" Margin="16,0,0,0" FontSize="11" Foreground="{StaticResource SubTextBrush}" VerticalAlignment="Center"
+                                       Text="{TemplateBinding InputGestureText}" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource ControlBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="Glyph" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bg" Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="DarkMenuSeparator" TargetType="Separator">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Separator">
+                    <Border Height="1" Margin="10,4" Background="#22FFFFFF" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

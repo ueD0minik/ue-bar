@@ -111,9 +111,12 @@ public sealed class ModuleRegistry : IAsyncDisposable
         _state = state ?? new InMemoryModuleStateStore();
         _dataRoot = dataRoot ?? AppPaths.Default.Root;
         _guard.ModuleFaulted += OnModuleFaulted;
-        _bus.IsModuleAvailable = id => Find(id)?.IsAvailable == true;
+        _bus.IsModuleAvailable = id => HostServices.ReservedIds.Contains(id) || Find(id)?.IsAvailable == true;
         Batteries = new DeviceBatteryHub(this);
     }
+
+    /// <summary>Services of the host offered on every module context (P2-5: pins, screen area, clipboard). Set before the start.</summary>
+    public HostServices Host { get; } = new();
 
     /// <summary>Device batteries across the modules (P2-2), offered on every module context.</summary>
     internal DeviceBatteryHub Batteries { get; }
@@ -187,6 +190,12 @@ public sealed class ModuleRegistry : IAsyncDisposable
         if (string.IsNullOrWhiteSpace(id))
         {
             _log.Error(null, $"Module {module.GetType().Name} has an empty ID – skipped");
+            return null;
+        }
+
+        if (HostServices.ReservedIds.Contains(id))
+        {
+            _log.Error(null, $"Module {module.GetType().Name} uses the reserved ID '{id}' – skipped");
             return null;
         }
 
@@ -782,7 +791,7 @@ public sealed class ModuleRegistry : IAsyncDisposable
         }
 
         entry.Context?.Dispose();
-        var context = new ModuleContext(entry.Id, _bus.For(entry.Id), _log.ForModule(entry.Id), _guard, _dataRoot, _state as IModuleSecretStore, () => DeviceName?.Invoke() ?? "", UiCulture, Batteries);
+        var context = new ModuleContext(entry.Id, _bus.For(entry.Id), _log.ForModule(entry.Id), _guard, _dataRoot, _state as IModuleSecretStore, () => DeviceName?.Invoke() ?? "", UiCulture, Batteries, Host);
         entry.Context = context;
 
         var started = await _guard.RunAsync(

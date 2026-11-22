@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="Shot_ModuleName" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Shot_TileName" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Shot_Capture" xml:space="preserve">
+    <value>Aufnehmen</value>
+  </data>
+  <data name="Shot_ModeRegion" xml:space="preserve">
+    <value>Bereich (Rechteck ziehen)</value>
+  </data>
+  <data name="Shot_ModeWindow" xml:space="preserve">
+    <value>Fenster (anklicken)</value>
+  </data>
+  <data name="Shot_ModeScreen" xml:space="preserve">
+    <value>Ganzer Bildschirm</value>
+  </data>
+  <data name="Shot_ModeRegionShort" xml:space="preserve">
+    <value>Bereich</value>
+  </data>
+  <data name="Shot_ModeWindowShort" xml:space="preserve">
+    <value>Fenster</value>
+  </data>
+  <data name="Shot_ModeScreenShort" xml:space="preserve">
+    <value>Bildschirm</value>
+  </data>
+  <data name="Shot_SettingHotkey" xml:space="preserve">
+    <value>Tastenkürzel</value>
+  </data>
+  <data name="Shot_SettingHotkey_Hint" xml:space="preserve">
+    <value>Nimmt einen Screenshot im Modus unten auf. Entf = Standard.</value>
+  </data>
+  <data name="Shot_SettingMode" xml:space="preserve">
+    <value>Modus</value>
+  </data>
+  <data name="Shot_SettingMode_Hint" xml:space="preserve">
+    <value>Für Tastenkürzel und Kachel. Im Bereichsmodus nimmt ein Klick ohne Ziehen das Fenster unter der Maus.</value>
+  </data>
+  <data name="Shot_SettingAfter" xml:space="preserve">
+    <value>Nach der Aufnahme</value>
+  </data>
+  <data name="Shot_SettingAfter_Hint" xml:space="preserve">
+    <value>„Fragen“ zeigt eine kleine Leiste am gewählten Bereich.</value>
+  </data>
+  <data name="Shot_AfterAsk" xml:space="preserve">
+    <value>Fragen (Anpinnen · Kopieren · Speichern · Text erkennen)</value>
+  </data>
+  <data name="Shot_ActionPin" xml:space="preserve">
+    <value>Anpinnen</value>
+  </data>
+  <data name="Shot_ActionCopy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="Shot_ActionSave" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Shot_ActionOcr" xml:space="preserve">
+    <value>Text erkennen</value>
+  </data>
+  <data name="Shot_SettingFolder" xml:space="preserve">
+    <value>Ordner für gespeicherte Screenshots</value>
+  </data>
+  <data name="Shot_SettingFolder_Hint" xml:space="preserve">
+    <value>Leer = {0}. Dateinamen mit Datum und Uhrzeit.</value>
+  </data>
+  <data name="Shot_SettingOcrResult" xml:space="preserve">
+    <value>Erkannter Text</value>
+  </data>
+  <data name="Shot_OcrCopy" xml:space="preserve">
+    <value>In die Zwischenablage kopieren</value>
+  </data>
+  <data name="Shot_OcrPin" xml:space="preserve">
+    <value>Als Text-Pin anpinnen</value>
+  </data>
+  <data name="Shot_OcrBoth" xml:space="preserve">
+    <value>Kopieren und anpinnen</value>
+  </data>
+  <data name="Shot_SettingOcrLanguage" xml:space="preserve">
+    <value>Erkennungssprache</value>
+  </data>
+  <data name="Shot_SettingOcrLanguage_Hint" xml:space="preserve">
+    <value>Automatisch = deine Windows-Sprachen. Weitere: Windows-Einstellungen → Zeit und Sprache → Sprache → Sprachoptionen → „Optische Zeichenerkennung“.</value>
+  </data>
+  <data name="Shot_OcrAuto" xml:space="preserve">
+    <value>Automatisch (Windows-Sprachen)</value>
+  </data>
+  <data name="Shot_OcrNoLanguage" xml:space="preserve">
+    <value>In Windows ist keine Sprache für die Texterkennung installiert. Hinzufügen: Einstellungen → Zeit und Sprache → Sprache → Sprachoptionen → „Optische Zeichenerkennung“.</value>
+  </data>
+  <data name="Shot_OcrNoLanguageTitle" xml:space="preserve">
+    <value>Texterkennung nicht möglich</value>
+  </data>
+  <data name="Shot_OcrLanguageMissing" xml:space="preserve">
+    <value>Die Erkennungssprache „{0}“ ist in Windows nicht installiert. Wähl „Automatisch“ oder installier sie (Sprachoptionen → „Optische Zeichenerkennung“).</value>
+  </data>
+  <data name="Shot_OcrFailed" xml:space="preserve">
+    <value>Texterkennung fehlgeschlagen</value>
+  </data>
+  <data name="Shot_OcrEmpty" xml:space="preserve">
+    <value>Kein Text gefunden</value>
+  </data>
+  <data name="Shot_OcrDone" xml:space="preserve">
+    <value>Text erkannt</value>
+  </data>
+  <data name="Shot_OcrCopied" xml:space="preserve">
+    <value>Text erkannt und kopiert</value>
+  </data>
+  <data name="Shot_OcrPinned" xml:space="preserve">
+    <value>Text erkannt und angepinnt</value>
+  </data>
+  <data name="Shot_OcrCopiedPinned" xml:space="preserve">
+    <value>Text erkannt, kopiert und angepinnt</value>
+  </data>
+  <data name="Shot_OcrPinButton" xml:space="preserve">
+    <value>Anpinnen</value>
+  </data>
+  <data name="Shot_OcrCopyButton" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="Shot_Copied" xml:space="preserve">
+    <value>Screenshot kopiert</value>
+  </data>
+  <data name="Shot_CopyFailed" xml:space="preserve">
+    <value>Screenshot konnte nicht kopiert werden</value>
+  </data>
+  <data name="Shot_Saved" xml:space="preserve">
+    <value>Screenshot gespeichert</value>
+  </data>
+  <data name="Shot_SaveFailed" xml:space="preserve">
+    <value>Screenshot konnte nicht gespeichert werden</value>
+  </data>
+  <data name="Shot_PinFailed" xml:space="preserve">
+    <value>Screenshot konnte nicht angepinnt werden (zu viele Pins?)</value>
+  </data>
+  <data name="Shot_NotAvailable" xml:space="preserve">
+    <value>Diese Version der ue Bar kann keinen Bildschirmbereich auswählen.</value>
+  </data>
+  <data name="Shot_NoHotkey" xml:space="preserve">
+    <value>Kein Tastenkürzel</value>
+  </data>
+  <data name="Shot_Command" xml:space="preserve">
+    <value>Screenshot (shot fenster, shot bildschirm, shot text)</value>
+  </data>
+  <data name="Shot_Starting" xml:space="preserve">
+    <value>Screenshot …</value>
+  </data>
+  <data name="Shot_Busy" xml:space="preserve">
+    <value>Es läuft schon eine Aufnahme.</value>
+  </data>
+  <data name="Shot_SearchWindow" xml:space="preserve">
+    <value>Screenshot eines Fensters</value>
+  </data>
+  <data name="Shot_SearchScreen" xml:space="preserve">
+    <value>Screenshot des ganzen Bildschirms</value>
+  </data>
+  <data name="Shot_SearchText" xml:space="preserve">
+    <value>Text auf dem Bildschirm erkennen</value>
+  </data>
+  <data name="Shot_BusAction" xml:space="preserve">
+    <value>Screenshot aufnehmen: { mode?: region|window|screen, action?: pin|copy|save|ocr } → { started }</value>
+  </data>
+  <data name="Shot_BusEvent" xml:space="preserve">
+    <value>Ein Screenshot wurde aufgenommen: { mode, action, width, height, monitors } – kein Bild</value>
+  </data>
+</root>

@@ -280,7 +280,7 @@ internal sealed class BarViewModel : ObservableObject
     public bool ShowSetupSection => Setup is not null && Welcome is null;
 
     /// <summary>Tabs and grid visible (not in first start/welcome, not in the history).</summary>
-    public bool ShowTabs => Setup is null && Welcome is null && !ShowHistory;
+    public bool ShowTabs => Setup is null && Welcome is null && !ShowHistory && !ShowPins;
 
     public void ShowSetup(SetupViewModel setup) => Setup = setup;
 
@@ -293,6 +293,7 @@ internal sealed class BarViewModel : ObservableObject
         session.LayoutChanged += (_, _) => _ = RebuildEditingAsync();
         session.Editor.Changed += (_, _) => ShowStatus(session.Editor.StatusItems); // status line right away from the working state
         ShowHistory = false;
+        ShowPins = false;
         IsQuickSearchOpen = false;
         session.SelectionChanged += (_, _) => MarkSelection();
         session.PropertyChanged += (_, e) =>
@@ -473,7 +474,56 @@ internal sealed class BarViewModel : ObservableObject
         }
     }
 
-    public RelayCommand ToggleHistoryCommand => field ??= new RelayCommand(() => ShowHistory = !ShowHistory);
+    public RelayCommand ToggleHistoryCommand => field ??= new RelayCommand(() =>
+    {
+        ShowPins = false;
+        ShowHistory = !ShowHistory;
+    });
+
+    /// <summary>Pin list (P2-5); null while the pins are not set up.</summary>
+    public PinsViewModel? Pins
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value) && value is not null)
+            {
+                value.ContentChanged += (_, _) =>
+                {
+                    if (ShowPins)
+                    {
+                        ContentSizeChanged?.Invoke(this, EventArgs.Empty);
+                    }
+                };
+            }
+        }
+    }
+
+    /// <summary>Pin icon: show the pin list instead of the tabs.</summary>
+    public bool ShowPins
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (value && Pins is { } pins)
+                {
+                    pins.Refresh();
+                }
+
+                OnPropertyChanged(nameof(ShowTabs));
+                ContentSizeChanged?.Invoke(this, EventArgs.Empty);
+                PublishVisibility();
+            }
+        }
+    }
+
+    public RelayCommand TogglePinsCommand => field ??= new RelayCommand(() =>
+    {
+        ShowHistory = false;
+        ShowPins = !ShowPins;
+    });
 
     public RelayCommand ClearHistoryCommand => field ??= new RelayCommand(() => HistoryCleared?.Invoke(this, EventArgs.Empty));
 

@@ -90,4 +90,13 @@
   <data name="Color_Grey" xml:space="preserve">
     <value>Grey</value>
   </data>
+  <data name="Hotkey_Off" xml:space="preserve">
+    <value>No hotkey</value>
+  </data>
+  <data name="Hotkey_Active" xml:space="preserve">
+    <value>Active: {0}</value>
+  </data>
+  <data name="Hotkey_Taken" xml:space="preserve">
+    <value>{0} is already taken by another program – choose another one.</value>
+  </data>
 </root>

@@ -218,6 +218,38 @@ public sealed partial class QuickAccessModule
     /// live only in the layout (a folder dropped on a tile) are listed too, but only shown – they are
     /// edited in the bar.
     /// </summary>
+    /// <summary>
+    /// P2-5 (<see cref="ISettingListTiles"/>): an entry of the settings as a single tile – the same tile the
+    /// search would make (the target itself, own commands stay a reference). Null while it has no target yet.
+    /// </summary>
+    public TileConfig? CreateTileForListEntry(string fieldKey, IReadOnlyDictionary<string, string> entry)
+    {
+        if (fieldKey != QuickSettings.EntriesKey)
+        {
+            return null;
+        }
+
+        var values = new ModuleSettingValues(new Dictionary<string, string> { [fieldKey] = ModuleSettingValues.FormatList([entry]) });
+        if (QuickSettings.Entries(values).FirstOrDefault() is not { } parsed)
+        {
+            return null;
+        }
+
+        if (parsed.Kind == EntryKind.App)
+        {
+            EnsureAppsLoading();
+        }
+
+        return new TileConfig
+        {
+            Module = ModuleId,
+            Type = ItemTileType.TypeId,
+            Size = TileSize.Small,
+            Entities = new Dictionary<string, string> { ["main"] = TileTargetOf(parsed).ToString() },
+            Label = parsed.Name,
+        };
+    }
+
     public IReadOnlyList<SettingListRow> GetListRows(string fieldKey, IReadOnlyList<IReadOnlyDictionary<string, string>> entries)
     {
         if (fieldKey != QuickSettings.EntriesKey)
@@ -268,7 +300,7 @@ public sealed partial class QuickAccessModule
         }
 
         rows.AddRange(parsed.Where(e => !shown.Contains(e.Id)).Select(e =>
-            new SettingListRow(e.Name, $"{QuickNames.KindText(e.Kind)} · {Shorten(TileTargetOf(e) is { Kind: not TargetKind.Entry } t ? t : new QuickTarget(TargetKind.File, e.Value))}", QuickNames.Icon(e.Kind), T["Qa_GroupUnused"], e.Id)));
+            new SettingListRow(e.Name, $"{QuickNames.KindText(e.Kind)} · {Shorten(TileTargetOf(e) is { Kind: not TargetKind.Entry } t ? t : new QuickTarget(TargetKind.File, e.Value))}", QuickNames.Icon(e.Kind), T["Qa_GroupUnused"], e.Id) { CanAddTile = true }));
         return rows;
     }
 }

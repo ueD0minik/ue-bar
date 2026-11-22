@@ -1,0 +1,17 @@
+{
+  "id": "screenshot",
+  "name": {
+    "en": "Screenshot",
+    "de": "Screenshot"
+  },
+  "description": {
+    "en": "Capture an area, a window or a screen (Win+Alt+S): pin it, copy it, save it or recognize its text – offline, the images stay on this PC.",
+    "de": "Bereich, Fenster oder Bildschirm aufnehmen (Win+Alt+S): anpinnen, kopieren, speichern oder Text erkennen – offline, die Bilder bleiben auf diesem PC."
+  },
+  "version": "1.4.0",
+  "author": "Dominik Poschinger",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/ueD0minik/ue-bar",
+  "sdkVersion": "1.5",
+  "entryAssembly": "UeBar.Modules.Screenshot.dll"
+}

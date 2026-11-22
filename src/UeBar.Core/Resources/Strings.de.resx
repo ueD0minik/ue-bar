@@ -177,4 +177,22 @@
   <data name="Plugin_InstallFailed" xml:space="preserve">
     <value>Der Plugin-Ordner konnte nicht geändert werden: {0}</value>
   </data>
+  <data name="Pin_ImageTitle" xml:space="preserve">
+    <value>Bild {0}</value>
+  </data>
+  <data name="Pin_QuickCommand" xml:space="preserve">
+    <value>Notiz anpinnen</value>
+  </data>
+  <data name="Pin_BusAction" xml:space="preserve">
+    <value>Text-Pin anlegen: { text, title? } → { id }</value>
+  </data>
+  <data name="Pin_Created" xml:space="preserve">
+    <value>Angepinnt.</value>
+  </data>
+  <data name="Pin_NoText" xml:space="preserve">
+    <value>Was soll angepinnt werden? Beispiel: pin Milch kaufen</value>
+  </data>
+  <data name="Pin_TooMany" xml:space="preserve">
+    <value>Höchstens {0} Pins – schließ zuerst einen.</value>
+  </data>
 </root>

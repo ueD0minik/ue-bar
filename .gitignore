@@ -7,6 +7,8 @@ artifacts/
 TestResults/
 dist/
 installer/Output/
+# temporary project files of the WPF build
+*_wpftmp.csproj
 
 # IDE
 .vs/

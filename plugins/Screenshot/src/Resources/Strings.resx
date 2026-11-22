@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="Shot_ModuleName" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Shot_TileName" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Shot_Capture" xml:space="preserve">
+    <value>Capture</value>
+  </data>
+  <data name="Shot_ModeRegion" xml:space="preserve">
+    <value>Area (drag a rectangle)</value>
+  </data>
+  <data name="Shot_ModeWindow" xml:space="preserve">
+    <value>Window (click it)</value>
+  </data>
+  <data name="Shot_ModeScreen" xml:space="preserve">
+    <value>Whole screen</value>
+  </data>
+  <data name="Shot_ModeRegionShort" xml:space="preserve">
+    <value>Area</value>
+  </data>
+  <data name="Shot_ModeWindowShort" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="Shot_ModeScreenShort" xml:space="preserve">
+    <value>Screen</value>
+  </data>
+  <data name="Shot_SettingHotkey" xml:space="preserve">
+    <value>Hotkey</value>
+  </data>
+  <data name="Shot_SettingHotkey_Hint" xml:space="preserve">
+    <value>Takes a screenshot in the mode below. Delete = default.</value>
+  </data>
+  <data name="Shot_SettingMode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="Shot_SettingMode_Hint" xml:space="preserve">
+    <value>For hotkey and tile. In the area mode a click without dragging takes the window under the mouse.</value>
+  </data>
+  <data name="Shot_SettingAfter" xml:space="preserve">
+    <value>After capturing</value>
+  </data>
+  <data name="Shot_SettingAfter_Hint" xml:space="preserve">
+    <value>“Ask” shows a small bar at the picked area.</value>
+  </data>
+  <data name="Shot_AfterAsk" xml:space="preserve">
+    <value>Ask (pin · copy · save · recognize text)</value>
+  </data>
+  <data name="Shot_ActionPin" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="Shot_ActionCopy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Shot_ActionSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Shot_ActionOcr" xml:space="preserve">
+    <value>Recognize text</value>
+  </data>
+  <data name="Shot_SettingFolder" xml:space="preserve">
+    <value>Folder for saved screenshots</value>
+  </data>
+  <data name="Shot_SettingFolder_Hint" xml:space="preserve">
+    <value>Empty = {0}. File names with date and time.</value>
+  </data>
+  <data name="Shot_SettingOcrResult" xml:space="preserve">
+    <value>Recognized text</value>
+  </data>
+  <data name="Shot_OcrCopy" xml:space="preserve">
+    <value>Copy to the clipboard</value>
+  </data>
+  <data name="Shot_OcrPin" xml:space="preserve">
+    <value>Pin as a text pin</value>
+  </data>
+  <data name="Shot_OcrBoth" xml:space="preserve">
+    <value>Copy and pin</value>
+  </data>
+  <data name="Shot_SettingOcrLanguage" xml:space="preserve">
+    <value>Recognition language</value>
+  </data>
+  <data name="Shot_SettingOcrLanguage_Hint" xml:space="preserve">
+    <value>Automatic = your Windows languages. More: Windows settings → Time &amp; language → Language → language options → “Optical character recognition”.</value>
+  </data>
+  <data name="Shot_OcrAuto" xml:space="preserve">
+    <value>Automatic (Windows languages)</value>
+  </data>
+  <data name="Shot_OcrNoLanguage" xml:space="preserve">
+    <value>Windows has no text recognition language installed. Add one: Settings → Time &amp; language → Language → language options → “Optical character recognition”.</value>
+  </data>
+  <data name="Shot_OcrNoLanguageTitle" xml:space="preserve">
+    <value>Text recognition not possible</value>
+  </data>
+  <data name="Shot_OcrLanguageMissing" xml:space="preserve">
+    <value>The recognition language “{0}” is not installed in Windows. Choose “Automatic” or install it (language options → “Optical character recognition”).</value>
+  </data>
+  <data name="Shot_OcrFailed" xml:space="preserve">
+    <value>Text recognition failed</value>
+  </data>
+  <data name="Shot_OcrEmpty" xml:space="preserve">
+    <value>No text found</value>
+  </data>
+  <data name="Shot_OcrDone" xml:space="preserve">
+    <value>Text recognized</value>
+  </data>
+  <data name="Shot_OcrCopied" xml:space="preserve">
+    <value>Text recognized and copied</value>
+  </data>
+  <data name="Shot_OcrPinned" xml:space="preserve">
+    <value>Text recognized and pinned</value>
+  </data>
+  <data name="Shot_OcrCopiedPinned" xml:space="preserve">
+    <value>Text recognized, copied and pinned</value>
+  </data>
+  <data name="Shot_OcrPinButton" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="Shot_OcrCopyButton" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Shot_Copied" xml:space="preserve">
+    <value>Screenshot copied</value>
+  </data>
+  <data name="Shot_CopyFailed" xml:space="preserve">
+    <value>Screenshot could not be copied</value>
+  </data>
+  <data name="Shot_Saved" xml:space="preserve">
+    <value>Screenshot saved</value>
+  </data>
+  <data name="Shot_SaveFailed" xml:space="preserve">
+    <value>Screenshot could not be saved</value>
+  </data>
+  <data name="Shot_PinFailed" xml:space="preserve">
+    <value>Screenshot could not be pinned (too many pins?)</value>
+  </data>
+  <data name="Shot_NotAvailable" xml:space="preserve">
+    <value>This version of ue Bar cannot pick a screen area.</value>
+  </data>
+  <data name="Shot_NoHotkey" xml:space="preserve">
+    <value>No hotkey</value>
+  </data>
+  <data name="Shot_Command" xml:space="preserve">
+    <value>Screenshot (shot window, shot screen, shot text)</value>
+  </data>
+  <data name="Shot_Starting" xml:space="preserve">
+    <value>Screenshot …</value>
+  </data>
+  <data name="Shot_Busy" xml:space="preserve">
+    <value>A screenshot is already being taken.</value>
+  </data>
+  <data name="Shot_SearchWindow" xml:space="preserve">
+    <value>Screenshot of a window</value>
+  </data>
+  <data name="Shot_SearchScreen" xml:space="preserve">
+    <value>Screenshot of the whole screen</value>
+  </data>
+  <data name="Shot_SearchText" xml:space="preserve">
+    <value>Recognize text on the screen</value>
+  </data>
+  <data name="Shot_BusAction" xml:space="preserve">
+    <value>Take a screenshot: { mode?: region|window|screen, action?: pin|copy|save|ocr } → { started }</value>
+  </data>
+  <data name="Shot_BusEvent" xml:space="preserve">
+    <value>A screenshot was taken: { mode, action, width, height, monitors } – no image</value>
+  </data>
+</root>

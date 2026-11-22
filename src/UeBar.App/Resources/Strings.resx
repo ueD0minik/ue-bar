@@ -1090,4 +1090,217 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Fields_ListEmpty" xml:space="preserve">
     <value>No entries yet.</value>
   </data>
+  <data name="Fields_HotkeyNotRunning" xml:space="preserve">
+    <value>Active as soon as the plugin runs.</value>
+  </data>
+  <data name="Fields_ListAddTile" xml:space="preserve">
+    <value>Add as tile</value>
+  </data>
+  <data name="Fields_ListAddTile_Tip" xml:space="preserve">
+    <value>Puts a tile for this entry into the tab the bar shows right now.</value>
+  </data>
+  <data name="Fields_ListAlsoTile" xml:space="preserve">
+    <value>Also add as tile</value>
+  </data>
+  <data name="Fields_ListAlsoTile_Hint" xml:space="preserve">
+    <value>Added when you close this entry.</value>
+  </data>
+  <data name="Fields_ListNoTabs" xml:space="preserve">
+    <value>There is no tab yet – create one in the bar first.</value>
+  </data>
+  <data name="Fields_ListTileAdded" xml:space="preserve">
+    <value>Tile added to the tab “{0}”.</value>
+  </data>
+  <data name="Fields_ListTileFailed" xml:space="preserve">
+    <value>The tile could not be added.</value>
+  </data>
+  <data name="Fields_ListTileIncomplete" xml:space="preserve">
+    <value>Not added as tile: the entry is not complete yet. Fill it in, then use “Add as tile”.</value>
+  </data>
+  <data name="Hotkey_None" xml:space="preserve">
+    <value>No hotkey</value>
+  </data>
+  <data name="Hotkey_TurnOff" xml:space="preserve">
+    <value>No hotkey</value>
+  </data>
+  <data name="Pick_HintRegion" xml:space="preserve">
+    <value>Drag an area · click = window · Esc or right click = cancel</value>
+  </data>
+  <data name="Pick_HintScreen" xml:space="preserve">
+    <value>Click a screen · Esc or right click = cancel</value>
+  </data>
+  <data name="Pick_HintWindow" xml:space="preserve">
+    <value>Click a window · Esc or right click = cancel</value>
+  </data>
+  <data name="Pin_ClickThrough" xml:space="preserve">
+    <value>Let clicks through</value>
+  </data>
+  <data name="Pin_ClickThrough_Tip" xml:space="preserve">
+    <value>The pin stays visible, you work “through” it. Undo: pin list in the bar, or {0} twice (hide and show all).</value>
+  </data>
+  <data name="Pin_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Pin_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Pin_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Pin_Edit_Gesture" xml:space="preserve">
+    <value>Double click</value>
+  </data>
+  <data name="Pin_FontLarger" xml:space="preserve">
+    <value>Larger text</value>
+  </data>
+  <data name="Pin_FontSmaller" xml:space="preserve">
+    <value>Smaller text</value>
+  </data>
+  <data name="Pin_Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="Pin_Lock" xml:space="preserve">
+    <value>Lock position</value>
+  </data>
+  <data name="Pin_Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Pin_Opacity" xml:space="preserve">
+    <value>Opacity {0} %</value>
+  </data>
+  <data name="Pin_SaveAs" xml:space="preserve">
+    <value>Save as …</value>
+  </data>
+  <data name="Pin_SaveFilter" xml:space="preserve">
+    <value>PNG image|*.png</value>
+  </data>
+  <data name="Pin_ZoomReset" xml:space="preserve">
+    <value>Fit image</value>
+  </data>
+  <data name="Pins_ClickThrough" xml:space="preserve">
+    <value>clicks go through</value>
+  </data>
+  <data name="Pins_CloseAll" xml:space="preserve">
+    <value>Close all</value>
+  </data>
+  <data name="Pins_CloseAllAsk" xml:space="preserve">
+    <value>Close all pins?</value>
+  </data>
+  <data name="Pins_CloseAllYes" xml:space="preserve">
+    <value>Close all</value>
+  </data>
+  <data name="Pins_DimAfter" xml:space="preserve">
+    <value>Dim after</value>
+  </data>
+  <data name="Pins_DimAfter_Hint" xml:space="preserve">
+    <value>Without the mouse over a pin it gets darker (OLED); moving the mouse over it makes it bright at once.</value>
+  </data>
+  <data name="Pins_DimLevel" xml:space="preserve">
+    <value>Brightness while dimmed</value>
+  </data>
+  <data name="Pins_DimLevel_Hint" xml:space="preserve">
+    <value>How bright a dimmed pin stays.</value>
+  </data>
+  <data name="Pins_Empty" xml:space="preserve">
+    <value>No pins yet. Pin a note here, “pin &lt;text&gt;” in the quick search, or a screenshot.</value>
+  </data>
+  <data name="Pins_Folder" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="Pins_Folder_Hint" xml:space="preserve">
+    <value>Pins stay on this device only (never in the synchronized layout).</value>
+  </data>
+  <data name="Pins_FontSize" xml:space="preserve">
+    <value>Font size of new notes</value>
+  </data>
+  <data name="Pins_FontSize_Hint" xml:space="preserve">
+    <value>Changed per pin with Ctrl + mouse wheel or in its menu.</value>
+  </data>
+  <data name="Pins_Hidden" xml:space="preserve">
+    <value>hidden</value>
+  </data>
+  <data name="Pins_HideAll" xml:space="preserve">
+    <value>Hide all</value>
+  </data>
+  <data name="Pins_HideFullscreen" xml:space="preserve">
+    <value>Hide pins over fullscreen apps</value>
+  </data>
+  <data name="Pins_HideFullscreen_Hint" xml:space="preserve">
+    <value>While a game, video or presentation fills a screen, its pins are hidden.</value>
+  </data>
+  <data name="Pins_HideOne" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="Pins_Hotkey" xml:space="preserve">
+    <value>Show/hide all pins</value>
+  </data>
+  <data name="Pins_HotkeyHint" xml:space="preserve">
+    <value>{0} shows/hides all</value>
+  </data>
+  <data name="Pins_Hotkey_Hint" xml:space="preserve">
+    <value>Click the field and press the keys. Delete = default ({0}).</value>
+  </data>
+  <data name="Pins_Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="Pins_Locked" xml:space="preserve">
+    <value>locked</value>
+  </data>
+  <data name="Pins_NotAvailable" xml:space="preserve">
+    <value>Pins are not available.</value>
+  </data>
+  <data name="Pins_NoteEmpty" xml:space="preserve">
+    <value>Type a note first.</value>
+  </data>
+  <data name="Pins_NotePlaceholder" xml:space="preserve">
+    <value>Short note …</value>
+  </data>
+  <data name="Pins_NoteTip" xml:space="preserve">
+    <value>Enter = pin it</value>
+  </data>
+  <data name="Pins_OpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="Pins_PanelName" xml:space="preserve">
+    <value>Pins</value>
+  </data>
+  <data name="Pins_PinNote" xml:space="preserve">
+    <value>Pin note</value>
+  </data>
+  <data name="Pins_PixelShift" xml:space="preserve">
+    <value>Pixel shift</value>
+  </data>
+  <data name="Pins_PixelShift_Hint" xml:space="preserve">
+    <value>Moves all pins by a pixel or two every few minutes (OLED).</value>
+  </data>
+  <data name="Pins_ReleaseClickThrough" xml:space="preserve">
+    <value>Clickable again</value>
+  </data>
+  <data name="Pins_ReleaseClickThrough_Tip" xml:space="preserve">
+    <value>Ends “Let clicks through” for this pin.</value>
+  </data>
+  <data name="Pins_Seconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="Pins_SettingsIntro" xml:space="preserve">
+    <value>Pins are small windows that stay on top – notes and screenshots to copy from. Right click a pin for its menu.</value>
+  </data>
+  <data name="Pins_ShowAll" xml:space="preserve">
+    <value>Show all</value>
+  </data>
+  <data name="Pins_ShowOne" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="Pins_Text" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Pins_TooMany" xml:space="preserve">
+    <value>At most {0} pins – close one first.</value>
+  </data>
+  <data name="Pins_Untitled" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="Settings_Pins" xml:space="preserve">
+    <value>Pins</value>
+  </data>
 </root>

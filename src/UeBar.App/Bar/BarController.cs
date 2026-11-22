@@ -114,6 +114,17 @@ internal sealed class BarController : IDisposable
 
     // ------------------------------------------------------------------ Settings (M7)
 
+    /// <summary>
+    /// P2-5: hide the bar at once while a screen area is picked (true = it was visible). The state stays as it
+    /// is; afterwards it comes back or hides as usual.
+    /// </summary>
+    public bool SetCaptureHidden(bool hidden)
+    {
+        var visible = _window.IsVisible;
+        _window.SetCaptureHidden(hidden);
+        return visible;
+    }
+
     /// <summary>Change a bar setting: takes effect right away and is saved.</summary>
     public void Update(Action<BarSettings> change)
     {

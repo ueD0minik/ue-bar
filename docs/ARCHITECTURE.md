@@ -68,8 +68,11 @@ Loading (`PluginHost` in the core), only at start-up:
    is stored with the checksum of its code files in `plugin-trust.json`. Changed files → ask again.
 3. **Load**: each plugin gets its own `AssemblyLoadContext`. `UeBar.Sdk` and everything the app
    already has (the framework) come from the app – otherwise `IModule` would be two different
-   types. The plugin's own dependencies and language files come from its folder. The module class
-   is created on the thread pool with a time limit.
+   types. The plugin's own dependencies and language files come from its folder. Exception (1.4.0):
+   the C#/WinRT runtime and projection (`WinRT.Runtime`, `Microsoft.Windows.SDK.NET`) register
+   process-wide state and may exist only once – the highest version any plugin brings is loaded into
+   the app's context and shared (`ProcessWideAssemblies`). The module class is created on the thread
+   pool with a time limit.
 4. **Register**: loaded modules go to the module registry. Plugins that are off, not allowed,
    incompatible or broken are registered as "not loaded" with the reason, so their tiles keep a
    fitting placeholder.
@@ -138,6 +141,29 @@ Contract 1.4 (1.3.3): `ITileItemEditor` – a module lets the user edit the entr
 mode; it returns a changed copy of the `TileConfig`, the app gives it to the layout editor
 (`TileItemEditing` in the core), so undo, cancel and sync work as for every edit. `TileConfig.Options`
 holds own values of a tile. `ISettingListPresenter` shows a `List` setting compact and grouped.
+
+Contract 1.5 (1.4.0) – pins and screenshots, all generic:
+
+- **Pins** are a core feature. `PinManager` (core, WPF-free) keeps them in `%APPDATA%\ueBar\pins\`
+  (`pins.json` + one image file per image pin) – never in the layout, never synchronized. Placement per
+  monitor: offset from the monitor's corner in physical pixels, size in device-independent pixels; a
+  missing monitor means the primary one (`PinGeometry` in `UeBar.Bar`). The app draws one `PinWindow`
+  per visible pin (`PinController`): topmost, no taskbar, no focus except while editing text; snapping
+  through `WM_MOVING`/`WM_SIZING`; dimming and pixel shift from `PinGlow` with a timer that runs only
+  until the next change is due; fullscreen check every 2 s only while pins are visible. Modules use
+  `IPinService` on their context (own pins only); the user uses the pin list in the panel, the hotkey,
+  the quick command `pin` and the bus action `pins.create_text` (owner `pins`, a reserved ID).
+- **Picking a screen area** (`IScreenAreaPicker`, `ScreenAreaPicker` in the app): hide the bar, capture
+  the whole desktop once with GDI (the app is per-monitor DPI aware → physical pixels), one opaque
+  overlay window per monitor showing its part of the frozen image. The mouse is read in physical pixels;
+  each overlay maps them to its own device-independent pixels from its real size (`ScreenSelection`),
+  so rectangles across monitors with different scaling are right. Optional action bar at the area.
+- **Clipboard** (`IClipboardAccess`): write only, on the UI thread.
+- **Hotkeys of plugins**: `SettingFieldKind.Hotkey` + `IHotkeyHandler`; the app registers them while the
+  plugin runs (`PluginHotkeys`, `GlobalHotkeys` with its own message window, logic in `HotkeySet`). The
+  shared recording field pauses every own hotkey while recording.
+- `SettingFieldKind.Info` (a hint) and `ISettingListTiles` (a list entry becomes a tile; the app puts it
+  into the layout through `LayoutCoordinator.AddTileAsync`).
 
 ## Tiles are data
 

@@ -9,7 +9,7 @@ using UeBar.Core.Logging;
 namespace UeBar.Core.Modules;
 
 /// <summary>Context of a running module. Each start gets a new context with its own token.</summary>
-internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo, IUiLanguageInfo, IDeviceBatteryCatalog, IDisposable
+internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo, IUiLanguageInfo, IDeviceBatteryCatalog, IPinService, IScreenAreaPicker, IClipboardAccess, IDisposable
 {
     private readonly ModuleGuard _guard;
     private readonly string _dataRoot;
@@ -20,10 +20,12 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
 
     private readonly Func<string>? _deviceName;
     private readonly DeviceBatteryHub? _batteries;
+    private readonly HostServices _host;
 
-    public ModuleContext(string moduleId, IModuleBus bus, IModuleLogger log, ModuleGuard guard, string dataRoot, Settings.IModuleSecretStore? secrets = null, Func<string>? deviceName = null, UiCultureSource? culture = null, DeviceBatteryHub? batteries = null)
+    public ModuleContext(string moduleId, IModuleBus bus, IModuleLogger log, ModuleGuard guard, string dataRoot, Settings.IModuleSecretStore? secrets = null, Func<string>? deviceName = null, UiCultureSource? culture = null, DeviceBatteryHub? batteries = null, HostServices? host = null)
     {
         _batteries = batteries;
+        _host = host ?? new HostServices();
         _secrets = secrets;
         _deviceName = deviceName;
         _culture = culture ?? UiCultureSource.Shared;
@@ -37,6 +39,11 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
         if (_batteries is not null)
         {
             _batteries.Changed += OnBatteriesChanged;
+        }
+
+        if (_host.Pins is { } pins)
+        {
+            pins.Changed += OnPinsChanged;
         }
     }
 
@@ -74,6 +81,60 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
     public string? GetSecret(string key) => _secrets?.GetModuleSecret(ModuleId, key);
 
     public void SetSecret(string key, string? value) => _secrets?.SetModuleSecret(ModuleId, key, value);
+
+    // ------------------------------------------------------------------ pins (P2-5)
+
+    public event EventHandler? PinsChanged;
+
+    public IReadOnlyList<PinInfo> GetPins() => _host.Pins?.InfosOf(ModuleId) ?? [];
+
+    public string? CreateTextPin(TextPinRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Stopping.IsCancellationRequested ? null : _host.Pins?.CreateText(request.Text, request.Title, request.FontSize, ModuleId);
+    }
+
+    public string? CreateImagePin(ImagePinRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Stopping.IsCancellationRequested ? null : _host.Pins?.CreateImage(request.ImageData, request.Title, request.ScreenBounds, ModuleId);
+    }
+
+    public bool UpdatePin(string pinId, PinUpdate update) => _host.Pins?.UpdateFromModule(ModuleId, pinId, update) == true;
+
+    public bool ClosePin(string pinId) => _host.Pins?.CloseFromModule(ModuleId, pinId) == true;
+
+    private void OnPinsChanged(object? sender, Pins.PinChangedEventArgs e)
+    {
+        if (e.Kind is Pins.PinChangeKind.Placement or Pins.PinChangeKind.Options
+            || !string.Equals(e.Pin.Owner, ModuleId, StringComparison.OrdinalIgnoreCase)
+            || Volatile.Read(ref _disposed) != 0 || Stopping.IsCancellationRequested || PinsChanged is not { } handler)
+        {
+            return;
+        }
+
+        _guard.Invoke(ModuleId, "Pins changed", () => handler(this, EventArgs.Empty));
+    }
+
+    // ------------------------------------------------------------------ screen area, clipboard (P2-5)
+
+    public async Task<ScreenAreaResult?> PickScreenAreaAsync(ScreenAreaRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        if (_host.ScreenAreaPicker is not { } picker || Stopping.IsCancellationRequested)
+        {
+            return null;
+        }
+
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, Stopping);
+        return await picker.PickScreenAreaAsync(request, linked.Token).ConfigureAwait(false);
+    }
+
+    public Task<bool> SetTextAsync(string text, CancellationToken cancellationToken) =>
+        _host.Clipboard is { } clipboard && !string.IsNullOrEmpty(text) ? clipboard.SetTextAsync(text, cancellationToken) : Task.FromResult(false);
+
+    public Task<bool> SetImageAsync(byte[] png, CancellationToken cancellationToken) =>
+        _host.Clipboard is { } clipboard && png is { Length: > 0 } ? clipboard.SetImageAsync(png, cancellationToken) : Task.FromResult(false);
 
     public void RunBackground(string name, Func<CancellationToken, Task> work)
     {
@@ -147,6 +208,11 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
             if (_batteries is not null)
             {
                 _batteries.Changed -= OnBatteriesChanged;
+            }
+
+            if (_host.Pins is { } pins)
+            {
+                pins.Changed -= OnPinsChanged;
             }
 
             try

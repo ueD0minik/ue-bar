@@ -15,6 +15,7 @@ namespace UeBar.Core.Plugins;
 /// <list type="bullet">
 /// <item><c>UeBar.Sdk</c> always comes from the app – otherwise <c>IModule</c> of the plugin and of the app would be different types.</item>
 /// <item>What the app (and the .NET runtime) already has is shared if it is new enough for the plugin – so framework types are always the app's.</item>
+/// <item>The C#/WinRT runtime and projection exist once per process, shared by all plugins (<see cref="ProcessWideAssemblies"/>).</item>
 /// <item>Everything else – the plugin's own dependencies and its language files – comes from the plugin folder.</item>
 /// </list>
 /// Not collectible: plugins are never unloaded while the app runs.
@@ -51,6 +52,12 @@ internal sealed class PluginLoadContext : AssemblyLoadContext
         if (name is null || string.Equals(name, SdkName, StringComparison.OrdinalIgnoreCase))
         {
             return null; // → default context
+        }
+
+        if (ProcessWideAssemblies.Contains(name))
+        {
+            // P2-5: once per process, shared by all plugins (C#/WinRT).
+            return ProcessWideAssemblies.Load(name, _resolver?.ResolveAssemblyToPath(assemblyName) ?? Probe(assemblyName));
         }
 
         var isSatellite = name.EndsWith(".resources", StringComparison.OrdinalIgnoreCase);

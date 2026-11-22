@@ -31,6 +31,9 @@ public sealed class AppPaths
     public string LayoutSyncFile => Path.Combine(Root, "layout.sync.json");
     public string Backups => Path.Combine(Root, "backups");
 
+    /// <summary>Pins (P2-5): pins.json + images, this device only.</summary>
+    public string Pins => Path.Combine(Root, "pins");
+
     /// <summary>Plugins the user added (one folder per plugin, SPEC 4.4).</summary>
     public string Plugins => Path.Combine(Root, "plugins");
 

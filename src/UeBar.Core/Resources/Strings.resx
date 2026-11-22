@@ -177,4 +177,22 @@
   <data name="Plugin_InstallFailed" xml:space="preserve">
     <value>The plugin folder could not be changed: {0}</value>
   </data>
+  <data name="Pin_ImageTitle" xml:space="preserve">
+    <value>Image {0}</value>
+  </data>
+  <data name="Pin_QuickCommand" xml:space="preserve">
+    <value>Pin a note</value>
+  </data>
+  <data name="Pin_BusAction" xml:space="preserve">
+    <value>Create a text pin: { text, title? } → { id }</value>
+  </data>
+  <data name="Pin_Created" xml:space="preserve">
+    <value>Pinned.</value>
+  </data>
+  <data name="Pin_NoText" xml:space="preserve">
+    <value>What should be pinned? Example: pin Buy milk</value>
+  </data>
+  <data name="Pin_TooMany" xml:space="preserve">
+    <value>At most {0} pins – close one first.</value>
+  </data>
 </root>

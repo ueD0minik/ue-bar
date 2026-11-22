@@ -16,13 +16,13 @@ public static class CoreApiVersion
 {
     public const int Major = 1;
 
-    public const int Minor = 4;
+    public const int Minor = 5;
 
     /// <summary>The major version (kept from the time when the contract had a single number).</summary>
     public const int Current = Major;
 
     /// <summary>Contract version of this SDK as "major.minor".</summary>
-    public const string Text = "1.4";
+    public const string Text = "1.5";
 
     /// <summary>Contract version of this SDK.</summary>
     public static Version Version { get; } = new(Major, Minor);

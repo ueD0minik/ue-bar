@@ -168,9 +168,30 @@ public sealed class CollectionTests
             ("Sammlung „Schule“", "Mathe", "m"),
             ("Sammlung „Schule“", "example.org", null),   // lives only in the layout: shown, edited in the bar
             ("Sammlung „Freizeit“", "Mathe", null),        // the entry opens only once
-            ("Nicht verwendet", "Archiv", "u"),
+            ("Noch auf keiner Kachel", "Archiv", "u"),
         ], rows.Select(r => (r.Group, r.Title, r.EntryId)));
+        Assert.Equal([false, false, false, false, false, true], rows.Select(r => r.CanAddTile)); // P2-5: only entries on no tile get "Add as tile"
         Assert.Contains("in der Bar bearbeiten", rows[1].Detail, StringComparison.Ordinal);
         Assert.Equal("Ordner · D:\\Archiv", rows[^1].Detail);
+    }
+
+    [Fact]
+    public async Task Settings_explain_the_page_and_an_entry_becomes_the_same_tile_as_from_the_search()
+    {
+        await using var env = await new QuickEnv().StartAsync();
+
+        var intro = env.Module.SettingFields[0];
+        Assert.Equal(SettingFieldKind.Info, intro.Kind);
+        Assert.Contains("Bearbeiten → Kachel hinzufügen", intro.Description, StringComparison.Ordinal);
+
+        var folder = env.Module.CreateTileForListEntry(QuickSettings.EntriesKey, QuickEnv.Entry("u", "Archiv", "folder", folder: @"C:\Users\demo\Archiv"))!;
+        Assert.Equal((ItemTileType.TypeId, TileSize.Small, "Archiv"), (folder.Type, folder.Size, folder.Label));
+        Assert.Equal(@"folder:%USERPROFILE%\Archiv", folder.GetEntity("main")); // like the search: the target itself, portable
+
+        var command = env.Module.CreateTileForListEntry(QuickSettings.EntriesKey, QuickEnv.Entry("c", "Backup", "command", text: "robocopy a b"))!;
+        Assert.Equal("entry:c", command.GetEntity("main")); // own commands stay a reference to this PC
+
+        Assert.Null(env.Module.CreateTileForListEntry(QuickSettings.EntriesKey, QuickEnv.Entry("n", "Neu", "file"))); // no target yet
+        Assert.Null(env.Module.CreateTileForListEntry("other", QuickEnv.Entry("u", "Archiv", "folder", folder: @"D:\Archiv")));
     }
 }

@@ -47,6 +47,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <ItemsControl ItemsSource="{Binding StatusItems}" VerticalAlignment="Center" ClipToBounds="True">
                 <ItemsControl.ItemsPanel>
@@ -80,8 +81,28 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
+            <!-- P2-5: pins on the screen -->
+            <Button Grid.Column="2" Width="32" Height="32" Padding="0" Margin="0,0,6,0" Command="{Binding TogglePinsCommand}" ToolTip="{l:T Pins_PanelName}"
+                    Visibility="{Binding Pins, Converter={StaticResource NullToCollapsed}}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource BarButton}">
+                        <Setter Property="Background" Value="{StaticResource TabInactiveBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowPins}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Grid>
+                    <TextBlock Style="{StaticResource IconText}" FontSize="14" Text="&#xE707;" />
+                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-2,-4,0"
+                             Visibility="{Binding Pins.HasPins, Converter={StaticResource BoolToVisibility}, FallbackValue=Collapsed}" />
+                </Grid>
+            </Button>
+
             <!-- Bell: notification history (M6) -->
-            <Button Grid.Column="2" Width="32" Height="32" Padding="0" Margin="0,0,6,0" Command="{Binding ToggleHistoryCommand}" ToolTip="{l:T Panel_Notifications}">
+            <Button Grid.Column="3" Width="32" Height="32" Padding="0" Margin="0,0,6,0" Command="{Binding ToggleHistoryCommand}" ToolTip="{l:T Panel_Notifications}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource BarButton}">
                         <Setter Property="Background" Value="{StaticResource TabInactiveBrush}" />
@@ -99,19 +120,19 @@
                 </Grid>
             </Button>
 
-            <Button Grid.Column="3" Width="32" Height="32" Padding="0" Margin="0,0,6,0" Command="{Binding EditCommand}"
+            <Button Grid.Column="4" Width="32" Height="32" Padding="0" Margin="0,0,6,0" Command="{Binding EditCommand}"
                     Style="{StaticResource BarButton}" Background="{StaticResource TabInactiveBrush}" ToolTip="{l:T Panel_Edit}"
                     Visibility="{Binding ShowTabs, Converter={StaticResource BoolToVisibility}}">
                 <TextBlock Style="{StaticResource IconText}" FontSize="14" Text="&#xE70F;" />
             </Button>
 
             <!-- Gear (M7): settings -->
-            <Button Grid.Column="4" Width="32" Height="32" Padding="0" Margin="0,0,6,0" Command="{Binding OpenSettingsCommand}"
+            <Button Grid.Column="5" Width="32" Height="32" Padding="0" Margin="0,0,6,0" Command="{Binding OpenSettingsCommand}"
                     Style="{StaticResource BarButton}" Background="{StaticResource TabInactiveBrush}" ToolTip="{l:T Panel_Settings}">
                 <TextBlock Style="{StaticResource IconText}" FontSize="14" Text="&#xE713;" />
             </Button>
 
-            <Button Grid.Column="5" Width="32" Height="32" Padding="0" Command="{Binding TogglePinCommand}">
+            <Button Grid.Column="6" Width="32" Height="32" Padding="0" Command="{Binding TogglePinCommand}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource BarButton}">
                         <Setter Property="Background" Value="{StaticResource TabInactiveBrush}" />
@@ -309,6 +330,89 @@
                                                Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}" />
                                 </StackPanel>
                                 <TextBlock Grid.Column="2" Style="{StaticResource SubText}" FontSize="10" Margin="8,2,0,0" Text="{Binding TimeText}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <!-- P2-5: pin list (pin icon) -->
+        <StackPanel Margin="0,8,0,0" DataContext="{Binding Pins}"
+                    Visibility="{Binding DataContext.ShowPins, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibility}}">
+            <Grid Margin="2,0,0,6">
+                <StackPanel>
+                    <TextBlock Text="{l:T Pins_PanelName}" FontSize="14" FontWeight="SemiBold" />
+                    <TextBlock Style="{StaticResource SubText}" FontSize="11" Text="{Binding HotkeyText}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Visibility="{Binding HasPins, Converter={StaticResource BoolToVisibility}}">
+                    <Button Height="28" Padding="12,0" Margin="0,0,6,0" Style="{StaticResource BarButton}" Background="{StaticResource TabInactiveBrush}"
+                            Command="{Binding ToggleAllCommand}" Content="{Binding ToggleAllText}" FontSize="12" />
+                    <Button Height="28" Padding="12,0" Style="{StaticResource BarButton}" Background="{StaticResource TabInactiveBrush}"
+                            Command="{Binding CloseAllCommand}" Content="{l:T Pins_CloseAll}" FontSize="12"
+                            Visibility="{Binding IsConfirmingCloseAll, Converter={StaticResource InverseBoolToVisibility}}" />
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsConfirmingCloseAll, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{l:T Pins_CloseAllAsk}" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <Button Height="28" Padding="12,0" Margin="0,0,6,0" Style="{StaticResource BarButton}" Background="{StaticResource AlertBrush}"
+                                Command="{Binding ConfirmCloseAllCommand}" Content="{l:T Pins_CloseAllYes}" FontSize="12" />
+                        <Button Height="28" Padding="12,0" Style="{StaticResource BarButton}" Command="{Binding CancelCloseAllCommand}" Content="{l:T Common_No}" FontSize="12" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <!-- Quick note -->
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="PinNoteBox" Style="{StaticResource EditTextBox}" Text="{Binding NoteText, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnPinNoteKeyDown" PreviewMouseLeftButtonDown="OnPinNoteMouseDown"
+                         ToolTip="{l:T Pins_NoteTip}" />
+                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" Style="{StaticResource SubText}" FontSize="13" Text="{l:T Pins_NotePlaceholder}"
+                           Visibility="{Binding NoteText, Converter={StaticResource EmptyTextToVisible}}" />
+                <Button Grid.Column="1" Height="32" Padding="12,0" Margin="6,0,0,0" Style="{StaticResource BarButton}" Background="{DynamicResource AccentBrush}"
+                        Foreground="{StaticResource OnAccentTextBrush}" Command="{Binding AddNoteCommand}" FontSize="12">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource IconText}" FontSize="12" Text="&#xE707;" Margin="0,0,6,0" Foreground="{StaticResource OnAccentTextBrush}" />
+                        <TextBlock Text="{l:T Pins_PinNote}" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+            <TextBlock Style="{StaticResource SubText}" Margin="2,0,0,8" FontSize="12" Text="{Binding NoteMessage}"
+                       Visibility="{Binding NoteMessage, Converter={StaticResource NullToCollapsed}}" />
+
+            <TextBlock Style="{StaticResource SubText}" Margin="2,0,0,8" FontSize="12" Text="{l:T Pins_Empty}" TextWrapping="Wrap"
+                       Visibility="{Binding HasPins, Converter={StaticResource InverseBoolToVisibility}}" />
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="16" Background="{StaticResource TileOffBrush}" Padding="12,6" Margin="0,0,0,6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource IconText}" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"
+                                           Text="{Binding Icon, Converter={StaticResource IconGlyph}}" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Style="{StaticResource SubText}" FontSize="11" Text="{Binding Detail}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <Button Grid.Column="2" Height="28" Padding="10,0" Margin="6,0,0,0" Style="{StaticResource BarButton}" FontSize="11"
+                                        Command="{Binding ReleaseClickThroughCommand}" Content="{l:T Pins_ReleaseClickThrough}" ToolTip="{l:T Pins_ReleaseClickThrough_Tip}"
+                                        Visibility="{Binding IsClickThrough, Converter={StaticResource BoolToVisibility}}" />
+                                <Button Grid.Column="3" Width="28" Height="28" Padding="0" Margin="6,0,0,0" Style="{StaticResource BarButton}"
+                                        Command="{Binding ToggleCommand}" ToolTip="{Binding VisibilityTip}">
+                                    <TextBlock Style="{StaticResource IconText}" FontSize="12" Text="{Binding VisibilityGlyph}" />
+                                </Button>
+                                <Button Grid.Column="4" Width="28" Height="28" Padding="0" Margin="6,0,0,0" Style="{StaticResource BarButton}"
+                                        Command="{Binding CloseCommand}" ToolTip="{l:T Pin_Close}">
+                                    <TextBlock Style="{StaticResource IconText}" FontSize="12" Text="&#xE711;" />
+                                </Button>
                             </Grid>
                         </Border>
                     </DataTemplate>

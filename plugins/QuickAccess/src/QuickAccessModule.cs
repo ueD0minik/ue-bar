@@ -31,7 +31,8 @@ public sealed partial class QuickAccessModule :
     IModuleDiagnostics,
     ITileItemEditor,
     ILayoutAware,
-    ISettingListPresenter
+    ISettingListPresenter,
+    ISettingListTiles
 {
     public const string ModuleId = "quickaccess";
     internal const string GroupEntity = "group";

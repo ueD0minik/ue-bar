@@ -33,7 +33,7 @@ in a release is called `ueBar-plugin-<id>-<version>.zip`.
 ```powershell
 dotnet new classlib -n MyPlugin -f net10.0
 cd MyPlugin
-dotnet add package UeBar.Sdk --version 1.4.0
+dotnet add package UeBar.Sdk --version 1.5.0
 ```
 
 - Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF. A plugin that needs
@@ -66,7 +66,7 @@ Next to the `.csproj`:
   "author": "Your Name",
   "license": "GPL-3.0-or-later",
   "homepage": "https://example.org/myplugin",
-  "sdkVersion": "1.4",
+  "sdkVersion": "1.5",
   "entryAssembly": "MyPlugin.dll"
 }
 ```
@@ -218,6 +218,8 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 | `IDropHandler` | turn something dropped on the panel in edit mode (file, folder, shortcut, link) into a tile (1.3) |
 | `ITileItemEditor` | the user edits the entries of a tile right in the bar's edit mode: add (search, file, folder, web page, drop on the tile), reorder, rename, remove (1.4) |
 | `ISettingListPresenter` | how a `List` field is shown: compact rows, groups, rows that are only shown (1.4) |
+| `ISettingListTiles` | an entry of a `List` field becomes a tile: "Also add as tile" for new entries, "Add as tile" on rows with `CanAddTile` (1.5) |
+| `IHotkeyHandler` | your `Hotkey` settings fields become global hotkeys while the plugin runs (1.5, [below](#hotkeys-15)) |
 | `IModuleSettingsActions` | buttons on your settings page (`SettingFieldKind.Button`, 1.2) |
 | `ILayoutStoreProvider` | a place to sync the layout (e.g. a server) |
 | `ILayoutSuggestionProvider` / `ILayoutSuggestionOptions` | a suggested layout for the first start |
@@ -238,6 +240,12 @@ Implement only what you need; ue Bar checks with `is`/`as`.
 - `ShowWhen = "kind=file"` (or `"kind=app|command"`) on any field: shown only while the other field
   of the same level – the page or the same list entry – has one of these values.
 
+From 1.5:
+
+- `Hotkey` – a global hotkey like `"Win+Alt+S"`, recorded like the quick search's (empty = off). See
+  [hotkeys](#hotkeys-15).
+- `Info` – a hint on the page: `Label` as heading (may be empty), `Description` as text. Stores nothing.
+
 With `ILiveModuleSettings` your `ApplySettingsAsync` is also called while the plugin runs; it must
 then be safe against your own work (a lock around the values is usually all it takes).
 
@@ -249,6 +257,57 @@ possible". ue Bar puts it into the layout like any edit, so undo, "Cancel" and t
 it. Keep the entries in the configuration: slots in `Entities` and own values in `Options` (a
 string dictionary that travels with the layout, 1.4). `GetTileItems` says which entries there are, how
 many are allowed and where new ones may come from (`TileItemSources`).
+
+### Hotkeys (1.5)
+
+Add a field of kind `SettingFieldKind.Hotkey` (with a default such as `"Win+Alt+S"`) and implement
+`IHotkeyHandler`. While your plugin runs, ue Bar registers the hotkey, shows "in use" if another
+program has it, lets the user record a new one or turn it off, and calls
+`OnHotkeyAsync(fieldKey, ct)` on a press. Return quickly – start longer work with `RunBackground`.
+
+### Pins, picking a screen area, clipboard (1.5)
+
+Three services of the host on the module context – no WPF needed:
+
+```csharp
+if (context is IPinService pins)
+{
+    var id = pins.CreateTextPin(new TextPinRequest("Formula: a² + b² = c²") { Title = "Maths" });
+    pins.CreateImagePin(new ImagePinRequest(pngBytes) { ScreenBounds = area }); // appears exactly there
+    pins.UpdatePin(id!, new PinUpdate { Text = "…" });
+    pins.ClosePin(id!);
+}
+
+if (context is IScreenAreaPicker picker)
+{
+    var result = await picker.PickScreenAreaAsync(new ScreenAreaRequest(ScreenAreaMode.Region)
+    {
+        Actions = [new("pin", "Pin", "U+E718"), new("copy", "Copy", "U+E8C8")], // optional bar at the area
+    }, ct);
+    // result: Bounds (physical pixels), Monitors (bounds, work area, scale), Image (PNG), ActionId, WindowTitle
+}
+
+if (context is IClipboardAccess clipboard)
+{
+    await clipboard.SetTextAsync("…", ct);
+}
+```
+
+- **Pins** are drawn by the core: always on top, movable, resizable, dimmed after a while, kept across
+  restarts on this device only. A plugin sees and changes only its own pins; `PinsChanged` tells you
+  when the user closed or hid one.
+- **Picking** freezes the screen and darkens all monitors; the user drags a rectangle, clicks a window or
+  a monitor, Esc cancels (`null`). Coordinates are physical pixels of the virtual desktop
+  (`ScreenRect`), right with any scaling; `result.MainMonitor` is the monitor with most of the area.
+  One pick at a time – a second call while one is open returns `null`.
+- The clipboard can only be **written**.
+
+### Entries of a settings list as tiles (1.5)
+
+With `ISettingListTiles.CreateTileForListEntry(fieldKey, entry)` the settings page offers "Also add as
+tile" (default on) when the user creates an entry, and "Add as tile" on rows your
+`ISettingListPresenter` marks with `CanAddTile = true`. Return the same `TileConfig` your search would
+suggest, or `null` while the entry is incomplete; ue Bar puts it into the chosen tab.
 
 ### Important notifications
 
@@ -268,7 +327,16 @@ ue Bar asks the running plugins with `IDropHandler` one after another
 On the module context ue Bar offers more: `context as IHostInfo` (device name),
 `context as IModuleSecrets` (small encrypted secrets), `context as IUiLanguageInfo` (UI language
 and its change event), `context as IDeviceBatteryCatalog` (device batteries reported by other
-plugins, 1.1).
+plugins, 1.1), and from 1.5 `IPinService`, `IScreenAreaPicker` and `IClipboardAccess` (above).
+
+The host's own actions on the module bus have the provider ID `pins`: `pins.create_text`
+`{ "text", "title"? }` → `{ "id" }` creates a text pin that belongs to the calling plugin (with the
+user's permission, like every action). The ID `pins` is reserved – no plugin may use it.
+
+**Windows APIs (C#/WinRT):** target `net10.0-windows10.0.19041.0` (or later) like the Windows and the
+Screenshot plugin. `WinRT.Runtime.dll` and `Microsoft.Windows.SDK.NET.dll` may exist only once per
+process, so ue Bar shares the highest version any plugin brings – keep them in your plugin folder
+anyway.
 
 ## 6. Texts in two languages
 
@@ -331,7 +399,7 @@ checksum of the plugin's code files (`.dll`, `.exe`, `*.deps.json`, `plugin.json
 - The **major** version changes only for an unavoidable breaking change. Plugins for another major
   version are not loaded – Settings → Plugins says why.
 
-A plugin that needs `1.5` is not loaded by a ue Bar that offers `1.4` (it says "update ue Bar").
+A plugin that needs `1.6` is not loaded by a ue Bar that offers `1.5` (it says "update ue Bar").
 
 ## Rules
 

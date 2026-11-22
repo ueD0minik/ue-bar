@@ -1090,4 +1090,217 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Fields_ListEmpty" xml:space="preserve">
     <value>Noch keine Einträge.</value>
   </data>
+  <data name="Fields_HotkeyNotRunning" xml:space="preserve">
+    <value>Aktiv, sobald das Plugin läuft.</value>
+  </data>
+  <data name="Fields_ListAddTile" xml:space="preserve">
+    <value>Als Kachel hinzufügen</value>
+  </data>
+  <data name="Fields_ListAddTile_Tip" xml:space="preserve">
+    <value>Legt eine Kachel für diesen Eintrag in den Tab, den die Bar gerade zeigt.</value>
+  </data>
+  <data name="Fields_ListAlsoTile" xml:space="preserve">
+    <value>Auch als Kachel hinzufügen</value>
+  </data>
+  <data name="Fields_ListAlsoTile_Hint" xml:space="preserve">
+    <value>Wird angelegt, sobald du diesen Eintrag zuklappst.</value>
+  </data>
+  <data name="Fields_ListNoTabs" xml:space="preserve">
+    <value>Es gibt noch keinen Tab – leg zuerst in der Bar einen an.</value>
+  </data>
+  <data name="Fields_ListTileAdded" xml:space="preserve">
+    <value>Kachel im Tab „{0}“ hinzugefügt.</value>
+  </data>
+  <data name="Fields_ListTileFailed" xml:space="preserve">
+    <value>Die Kachel konnte nicht angelegt werden.</value>
+  </data>
+  <data name="Fields_ListTileIncomplete" xml:space="preserve">
+    <value>Nicht als Kachel angelegt: Der Eintrag ist noch unvollständig. Füll ihn aus und nimm dann „Als Kachel hinzufügen“.</value>
+  </data>
+  <data name="Hotkey_None" xml:space="preserve">
+    <value>Kein Tastenkürzel</value>
+  </data>
+  <data name="Hotkey_TurnOff" xml:space="preserve">
+    <value>Kein Tastenkürzel</value>
+  </data>
+  <data name="Pick_HintRegion" xml:space="preserve">
+    <value>Bereich ziehen · Klick = Fenster · Esc oder Rechtsklick = Abbrechen</value>
+  </data>
+  <data name="Pick_HintScreen" xml:space="preserve">
+    <value>Bildschirm anklicken · Esc oder Rechtsklick = Abbrechen</value>
+  </data>
+  <data name="Pick_HintWindow" xml:space="preserve">
+    <value>Fenster anklicken · Esc oder Rechtsklick = Abbrechen</value>
+  </data>
+  <data name="Pin_ClickThrough" xml:space="preserve">
+    <value>Klicks durchlassen</value>
+  </data>
+  <data name="Pin_ClickThrough_Tip" xml:space="preserve">
+    <value>Der Pin bleibt sichtbar, du arbeitest „durch ihn hindurch“. Aufheben: Pin-Liste in der Bar oder zweimal {0} (alle aus- und wieder einblenden).</value>
+  </data>
+  <data name="Pin_Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Pin_Copy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="Pin_Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
+  <data name="Pin_Edit_Gesture" xml:space="preserve">
+    <value>Doppelklick</value>
+  </data>
+  <data name="Pin_FontLarger" xml:space="preserve">
+    <value>Schrift größer</value>
+  </data>
+  <data name="Pin_FontSmaller" xml:space="preserve">
+    <value>Schrift kleiner</value>
+  </data>
+  <data name="Pin_Hide" xml:space="preserve">
+    <value>Ausblenden</value>
+  </data>
+  <data name="Pin_Lock" xml:space="preserve">
+    <value>Position sperren</value>
+  </data>
+  <data name="Pin_Menu" xml:space="preserve">
+    <value>Menü</value>
+  </data>
+  <data name="Pin_Opacity" xml:space="preserve">
+    <value>Deckkraft {0} %</value>
+  </data>
+  <data name="Pin_SaveAs" xml:space="preserve">
+    <value>Speichern unter …</value>
+  </data>
+  <data name="Pin_SaveFilter" xml:space="preserve">
+    <value>PNG-Bild|*.png</value>
+  </data>
+  <data name="Pin_ZoomReset" xml:space="preserve">
+    <value>Bild einpassen</value>
+  </data>
+  <data name="Pins_ClickThrough" xml:space="preserve">
+    <value>Klicks gehen durch</value>
+  </data>
+  <data name="Pins_CloseAll" xml:space="preserve">
+    <value>Alle schließen</value>
+  </data>
+  <data name="Pins_CloseAllAsk" xml:space="preserve">
+    <value>Alle Pins schließen?</value>
+  </data>
+  <data name="Pins_CloseAllYes" xml:space="preserve">
+    <value>Alle schließen</value>
+  </data>
+  <data name="Pins_DimAfter" xml:space="preserve">
+    <value>Abdunkeln nach</value>
+  </data>
+  <data name="Pins_DimAfter_Hint" xml:space="preserve">
+    <value>Ohne Maus darüber wird ein Pin dunkler (OLED); fährst du darüber, ist er sofort wieder hell.</value>
+  </data>
+  <data name="Pins_DimLevel" xml:space="preserve">
+    <value>Helligkeit abgedunkelt</value>
+  </data>
+  <data name="Pins_DimLevel_Hint" xml:space="preserve">
+    <value>Wie hell ein abgedunkelter Pin bleibt.</value>
+  </data>
+  <data name="Pins_Empty" xml:space="preserve">
+    <value>Noch keine Pins. Hier eine Notiz anpinnen, „pin &lt;Text&gt;“ in der Schnellsuche oder ein Screenshot.</value>
+  </data>
+  <data name="Pins_Folder" xml:space="preserve">
+    <value>Speicherort</value>
+  </data>
+  <data name="Pins_Folder_Hint" xml:space="preserve">
+    <value>Pins bleiben nur auf diesem Gerät (nie im synchronisierten Layout).</value>
+  </data>
+  <data name="Pins_FontSize" xml:space="preserve">
+    <value>Schriftgröße neuer Notizen</value>
+  </data>
+  <data name="Pins_FontSize_Hint" xml:space="preserve">
+    <value>Pro Pin mit Strg + Mausrad oder im Pin-Menü änderbar.</value>
+  </data>
+  <data name="Pins_Hidden" xml:space="preserve">
+    <value>ausgeblendet</value>
+  </data>
+  <data name="Pins_HideAll" xml:space="preserve">
+    <value>Alle ausblenden</value>
+  </data>
+  <data name="Pins_HideFullscreen" xml:space="preserve">
+    <value>Pins im Vollbild ausblenden</value>
+  </data>
+  <data name="Pins_HideFullscreen_Hint" xml:space="preserve">
+    <value>Solange ein Spiel, Video oder eine Präsentation einen Bildschirm füllt, sind dessen Pins ausgeblendet.</value>
+  </data>
+  <data name="Pins_HideOne" xml:space="preserve">
+    <value>Ausblenden</value>
+  </data>
+  <data name="Pins_Hotkey" xml:space="preserve">
+    <value>Alle Pins zeigen/ausblenden</value>
+  </data>
+  <data name="Pins_HotkeyHint" xml:space="preserve">
+    <value>{0} zeigt/blendet alle aus</value>
+  </data>
+  <data name="Pins_Hotkey_Hint" xml:space="preserve">
+    <value>Feld anklicken und Tasten drücken. Entf = Standard ({0}).</value>
+  </data>
+  <data name="Pins_Image" xml:space="preserve">
+    <value>Bild</value>
+  </data>
+  <data name="Pins_Locked" xml:space="preserve">
+    <value>gesperrt</value>
+  </data>
+  <data name="Pins_NotAvailable" xml:space="preserve">
+    <value>Pins sind nicht verfügbar.</value>
+  </data>
+  <data name="Pins_NoteEmpty" xml:space="preserve">
+    <value>Zuerst eine Notiz eingeben.</value>
+  </data>
+  <data name="Pins_NotePlaceholder" xml:space="preserve">
+    <value>Kurze Notiz …</value>
+  </data>
+  <data name="Pins_NoteTip" xml:space="preserve">
+    <value>Enter = anpinnen</value>
+  </data>
+  <data name="Pins_OpenFolder" xml:space="preserve">
+    <value>Ordner öffnen</value>
+  </data>
+  <data name="Pins_PanelName" xml:space="preserve">
+    <value>Pins</value>
+  </data>
+  <data name="Pins_PinNote" xml:space="preserve">
+    <value>Notiz anpinnen</value>
+  </data>
+  <data name="Pins_PixelShift" xml:space="preserve">
+    <value>Pixel-Shift</value>
+  </data>
+  <data name="Pins_PixelShift_Hint" xml:space="preserve">
+    <value>Verschiebt alle Pins alle paar Minuten um ein, zwei Pixel (OLED).</value>
+  </data>
+  <data name="Pins_ReleaseClickThrough" xml:space="preserve">
+    <value>Wieder anklickbar</value>
+  </data>
+  <data name="Pins_ReleaseClickThrough_Tip" xml:space="preserve">
+    <value>Beendet „Klicks durchlassen“ für diesen Pin.</value>
+  </data>
+  <data name="Pins_Seconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="Pins_SettingsIntro" xml:space="preserve">
+    <value>Pins sind kleine Fenster, die immer obenauf bleiben – Notizen und Screenshots zum Abschreiben. Rechtsklick auf einen Pin öffnet sein Menü.</value>
+  </data>
+  <data name="Pins_ShowAll" xml:space="preserve">
+    <value>Alle zeigen</value>
+  </data>
+  <data name="Pins_ShowOne" xml:space="preserve">
+    <value>Zeigen</value>
+  </data>
+  <data name="Pins_Text" xml:space="preserve">
+    <value>Notiz</value>
+  </data>
+  <data name="Pins_TooMany" xml:space="preserve">
+    <value>Höchstens {0} Pins – schließ zuerst einen.</value>
+  </data>
+  <data name="Pins_Untitled" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="Settings_Pins" xml:space="preserve">
+    <value>Pins</value>
+  </data>
 </root>

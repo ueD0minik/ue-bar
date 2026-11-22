@@ -380,7 +380,7 @@ internal sealed class QuickSearchViewModel : ObservableObject
         var hits = new List<QuickSearchHit>();
         if (_commands.Parse(query) is { } match)
         {
-            hits.Add(new QuickSearchHit(match.ModuleId, _registry.Find(match.ModuleId)?.DisplayName ?? match.ModuleId, null, match));
+            hits.Add(new QuickSearchHit(match.ModuleId, _registry.Find(match.ModuleId)?.DisplayName ?? _commands.HostDisplayName?.Invoke(match.ModuleId) ?? match.ModuleId, null, match));
         }
 
         if (query.Length > 0)

@@ -123,6 +123,9 @@ internal sealed partial class BarWindow : Window
         }
     }
 
+    /// <summary>P2-5: invisible for a moment while a screen area is picked (the screenshot must not show the bar).</summary>
+    public void SetCaptureHidden(bool hidden) => Root.Opacity = hidden ? 0 : 1;
+
     /// <summary>Create the window handle (without showing), set styles, listen to messages.</summary>
     public void EnsureCreated()
     {

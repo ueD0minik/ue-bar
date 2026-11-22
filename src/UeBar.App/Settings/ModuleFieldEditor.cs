@@ -59,6 +59,15 @@ internal sealed class ModuleFieldEditor
 
     public IReadOnlyList<SettingField> Fields => _fields;
 
+    /// <summary>P2-5: registers hotkey fields right when they are recorded (settings window only).</summary>
+    public UeBar.App.Plugins.PluginHotkeys? Hotkeys { get; init; }
+
+    /// <summary>P2-5: pauses all own global hotkeys while one is recorded.</summary>
+    public Action<bool>? SuspendHotkeys { get; init; }
+
+    /// <summary>P2-5: where "Add as tile" puts a tile (settings window only).</summary>
+    public UeBar.App.Bar.Edit.LayoutCoordinator? Layout { get; init; }
+
     /// <summary>Card with all fields + "Test connection" (if the module can do it).</summary>
     public Border Build(bool withTest = true)
     {
@@ -164,6 +173,50 @@ internal sealed class ModuleFieldEditor
                 result.Margin = new Thickness(2, 6, 0, 0);
                 content.Children.Add(result);
                 return Row(field.Label, field.Description, content, controlBelow: true);
+            }
+
+            case SettingFieldKind.Info:
+            {
+                // P2-5: a hint, stores nothing.
+                var info = new StackPanel { Margin = new Thickness(0, 2, 0, 2) };
+                if (!string.IsNullOrWhiteSpace(field.Label))
+                {
+                    info.Children.Add(new TextBlock { Text = field.Label, FontSize = 14, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 4) });
+                }
+
+                if (!string.IsNullOrWhiteSpace(field.Description))
+                {
+                    var text = Hint(field.Description);
+                    text.TextWrapping = TextWrapping.Wrap;
+                    info.Children.Add(text);
+                }
+
+                return info;
+            }
+
+            case SettingFieldKind.Hotkey when _immediate && Hotkeys is { } hotkeys && _owner is not null && _fields.Contains(field):
+            {
+                // P2-5: recorded like the quick search's hotkey, registered right away (only if free).
+                var binding = new HotkeyBinding(
+                    () => _settings.GetModuleSettings(_module.Id).GetString(field.Key) ?? field.DefaultValue ?? "",
+                    () => hotkeys.StatusOf(_module.Id, field.Key) ?? (UeBar.Bar.HotkeyRegistration.Invalid, Loc.Get("Fields_HotkeyNotRunning")),
+                    text =>
+                    {
+                        var result = hotkeys.Change(_module.Id, field.Key, text);
+                        if (result.Result == UeBar.Bar.HotkeyRegistration.Registered || text.Length == 0)
+                        {
+                            _saved.Text = Loc.Get("Fields_Saved");
+                            _restart.Stop();
+                            _restart.Start(); // the plugin learns the new value (live or restart)
+                        }
+
+                        return result;
+                    },
+                    field.DefaultValue ?? "")
+                {
+                    AllowOff = true,
+                };
+                return Row(field.Label, field.Description, HotkeyRecorderUi.Create(_owner, binding, SuspendHotkeys ?? (_ => { }), _log), controlBelow: true);
             }
 
             case SettingFieldKind.Toggle:
@@ -343,7 +396,61 @@ internal sealed class ModuleFieldEditor
         var list = new StackPanel();
         var filter = "";
 
+        // P2-5: entries can become tiles (module with ISettingListTiles, settings window only).
+        var tiles = _immediate && Layout is not null && _module.Module is ISettingListTiles;
+        var newEntries = new Dictionary<string, (bool Add, string? Tab)>(StringComparer.Ordinal);
+        var tileResult = Hint("");
+        tileResult.TextWrapping = TextWrapping.Wrap;
+        tileResult.Margin = new Thickness(2, 6, 0, 0);
+        tileResult.Visibility = Visibility.Collapsed;
+
         void Save() => changed(items.Count == 0 ? null : ModuleSettingValues.FormatList(items));
+
+        async Task AddAsTileAsync(Dictionary<string, string> item, string? tabId, bool quietIfIncomplete)
+        {
+            if (Layout is not { } layout || (tabId ?? layout.CurrentTabId) is not { } tab)
+            {
+                return;
+            }
+
+            IReadOnlyDictionary<string, string> snapshot = new Dictionary<string, string>(item, StringComparer.Ordinal);
+            var tile = _registry.Invoke(_module.Id, "Tile for list entry", m => ((ISettingListTiles)m).CreateTileForListEntry(field.Key, snapshot)).Value;
+            string message;
+            if (tile is null)
+            {
+                if (quietIfIncomplete)
+                {
+                    return;
+                }
+
+                message = Loc.Get("Fields_ListTileIncomplete");
+            }
+            else
+            {
+                var tabName = layout.TabChoices.FirstOrDefault(t => t.Id == tab).Name ?? tab;
+                message = await layout.AddTileAsync(tab, tile) ? Loc.F("Fields_ListTileAdded", tabName) : Loc.Get("Fields_ListTileFailed");
+            }
+
+            tileResult.Text = message;
+            tileResult.Visibility = Visibility.Visible;
+            Render();
+        }
+
+        void CommitNew(string id)
+        {
+            if (newEntries.Remove(id, out var pending) && pending.Add && items.FirstOrDefault(i => i.TryGetValue("id", out var x) && x == id) is { } item)
+            {
+                _ = AddAsTileAsync(item, pending.Tab, quietIfIncomplete: false);
+            }
+        }
+
+        void CommitAllNew()
+        {
+            foreach (var id in newEntries.Keys.ToList())
+            {
+                CommitNew(id);
+            }
+        }
 
         IReadOnlyList<SettingListRow> Rows()
         {
@@ -404,9 +511,31 @@ internal sealed class ModuleFieldEditor
                 rows.Add(row);
             }
 
+            if (tiles && item.TryGetValue("id", out var newId) && newEntries.TryGetValue(newId, out var pending))
+            {
+                // P2-5: a new entry becomes a tile too (default on) – when it is closed, the next one is added or the page is left.
+                var tabs = Layout!.TabChoices;
+                var tabCombo = Combo(tabs.Select(t => (t.Name, (string?)t.Id)), pending.Tab ?? Layout.CurrentTabId, v => newEntries[newId] = (newEntries.TryGetValue(newId, out var p) && p.Add, v), width: 260);
+                tabCombo.Visibility = pending.Add && tabs.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                var alsoTile = SwitchRow(Loc.Get("Fields_ListAlsoTile"), tabs.Count > 0 ? Loc.Get("Fields_ListAlsoTile_Hint") : Loc.Get("Fields_ListNoTabs"), pending.Add && tabs.Count > 0, on =>
+                {
+                    newEntries[newId] = (on, newEntries.TryGetValue(newId, out var p) ? p.Tab : Layout.CurrentTabId);
+                    tabCombo.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+                });
+                rows.Add(alsoTile);
+                tabCombo.Margin = new Thickness(0, 0, 0, 6);
+                tabCombo.HorizontalAlignment = HorizontalAlignment.Left;
+                rows.Add(tabCombo);
+            }
+
             rows.Add(Button(Loc.Get("Fields_ListRemove"), () =>
             {
                 items.Remove(item);
+                if (item.TryGetValue("id", out var removedId))
+                {
+                    newEntries.Remove(removedId);
+                }
+
                 Save();
                 Render();
             }, icon: "\uE74D"));
@@ -477,10 +606,30 @@ internal sealed class ModuleFieldEditor
                 {
                     expanded.Add(id);
                 }
+                else
+                {
+                    CommitNew(id); // a new entry was closed: now it may become a tile
+                }
 
                 Render();
             };
-            return button;
+            if (!tiles || !row.CanAddTile || items.FirstOrDefault(i => i.TryGetValue("id", out var x) && x == id) is not { } rowItem)
+            {
+                return button;
+            }
+
+            // P2-5: an entry on no tile yet gets "Add as tile" (into the tab the bar shows).
+            var add = Button(Loc.Get("Fields_ListAddTile"), () => _ = AddAsTileAsync(rowItem, null, quietIfIncomplete: false), icon: "\uE710");
+            add.Margin = new Thickness(6, 0, 0, 0);
+            add.VerticalAlignment = VerticalAlignment.Center;
+            add.ToolTip = Loc.Get("Fields_ListAddTile_Tip");
+            var line = new Grid();
+            line.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            line.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            line.Children.Add(button);
+            Grid.SetColumn(add, 1);
+            line.Children.Add(add);
+            return line;
         }
 
         void Render()
@@ -541,8 +690,14 @@ internal sealed class ModuleFieldEditor
                 item[itemField.Key] = itemField.DefaultValue!;
             }
 
+            CommitAllNew(); // the previous new entry is done
             items.Add(item);
             expanded.Add(item["id"]);
+            if (tiles)
+            {
+                newEntries[item["id"]] = (true, Layout!.CurrentTabId);
+            }
+
             search.Text = "";
             Save();
             Render();
@@ -550,6 +705,8 @@ internal sealed class ModuleFieldEditor
         add.Margin = new Thickness(0, 8, 0, 0);
         add.HorizontalAlignment = HorizontalAlignment.Left;
         host.Children.Add(add);
+        host.Children.Add(tileResult);
+        host.Unloaded += (_, _) => CommitAllNew(); // page left or window closed
         Render();
         return host;
     }

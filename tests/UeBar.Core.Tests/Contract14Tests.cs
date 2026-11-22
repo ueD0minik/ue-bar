@@ -21,7 +21,7 @@ public sealed class Contract14Tests
         Assert.Equal("Mathe", back.GetOption("item1.name"));
         Assert.Null(back.GetOption("missing"));
         Assert.Null(JsonNode.Parse(UeBarJson.Serialize(new TileConfig { Id = "u" }))!["options"]); // old layouts stay as they were
-        Assert.Equal(new Version(1, 4), CoreApiVersion.Version);
+        Assert.True(CoreApiVersion.Version >= new Version(1, 4)); // since 1.5 (P2-5) the contract has grown further
     }
 
     [Fact]

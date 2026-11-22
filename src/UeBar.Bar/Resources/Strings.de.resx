@@ -90,4 +90,13 @@
   <data name="Color_Grey" xml:space="preserve">
     <value>Grau</value>
   </data>
+  <data name="Hotkey_Off" xml:space="preserve">
+    <value>Kein Tastenkürzel</value>
+  </data>
+  <data name="Hotkey_Active" xml:space="preserve">
+    <value>Aktiv: {0}</value>
+  </data>
+  <data name="Hotkey_Taken" xml:space="preserve">
+    <value>{0} ist schon von einem anderen Programm belegt – bitte ein anderes wählen.</value>
+  </data>
 </root>

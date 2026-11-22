@@ -105,6 +105,39 @@ internal sealed class LayoutCoordinator
         return merged.Tabs.Count - current.Tabs.Count;
     }
 
+    /// <summary>P2-5: tabs a tile can be put into (all tabs of this device, also hidden ones) – for the settings page.</summary>
+    public IReadOnlyList<(string Id, string Name)> TabChoices =>
+        [.. (_session?.Editor.Tabs ?? _manager.Composed.AllTabs).Where(t => !t.HiddenOnDevice).Select(t => (t.Tab.Id, string.IsNullOrWhiteSpace(t.Tab.Name) ? t.Tab.Id : t.Tab.Name))];
+
+    /// <summary>The tab the bar shows right now (default for new tiles from the settings).</summary>
+    public string? CurrentTabId => ViewModel?.SelectedTab?.Id ?? TabChoices.FirstOrDefault().Id;
+
+    /// <summary>
+    /// P2-5: puts a tile from outside the bar (settings: "Add as tile") into a tab. During editing it becomes part
+    /// of the edit (Cancel discards it), otherwise it is saved right away like any change (and synchronized).
+    /// </summary>
+    public async Task<bool> AddTileAsync(string tabId, TileConfig tile)
+    {
+        if (_session is { } session)
+        {
+            var added = session.Editor.AddTile(tabId, tile) is not null;
+            _log.Info(tile.Module, $"Tile added from the settings to the running edit: {added}");
+            return added;
+        }
+
+        var editor = new LayoutEditor(_manager.Base, _manager.Device, config => _registry.FindTileType(config.Type)?.Type.AllowedSizes);
+        if (editor.AddTile(tabId, tile) is null)
+        {
+            return false;
+        }
+
+        var (baseLayout, device) = editor.Result;
+        await _manager.SaveAsync(baseLayout, device);
+        _log.Info(tile.Module, $"Tile added from the settings: {tile.Type} → tab {tabId}");
+        await ReloadAsync();
+        return true;
+    }
+
     /// <summary>Show the first start as long as there is no base layout (M5b).</summary>
     public void UpdateSetup()
     {

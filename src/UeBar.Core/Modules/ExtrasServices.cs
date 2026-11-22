@@ -236,13 +236,41 @@ public sealed class QuickCommandService(ModuleRegistry registry, IUeLogger log)
 {
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
 
-    /// <summary>All commands offered by running modules.</summary>
+    private readonly List<HostCommand> _hostCommands = [];
+
+    /// <summary>All commands offered by the host itself (P2-5: "pin text") and by running modules.</summary>
     public IReadOnlyList<(string ModuleId, QuickCommandInfo Command)> Commands =>
     [
+        .. HostCommands.Select(c => (c.OwnerId, c.Info)),
         .. registry.GetCapabilities<IQuickCommandProvider>()
             .SelectMany(p => (registry.Invoke(p.Module.Id, "Quick commands", m => ((IQuickCommandProvider)m).QuickCommands).Value ?? [])
                 .Select(c => (p.Module.Id, c))),
     ];
+
+    private IReadOnlyList<HostCommand> HostCommands
+    {
+        get
+        {
+            lock (_hostCommands)
+            {
+                return [.. _hostCommands];
+            }
+        }
+    }
+
+    /// <summary>A command of the host (P2-5, e.g. pins): runs directly, not through a module.</summary>
+    public void AddHostCommand(string ownerId, QuickCommandInfo info, Func<string, Task<QuickCommandResult>> run)
+    {
+        lock (_hostCommands)
+        {
+            _hostCommands.Add(new HostCommand(ownerId, info, run));
+        }
+    }
+
+    /// <summary>Display name of the owner of a command (a module, or the host's own name).</summary>
+    public Func<string, string?>? HostDisplayName { get; set; }
+
+    private sealed record HostCommand(string OwnerId, QuickCommandInfo Info, Func<string, Task<QuickCommandResult>> Run);
 
     /// <summary>
     /// Recognizes "prefix text": the text must start with the prefix, a space may
@@ -279,6 +307,19 @@ public sealed class QuickCommandService(ModuleRegistry registry, IUeLogger log)
 
     public async Task<QuickCommandResult> ExecuteAsync(QuickCommandMatch match)
     {
+        if (HostCommands.FirstOrDefault(c => c.OwnerId == match.ModuleId && c.Info.Prefix == match.Command.Prefix) is { } host)
+        {
+            try
+            {
+                return await host.Run(match.Argument).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                log.Error(null, $"Quick command {match.Command.Prefix} failed", ex);
+                return new QuickCommandResult(false, CoreText.T["Command_Failed"]);
+            }
+        }
+
         var result = await registry.InvokeAsync(
             match.ModuleId,
             $"Quick command {match.Command.Prefix}",

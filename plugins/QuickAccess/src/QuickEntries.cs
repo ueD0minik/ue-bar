@@ -46,8 +46,12 @@ internal static class QuickSettings
     public const string TextKey = "text";
     public const string AdminKey = "admin";
 
+    public const string IntroKey = "intro";
+
     public static IReadOnlyList<SettingField> Fields =>
     [
+        // P2-5: what this page is for – tiles are made in the bar.
+        new(IntroKey, "", SettingFieldKind.Info, null, T["Qa_SettingIntro"]),
         new(EntriesKey, T["Qa_SettingEntries"], SettingFieldKind.List, null, T["Qa_SettingEntries_Hint"])
         {
             AddText = T["Qa_SettingAdd"],

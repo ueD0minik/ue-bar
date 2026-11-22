@@ -130,6 +130,9 @@
     <value>Collection "{0}"</value>
   </data>
   <data name="Qa_GroupUnused" xml:space="preserve">
-    <value>Not used</value>
+    <value>On no tile yet</value>
+  </data>
+  <data name="Qa_SettingIntro" xml:space="preserve">
+    <value>Tiles and collections are easiest to create right in the bar (Edit → Add tile). Here you manage entries that apply to this PC only, e.g. your own commands.</value>
   </data>
 </root>

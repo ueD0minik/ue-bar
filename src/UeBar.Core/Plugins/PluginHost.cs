@@ -286,6 +286,12 @@ public sealed class PluginHost
     /// <summary>Loads every plugin in <see cref="PluginState.Pending"/>: own load context, create the module.</summary>
     public async Task LoadAsync()
     {
+        // P2-5: copies of assemblies that may exist only once per process – the highest version is shared.
+        foreach (var plugin in _plugins.Where(p => p.State == PluginState.Pending))
+        {
+            ProcessWideAssemblies.Offer(plugin.Directory);
+        }
+
         foreach (var plugin in _plugins.Where(p => p.State == PluginState.Pending).ToList())
         {
             var started = System.Diagnostics.Stopwatch.GetTimestamp();

@@ -1,5 +1,57 @@
 # Changelog
 
+## 1.4.0 – Pins and the Screenshot plugin
+
+**Plugin interface (`CoreApiVersion`): 1.5** – extended, nothing broken: plugins for 1.0–1.4 keep
+loading. SDK package `UeBar.Sdk 1.5.0`.
+
+### New
+- **Pins** (a core feature): notes and images as small windows on top of everything – borderless,
+  rounded, movable (edges snap to the screen), resizable, position lockable. Images: mouse wheel =
+  zoom, drag a zoomed image to pan. Text: double click = edit, Ctrl + mouse wheel = font size. Right
+  click: copy, save as (images), opacity, lock position, let clicks through, hide, close.
+  - **Pin list in the bar** (pin icon in the panel): show/hide single pins or all, close all, "Pin
+    note". Hotkey **Win + Alt + P** shows/hides all pins (changeable); showing all also ends "let
+    clicks through".
+  - **OLED:** a pin dims after 60 s without the mouse (to 35 %) and lights up at once when the mouse
+    comes; pixel shift every few minutes; hidden over fullscreen apps (all adjustable under Settings →
+    Pins).
+  - Kept across restarts in `%APPDATA%\ueBar\pins` – content, size and place per monitor (a missing
+    monitor means the primary one). Never in the synced layout.
+  - Quick command `pin <text>` (quick search and Assist), bus action `pins.create_text` (provider
+    `pins`, with permission).
+- **Screenshot plugin** (`plugins/Screenshot`, plugin ID `screenshot`, comes with ue Bar and is on):
+  **Win + Alt + S**, a tile and the quick command `shot` capture an area (default), a window or a
+  screen – also across monitors with different scaling. A small bar at the area: pin, copy, save
+  (`Pictures\Screenshots\ue Bar`, dated names) or recognize text (Windows OCR, offline; copied or
+  pinned). A default action skips the bar. Missing recognition language → a hint how to add one.
+  Bus: event `screenshot.taken` (metadata only), action `screenshot.capture`.
+- **Picking a screen area** as a core function: the screen freezes, one overlay per monitor, drag a
+  rectangle, click a window or a monitor, Esc/right click cancels.
+- **Quick access settings** are easier: a hint at the top (tiles are made in the bar), "Also add as
+  tile" (on, with the tab) when creating an entry, "Add as tile" for entries on no tile yet; the
+  group "Not used" is now called "On no tile yet".
+- **SDK 1.5:** `IPinService`, `IScreenAreaPicker` (+ `ScreenRect`, `ScreenMonitor`,
+  `ScreenAreaRequest/Result`), `IClipboardAccess` (write only), settings field kinds `Hotkey` (with
+  `IHotkeyHandler`: plugins get global hotkeys, recorded like the quick search's) and `Info`,
+  `ISettingListTiles` + `SettingListRow.CanAddTile`.
+
+### Changed
+- The hotkey recording field is shared by the quick search, the pins and plugin hotkey fields; while
+  recording, every own hotkey pauses.
+- Plugin loader: `WinRT.Runtime` and `Microsoft.Windows.SDK.NET` are loaded once per process and
+  shared by all plugins (the highest version any plugin brings). Two plugins using Windows APIs (here
+  Windows and Screenshot) each loading their own copy made the second one fail.
+- The module ID `pins` is reserved for the core.
+
+### Tests
+- Core +16 (pins: create/change/close, restart, broken files, limits, owner-only access through the
+  SDK, bus action with permission, quick command, reserved ID, contract 1.5), Bar +18 (placement per
+  monitor and scaling, missing monitor, snapping, fullscreen hiding, dimming and pixel shift, picking
+  across monitors, several hotkeys), Screenshot +30 (actions, file names, events with metadata only,
+  OCR with German/English test images and a missing language, quick command, hotkey, bus, plugin
+  load), Quick access +1. Total 691.
+
 ## 1.3.3 – Collections edited in the bar, compact settings lists
 
 **Plugin interface (`CoreApiVersion`): 1.4** – extended, nothing broken: plugins for 1.0–1.3 keep

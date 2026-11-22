@@ -71,7 +71,11 @@ public interface IModule
     Task StopAsync(CancellationToken cancellationToken);
 }
 
-/// <summary>What a module gets from the core when it starts.</summary>
+/// <summary>
+/// What a module gets from the core when it starts. Further services of the host are offered on the same
+/// object – check with <c>as</c>: <see cref="IModuleSecrets"/>, <see cref="IHostInfo"/>, <see cref="IUiLanguageInfo"/>,
+/// <see cref="IDeviceBatteryCatalog"/>, <see cref="IPinService"/>, <see cref="IScreenAreaPicker"/>, <see cref="IClipboardAccess"/>.
+/// </summary>
 public interface IModuleContext
 {
     string ModuleId { get; }

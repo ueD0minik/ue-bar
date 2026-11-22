@@ -37,6 +37,18 @@ public enum SettingFieldKind
     /// gives every entry a stable <c>"id"</c>. Read it with <see cref="ModuleSettingValues.GetList"/>.
     /// </summary>
     List,
+
+    /// <summary>
+    /// A global hotkey (contract 1.5), e.g. <c>"Win+Alt+S"</c>: recorded like the quick search's hotkey;
+    /// empty = off. While the module runs the core registers it and calls <see cref="IHotkeyHandler.OnHotkeyAsync"/>.
+    /// </summary>
+    Hotkey,
+
+    /// <summary>
+    /// A hint on the page (contract 1.5): <see cref="SettingField.Label"/> as a heading (may be empty) and
+    /// <see cref="SettingField.Description"/> as text. Stores nothing.
+    /// </summary>
+    Info,
 }
 
 public sealed record SettingChoice(string Value, string Label);

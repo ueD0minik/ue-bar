@@ -54,10 +54,18 @@ found"** and stays – ue Bar looks again whenever the panel opens.
 target (file and folder with "Browse…"). They appear in the search – also to add tiles and entries of
 collections – and other plugins can open them by ID (module bus, below).
 
+Tiles and collections are easiest to make right in the bar (edit mode → Add tile); the page is for
+entries of this PC only, e.g. your own commands – a hint at the top says so.
+
 The page is compact: one row per entry (icon, name, kind, shortened target), a click opens its fields,
 a search field filters. Rows are grouped by where they are used: **Single tiles**, each
-**collection**, **Not used**. Things that live only in the layout (a folder dropped on a collection)
+**collection**, **On no tile yet**. Things that live only in the layout (a folder dropped on a collection)
 are listed too, marked "edit in the bar".
+
+- A **new entry** becomes a tile too: **Also add as tile** is on by default, with the tab to put it in
+  (default: the tab the bar shows). The tile is added when you close the entry (or add the next one,
+  or leave the page). Turn it off for entries you only want in the search.
+- Every entry **on no tile yet** has an **Add as tile** button (into the tab the bar shows).
 
 ![Settings of the quick access plugin](images/quickaccess-settings.png)
 
