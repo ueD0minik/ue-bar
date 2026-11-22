@@ -81,9 +81,15 @@ code, addresses, tables, settings lists and anything where every line means some
 Limits: tables with many columns, text flowing around pictures and a heading across two columns are not
 rebuilt exactly – pick "Lines as in the image" or capture one column at a time. A list of short lines without
 separators (e.g. file details in an app) may get two lines joined after its longest line in running text –
-whether that line wrapped cannot be seen. The recognition itself is Windows' own: on 11 test screenshots it
-got about 2–3 of 100 words wrong (typical mix-ups: "Start" → "Statt", "I" → "l", "0" → "e" in code fonts).
-Preparing the image (inverting dark designs, enlarging small text) was measured and did not read better.
+whether that line wrapped cannot be seen.
+
+The recognition itself is Windows' own. Before it, a capture is enlarged – twice, three times when it is
+small, smoothly (linear); a whole screen stays as it is – which reads small screen text clearly better. Measured on real screenshots
+(Claude Code, a web page, a list): about 4–8 wrong words per 100. Typical mix-ups that remain: "rn" → "m"
+("Kern" → "Kem") in small type, "I" → "l", a dot or arrow missing ("1.4.2" → "1.42"). ue Bar does not guess
+words – there is no dictionary correction. In Word, switch the formatting marks off (¶) before capturing:
+with them, whole paragraphs are lost. Grey, inverting dark designs and a second, larger pass were measured
+and did not read better.
 
 ## Text recognition languages
 

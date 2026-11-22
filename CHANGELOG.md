@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.4.3 – Text recognition measured on real screenshots
+
+Fixes only; plugin interface unchanged (1.6).
+
+### Fixed
+- **Small screen text is read better:** captures are enlarged with linear instead of Fant interpolation.
+  On real screenshots (a Claude Code window, a light web page, a dark list) wrong words per 100 went
+  from 9.8 / 11.4 / 11.2 to 7.9 / 3.5 / 7.7. Under 0.2 s per capture.
+- **A bullet in front of a quote** ("• „Absatz“ …") was not recognized at all with the old scaling – it is now.
+- **Punctuation on its own** ("genannt ,", "( Planung )") sticks to its word – a spacing rule, no text is
+  changed. There is still no dictionary correction: "rn" read as "m" ("Kern" → "Kem") and a missing dot
+  ("1.4.2" → "1.42") remain – they are already in Windows' result, enlarging (up to ×3), grey and inverting
+  did not change them.
+
+### Measured
+- Grey (against ClearType fringes), inverting dark images, cubic interpolation, ×2.5/×3 and a second,
+  enlarged pass were measured on the real screenshots and were not better (or took more than 1 s). A Word page
+  with formatting marks shown loses whole paragraphs in Windows' recognition with every preparation.
+- The real screenshots stay private; their tests run only where they are (skipped on the build server).
+
+### Tests
+- Screenshot +4 (real screenshots: the shipped preparation is the best and under 1 s, the bullet case;
+  the order-free error rate; punctuation). Total 798.
+
 ## 1.4.2 – More reliable text recognition, keys for the picker bar
 
 **Plugin interface (`CoreApiVersion`): 1.6** – extended by one property (SDK package 1.6.0); plugins for

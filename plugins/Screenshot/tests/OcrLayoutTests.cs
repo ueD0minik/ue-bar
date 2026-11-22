@@ -216,6 +216,19 @@ public sealed class OcrLayoutTests
     }
 
     [Fact]
+    public void Punctuation_on_its_own_sticks_to_its_word()
+    {
+        // P2-5-Fix 4, real screenshot: Windows returned "genannt" and "," as two words with a normal gap.
+        OcrWordBox[] words =
+        [
+            new("wie", 0, 0, 30, 20), new("genannt", 40, 0, 70, 20), new(",", 118, 0, 4, 20),
+            new("obwohl", 130, 0, 60, 20), new("(", 200, 0, 6, 20), new("Planung", 214, 0, 70, 20), new(")", 292, 0, 6, 20),
+        ];
+
+        Assert.Equal("wie genannt, obwohl (Planung)", OcrLayout.Compose(new OcrLineBox("wie genannt , obwohl ( Planung )", words)));
+    }
+
+    [Fact]
     public void Pieces_far_apart_on_one_height_stay_columns()
     {
         OcrLineBox[] page = [Line("left column", 40, 100), Line("right column", 600, 100)];

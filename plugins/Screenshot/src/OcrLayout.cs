@@ -266,6 +266,12 @@ internal static partial class OcrLayout
     /// they touch – "hast .", "Netzwerk- ,", "Vokabel liste". A space only where there is a gap of more than a
     /// fifth of the letter height. Only for lines whose words make up the whole text (Latin script).
     /// </summary>
+    /// <summary>Punctuation that is never preceded by a space: , . ; : ! ? ) ] } and closing quotes.</summary>
+    private static readonly HashSet<char> ClosingPunctuation = [',', '.', ';', ':', '!', '?', ')', ']', '}', '"', '\u201C', '\u201D', '\u00BB', '\''];
+
+    /// <summary>Punctuation never followed by a space: ( [ { and opening quotes (German low-9, English, guillemet).</summary>
+    private static readonly HashSet<char> OpeningPunctuation = ['(', '[', '{', '\u201E', '\u201C', '\u00AB'];
+
     internal static string Compose(OcrLineBox line)
     {
         if (line.Words.Count < 2 || string.Concat(line.Words.Select(w => w.Text)) != line.Text.Replace(" ", "", StringComparison.Ordinal))
@@ -286,7 +292,12 @@ internal static partial class OcrLayout
         for (var i = 1; i < line.Words.Count; i++)
         {
             var touching = gaps[i] < 0.2 * letter && (usual <= 0 || gaps[i] < 0.35 * usual);
-            if (!touching)
+
+            // P2-5-Fix 4: a word that is only closing punctuation ("genannt ,") belongs to the word before, an
+            // opening bracket or quote alone to the word after – a spacing rule, no text is changed.
+            var closes = line.Words[i].Text.All(ClosingPunctuation.Contains);
+            var opens = line.Words[i - 1].Text.All(OpeningPunctuation.Contains);
+            if (!touching && !closes && !opens)
             {
                 text.Append(' ');
             }

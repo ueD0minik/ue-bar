@@ -142,9 +142,9 @@ public sealed partial class OcrQualityTests(ITestOutputHelper output)
         (string Label, OcrPreparation Preparation)[] variants =
         [
             ("shipped", OcrPreparation.Best),
-            ("invert dark", new(true, false)),
-            ("enlarge small", new(false, true)),
-            ("both", new(true, true)),
+            ("invert dark", OcrPreparation.Best with { InvertDark = true }),
+            ("enlarge small", OcrPreparation.Best with { RescaleSmallText = true }),
+            ("both", OcrPreparation.Best with { InvertDark = true, RescaleSmallText = true }),
         ];
         var totals = new List<(string Label, double PerHundred)>();
         foreach (var (label, preparation) in variants)

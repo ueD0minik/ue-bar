@@ -140,26 +140,29 @@ internal sealed class WindowsOcr : IShotOcr
         {
             ScaledWidth = (uint)Math.Max(1, Math.Round(decoder.PixelWidth * factor)),
             ScaledHeight = (uint)Math.Max(1, Math.Round(decoder.PixelHeight * factor)),
-            InterpolationMode = BitmapInterpolationMode.Fant,
+            InterpolationMode = Preparation.Interpolation,
         };
         using var bitmap = await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transform, ExifOrientationMode.IgnoreExifOrientation, ColorManagementMode.DoNotColorManage)
             .AsTask(cancellationToken).ConfigureAwait(false);
-        if (!Preparation.InvertDark)
+        if (!Preparation.InvertDark && !Preparation.Grayscale)
         {
             return (await engine.RecognizeAsync(bitmap).AsTask(cancellationToken).ConfigureAwait(false), false);
         }
 
         var pixels = new byte[bitmap.PixelWidth * bitmap.PixelHeight * 4];
         bitmap.CopyToBuffer(pixels.AsBuffer());
-        var isDark = dark ?? OcrImage.IsDark(pixels);
-        if (!isDark)
+        var isDark = Preparation.InvertDark && (dark ?? OcrImage.IsDark(pixels));
+        if (isDark)
         {
-            return (await engine.RecognizeAsync(bitmap).AsTask(cancellationToken).ConfigureAwait(false), false);
+            OcrImage.InvertToGray(pixels, Preparation.Stretch);
+        }
+        else
+        {
+            OcrImage.ToGray(pixels); // P2-5-Fix 4: grey removes the coloured ClearType fringes
         }
 
-        OcrImage.InvertToGray(pixels, Preparation.Stretch);
         using var prepared = SoftwareBitmap.CreateCopyFromBuffer(pixels.AsBuffer(), BitmapPixelFormat.Bgra8, bitmap.PixelWidth, bitmap.PixelHeight, BitmapAlphaMode.Premultiplied);
-        return (await engine.RecognizeAsync(prepared).AsTask(cancellationToken).ConfigureAwait(false), true);
+        return (await engine.RecognizeAsync(prepared).AsTask(cancellationToken).ConfigureAwait(false), isDark);
     }
 
     /// <summary>Typical letter height of a result: the median of the tallest word of every line.</summary>
@@ -202,6 +205,17 @@ internal static class OcrImage
         }
 
         return false;
+    }
+
+    /// <summary>Grey (luma) – the coloured ClearType fringes of screen text become plain grey edges. In place.</summary>
+    public static void ToGray(Span<byte> bgra)
+    {
+        for (var i = 0; i + 3 < bgra.Length; i += 4)
+        {
+            var v = Luma(bgra[i + 2], bgra[i + 1], bgra[i]);
+            bgra[i] = bgra[i + 1] = bgra[i + 2] = v;
+            bgra[i + 3] = 255;
+        }
     }
 
     /// <summary>
@@ -266,17 +280,25 @@ internal sealed record OcrPreparation(bool InvertDark, bool RescaleSmallText)
     /// <summary>Contrast after inverting: 0 = none, 1 = darkest/lightest 1 % to black/white (tests compare).</summary>
     public double Stretch { get; init; } = 1;
 
-    /// <summary>Tests only: decode at this factor instead of the size-based one.</summary>
+    /// <summary>Decode at this factor instead of the size-based one (measuring).</summary>
     public double? Factor { get; init; }
+
+    /// <summary>Grey before recognition – no coloured ClearType fringes (P2-5-Fix 4).</summary>
+    public bool Grayscale { get; init; }
+
+    /// <summary>How the image is enlarged (P2-5-Fix 4 compares Fant, cubic and linear).</summary>
+    public BitmapInterpolationMode Interpolation { get; init; } = BitmapInterpolationMode.Fant;
 
     public static OcrPreparation None { get; } = new(false, false);
 
     /// <summary>
-    /// What ships: measured on 11 test screenshots (OcrQualityTests), neither inverting dark images nor a second,
-    /// enlarged pass read better overall (inverting 4.8 → 5.2, enlarging → 5.2 wrong words per 100; enlarging
-    /// made whole-window captures worse). Both stay switchable for measuring new screenshots.
+    /// What ships (P2-5-Fix 4): measured on the user's real screenshots (RealScreenshotTests – Claude Code, a web
+    /// page, a dark list): enlarging the usual way (×2 below 1600 px) with <b>linear</b> interpolation read best –
+    /// 10.8 → 7.0 wrong words per 100 against Fant; it also keeps a "•" in front of a quote that Fant lost. Grey,
+    /// inverting dark images, cubic, ×2.5/×3 and a second enlarged pass were not better (or above 1 s). They stay
+    /// switchable for measuring new screenshots.
     /// </summary>
-    public static OcrPreparation Best { get; } = new(false, false);
+    public static OcrPreparation Best { get; } = new(false, false) { Interpolation = BitmapInterpolationMode.Linear };
 }
 
 /// <summary>How much an image is enlarged before recognition (WinRT-free, testable).</summary>

@@ -87,9 +87,14 @@ Grenzen: Tabellen mit vielen Spalten, Text, der um Bilder fließt, und eine Übe
 werden nicht genau nachgebaut – dann „Zeilen wie im Bild“ wählen oder eine Spalte nach der anderen
 aufnehmen. Bei einer Liste kurzer Zeilen ohne Trennzeichen (z. B. Dateiangaben in einem Programm) können im
 Fließtext nach der längsten Zeile zwei Zeilen zusammenrutschen – ob dort umbrochen wurde, sieht man nicht.
-Die Erkennung selbst ist die von Windows: Auf 11 Test-Bildschirmfotos lag sie bei etwa 2–3 falschen Wörtern
-pro 100 (typisch: „Start“ → „Statt“, „I“ → „l“, „0“ → „e“ in Code-Schriften). Das Bild vorher aufzubereiten
-(dunkles Design umkehren, kleine Schrift vergrößern) wurde gemessen und war nicht besser.
+
+Die Erkennung selbst ist die von Windows. Vorher wird die Aufnahme vergrößert – doppelt, bei kleinen
+Ausschnitten dreifach, weich (linear); ein ganzer Bildschirm bleibt, wie er ist –, damit liest Windows kleine Bildschirmschrift deutlich besser.
+Gemessen an echten Bildschirmfotos (Claude Code, Webseite, Liste): etwa 4–8 falsche Wörter pro 100. Was
+bleibt: „rn“ → „m“ („Kern“ → „Kem“) bei kleiner Schrift, „I“ → „l“, ein fehlender Punkt oder Pfeil („1.4.2“ →
+„1.42“). Die ue Bar rät keine Wörter – es gibt keine Wörterbuch-Korrektur. In Word vor der Aufnahme die
+Formatierungszeichen (¶) ausschalten: Mit ihnen gehen ganze Absätze verloren. Graustufen, dunkles Design
+umkehren und ein zweiter, größerer Durchgang wurden gemessen und waren nicht besser.
 
 ## Sprachen der Texterkennung
 
