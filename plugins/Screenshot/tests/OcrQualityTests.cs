@@ -11,7 +11,7 @@ namespace UeBar.Modules.Screenshot.Tests;
 /// P2-5-Fix 3: how well the real Windows OCR reads typical screenshots (demo content, drawn with ClearType like
 /// a real window: dark terminal, dark editor, light web page, slide, small text at 100 %, vocabulary list) –
 /// with and without preparing the image. Error rate = wrong words per 100 (word edit distance to the expected
-/// text). The preparation that ships must not be worse on any picture and must stay under 1 s.
+/// text). The recognized text must not be worse than Windows' own and must stay under 1 s. Which preparation ships is decided on the user's real screenshots (RealScreenshotTests).
 /// </summary>
 public sealed partial class OcrQualityTests(ITestOutputHelper output)
 {
@@ -136,44 +136,6 @@ public sealed partial class OcrQualityTests(ITestOutputHelper output)
         Assert.True(Structure(expected).SequenceEqual(Structure(flow)), $"{picture}: expected lines per paragraph {string.Join(",", Structure(expected))}, got {string.Join(",", Structure(flow))}:\n{flow}");
     }
 
-    [Fact]
-    public async Task Preparing_the_image_ships_only_when_it_is_better_overall()
-    {
-        (string Label, OcrPreparation Preparation)[] variants =
-        [
-            ("shipped", OcrPreparation.Best),
-            ("invert dark", OcrPreparation.Best with { InvertDark = true }),
-            ("enlarge small", OcrPreparation.Best with { RescaleSmallText = true }),
-            ("both", OcrPreparation.Best with { InvertDark = true, RescaleSmallText = true }),
-        ];
-        var totals = new List<(string Label, double PerHundred)>();
-        foreach (var (label, preparation) in variants)
-        {
-            double wrong = 0, words = 0;
-            foreach (var row in Pictures)
-            {
-                var (picture, language) = ((string)row[0], (string)row[1]);
-                if (await MeasureAsync(picture, language, preparation, exactLanguage: true) is { } m)
-                {
-                    var expected = await File.ReadAllTextAsync(Path.Combine(Folder, picture + ".txt"));
-                    var count = Words(expected).Length;
-                    wrong += ErrorRate(expected, m.Outcome.Formatted(OcrTextFormat.Lines)) * count / 100;
-                    words += count;
-                }
-            }
-
-            if (words > 0)
-            {
-                totals.Add((label, 100 * wrong / words));
-                output.WriteLine($"{label,-14} {100 * wrong / words,5:0.0} wrong words per 100");
-            }
-        }
-
-        if (totals.Count > 0)
-        {
-            Assert.All(totals, t => Assert.True(totals[0].PerHundred <= t.PerHundred, $"{t.Label} reads better ({t.PerHundred:0.0}) than what ships ({totals[0].PerHundred:0.0})"));
-        }
-    }
     [Fact]
     public void Dark_images_are_found_and_turned_into_dark_text_on_light()
     {
