@@ -1318,4 +1318,19 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Pins_Stored" xml:space="preserve">
     <value>Stored pins: {0} ({1})</value>
   </data>
+  <data name="Hook_Retrying" xml:space="preserve">
+    <value>The keyboard hook could not be set yet – trying again.</value>
+  </data>
+  <data name="Hook_Failed" xml:space="preserve">
+    <value>Windows did not allow the keyboard hook. The replacement hotkey works instead.</value>
+  </data>
+  <data name="Choice_Search" xml:space="preserve">
+    <value>Search …</value>
+  </data>
+  <data name="Choice_Empty" xml:space="preserve">
+    <value>Nothing here</value>
+  </data>
+  <data name="Choice_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
 </root>

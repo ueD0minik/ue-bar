@@ -8,10 +8,10 @@
     "en": "Apps from the Start menu, files, Office templates, folders, web pages and own commands as tiles – also several in one tile, by drag and drop and in the quick search.",
     "de": "Apps aus dem Startmenü, Dateien, Office-Vorlagen, Ordner, Webseiten und eigene Befehle als Kacheln – auch mehrere in einer Kachel, per Ziehen und Ablegen und in der Schnellsuche."
   },
-  "version": "1.4.3",
+  "version": "1.5.0",
   "author": "Dominik Poschinger",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/ueD0minik/ue-bar",
-  "sdkVersion": "1.6",
+  "sdkVersion": "1.7",
   "entryAssembly": "UeBar.Modules.QuickAccess.dll"
 }

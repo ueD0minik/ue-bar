@@ -6,10 +6,11 @@ dashboard at the top edge of the Windows screen.
 A plugin is a class library that references **only this package**, implements `IModule` and ships
 with a `plugin.json`. It describes its tiles as data (`TileModel` with building blocks such as
 `TapAction`, `SliderElement`, `ValueDisplayElement`); ue Bar renders them. No WPF needed – also not
-for pins on the screen, picking a screen area or global hotkeys (interface 1.5), keys for the buttons of the picker bar (1.6).
+for pins on the screen, picking a screen area or global hotkeys (interface 1.5), keys for the buttons of the picker bar (1.6),
+a choice popup with search, pasting into the previous window, watching the clipboard and taking over a hotkey like Win+V (1.7).
 
 ```xml
-<PackageReference Include="UeBar.Sdk" Version="1.6.0" />
+<PackageReference Include="UeBar.Sdk" Version="1.7.0" />
 ```
 
 ```

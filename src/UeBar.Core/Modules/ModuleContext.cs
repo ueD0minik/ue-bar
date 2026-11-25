@@ -9,7 +9,7 @@ using UeBar.Core.Logging;
 namespace UeBar.Core.Modules;
 
 /// <summary>Context of a running module. Each start gets a new context with its own token.</summary>
-internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo, IUiLanguageInfo, IDeviceBatteryCatalog, IPinService, IScreenAreaPicker, IClipboardAccess, IFileSaveDialog, IDisposable
+internal sealed partial class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo, IUiLanguageInfo, IDeviceBatteryCatalog, IPinService, IScreenAreaPicker, IClipboardAccess, IFileSaveDialog, IDisposable
 {
     private readonly ModuleGuard _guard;
     private readonly string _dataRoot;
@@ -130,11 +130,30 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
         return await picker.PickScreenAreaAsync(request, linked.Token).ConfigureAwait(false);
     }
 
-    public Task<bool> SetTextAsync(string text, CancellationToken cancellationToken) =>
-        _host.Clipboard is { } clipboard && !string.IsNullOrEmpty(text) ? clipboard.SetTextAsync(text, cancellationToken) : Task.FromResult(false);
+    public Task<bool> SetTextAsync(string text, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return Task.FromResult(false);
+        }
 
-    public Task<bool> SetImageAsync(byte[] png, CancellationToken cancellationToken) =>
-        _host.Clipboard is { } clipboard && png is { Length: > 0 } ? clipboard.SetImageAsync(png, cancellationToken) : Task.FromResult(false);
+        // P2-6: through the writer when there is one – then the change is known as this module's.
+        return _host.ClipboardWriter is { } writer ? writer.SetContentAsync(ModuleId, new ClipboardContent { Text = text }, cancellationToken)
+            : _host.Clipboard is { } clipboard ? clipboard.SetTextAsync(text, cancellationToken)
+            : Task.FromResult(false);
+    }
+
+    public Task<bool> SetImageAsync(byte[] png, CancellationToken cancellationToken)
+    {
+        if (png is not { Length: > 0 })
+        {
+            return Task.FromResult(false);
+        }
+
+        return _host.ClipboardWriter is { } writer ? writer.SetContentAsync(ModuleId, new ClipboardContent { ImagePng = png }, cancellationToken)
+            : _host.Clipboard is { } clipboard ? clipboard.SetImageAsync(png, cancellationToken)
+            : Task.FromResult(false);
+    }
 
     // ------------------------------------------------------------------ "Save as" (P2-5-Fix 1)
 
@@ -228,6 +247,8 @@ internal sealed class ModuleContext : IModuleContext, IModuleSecrets, IHostInfo,
             {
                 pins.Changed -= OnPinsChanged;
             }
+
+            ReleaseContract17(); // P2-6: watches and hotkeys end with the module
 
             try
             {

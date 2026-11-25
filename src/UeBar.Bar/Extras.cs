@@ -133,7 +133,7 @@ public sealed record Hotkey(HotkeyModifiers Modifiers, int VirtualKey, string Te
         return null;
     }
 
-    private static int? KeyCode(string name)
+    internal static int? KeyCode(string name)
     {
         if (NamedKeys.TryGetValue(name, out var named))
         {

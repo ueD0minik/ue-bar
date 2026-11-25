@@ -1,5 +1,52 @@
 # Changelog
 
+## 1.5.0 – Clipboard history with Win + V
+
+**Plugin interface (`CoreApiVersion`): 1.7** – extended (SDK package 1.7.0); plugins for 1.0–1.6 keep loading.
+
+### New
+- **Clipboard plugin** (`clipboard`, comes with ue Bar, on by default): text (with HTML/RTF), images (up to
+  10 MB) and file lists from Explorer (paths only) are recorded – with time, app (name and icon), kind and size.
+  The same content again only moves its entry to the top. Limits: 100 entries, 7 days, 200 MB in total; kept
+  entries (★) are exempt. All configurable.
+- **`Win + V` opens the history** (taken over from Windows, can be switched off; `Win + Alt + V` always works).
+  It appears at the text cursor of the window you were in: `Enter`/click pastes there, `Shift + Enter` as plain
+  text, `Ctrl + C` only copies, `Ctrl + M` keeps (★), `Ctrl + P` pins, `Delete` deletes, typing searches. Pasting
+  from the history does not add a new entry.
+- **Private content stays private:** what password managers mark (`ExcludeClipboardContentFromMonitorProcessing`,
+  `CanIncludeInClipboardHistory` = 0, `Clipboard Viewer Ignore`) is never read; excluded apps (KeePass,
+  KeePassXC, Bitwarden, 1Password and more, configurable) are never stored; pause in the tray, on the tile, with
+  `cb pause` or in the settings (a restart ends it); clear with or without the kept entries.
+- **Stored encrypted (DPAPI, current Windows user)** in `%APPDATA%\ueBar\modules\clipboard\`, kept across restarts,
+  never synchronized, never in the layout or the log (the log says kind and size only). Deleting an entry deletes
+  its files at once; stray files are removed at start.
+- **Tile** "Clipboard" (latest entries – tap copies, "All" opens the history, pause), **quick command** `cb <search>`
+  (Enter copies), `cb pause`, `cb clear`; **bus:** `clipboard.changed` (metadata only), `clipboard.copy_text`,
+  `clipboard.recent` (contents only if the user allows it).
+- **SDK 1.7** for every plugin: `IChoicePopup` (a popup list with search, previews, groups and keyed actions at the
+  text cursor), `IPasteService` (focus back + `Ctrl + V`), `IClipboardWatcher` (event driven, privacy marks
+  honored), `IClipboardWriter` (text, HTML, RTF, image and files at once; tells the watcher who wrote),
+  `IHotkeyTakeoverService` (hotkeys Windows keeps for itself, with a lean keyboard hook on its own thread),
+  `ITrayMenuProvider` (entries in the tray menu).
+
+### Changed
+- `IClipboardAccess` (1.5) now writes through the new writer, so a clipboard watcher knows which plugin wrote.
+
+### Measured
+- Release build, collapsed, two instances side by side (one without the plugin): with 100 entries of which 10 are
+  Full-HD images 56 MB private / 153 MB working set – the one without the plugin 58 / 150 MB. CPU 0.2–0.5 s per
+  minute in both (no measurable difference). History on disk 3.2 MB.
+- Images leave large buffers behind that an idle app would keep for a long time: 5 s after the last image the
+  memory is cleaned once (without that: +35 MB after 10 Full-HD images).
+- Installer 7.8 MB (+0.14 MB).
+
+### Tests
+- Clipboard +26 (all kinds, duplicates, limits and kept entries, password-manager marks and excluded apps, pause,
+  encryption and restart, deleting and orphans, Win+V on/off/failed, popup keys, pasting, plain text, pinning,
+  quick command, tile, bus, no content in the log, memory with 100 entries, loading as a plugin), Bar +9 (keyboard
+  hook filter and schedule, popup keys, search, placement, privacy marks), Core +5 (contract 1.7 through the
+  guard). Total 837.
+
 ## 1.4.3 – Text recognition measured on real screenshots
 
 Fixes only; plugin interface unchanged (1.6).

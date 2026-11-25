@@ -74,7 +74,9 @@ public interface IModule
 /// <summary>
 /// What a module gets from the core when it starts. Further services of the host are offered on the same
 /// object – check with <c>as</c>: <see cref="IModuleSecrets"/>, <see cref="IHostInfo"/>, <see cref="IUiLanguageInfo"/>,
-/// <see cref="IDeviceBatteryCatalog"/>, <see cref="IPinService"/>, <see cref="IScreenAreaPicker"/>, <see cref="IClipboardAccess"/>.
+/// <see cref="IDeviceBatteryCatalog"/>, <see cref="IPinService"/>, <see cref="IScreenAreaPicker"/>, <see cref="IClipboardAccess"/>,
+/// <see cref="IFileSaveDialog"/>, and since contract 1.7 <see cref="IClipboardWatcher"/>, <see cref="IClipboardWriter"/>,
+/// <see cref="IPasteService"/>, <see cref="IChoicePopup"/> and <see cref="IHotkeyTakeoverService"/>.
 /// </summary>
 public interface IModuleContext
 {

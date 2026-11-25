@@ -8,8 +8,8 @@ Schnellsuche. Vorbild ist die „Now Bar“ von Samsung One UI. Was die Kacheln 
 **Plugins** – [Home Assistant](plugins/HomeAssistant/README.de.md), [Windows](plugins/Windows/README.de.md)
 (Lautstärke, Medien, WLAN, Bluetooth, Akkus, Systemwerte dieses PCs), [Timer](plugins/Timer/README.de.md)
 (Timer, Stoppuhr, Pomodoro), [Schnellzugriff](plugins/QuickAccess/README.de.md) (Apps, Dateien,
-Ordner, Webseiten als Kacheln) und [Screenshot](plugins/Screenshot/README.de.md) (aufnehmen, anpinnen,
-Text erkennen) werden mitgeliefert; weitere kommen dazu, ohne die App neu zu bauen. Notizen und
+Ordner, Webseiten als Kacheln), [Screenshot](plugins/Screenshot/README.de.md) (aufnehmen, anpinnen,
+Text erkennen) und [Zwischenablage](plugins/Clipboard/README.de.md) (Verlauf mit `Win + V`) werden mitgeliefert; weitere kommen dazu, ohne die App neu zu bauen. Notizen und
 Screenshots lassen sich als kleine Fenster, die immer obenauf bleiben, auf dem Bildschirm **anpinnen**.
 
 ![Panel mit Kacheln eines Beispiel-Zuhauses](docs/images/panel.png)
@@ -121,6 +121,7 @@ Quelle und eine deutliche Warnung) und wieder, wenn sich seine Dateien ändern. 
 | [Timer](plugins/Timer/README.de.md) | Timer mit Voreinstellungen und Namen, Stoppuhr, Pomodoro (kann Aktionen anderer Plugins auslösen); `t 10` in der Schnellsuche, Restzeit in der Pill | ja |
 | [Schnellzugriff](plugins/QuickAccess/README.de.md) | Startmenü-Apps, Dateien, Office-Vorlagen (neues Dokument), Ordner, Webseiten und eigene Befehle als Kacheln mit echten Symbolen – auch bis zu sechs in einer Kachel; Ziehen und Ablegen, Schnellsuche | ja |
 | [Screenshot](plugins/Screenshot/README.de.md) | Bereich, Fenster oder Bildschirm aufnehmen (`Win + Alt + S`), dann anpinnen, kopieren, speichern oder Text erkennen (Windows-OCR, offline) | ja |
+| [Zwischenablage](plugins/Clipboard/README.de.md) | Zwischenablage-Verlauf mit `Win + V`: Text, Bilder, Dateien; suchen, ins vorherige Fenster einfügen, merken, anpinnen – verschlüsselt nur auf diesem PC, Passwortmanager ausgenommen | ja |
 | [Test-Modul](plugins/Dummy/README.de.md) | Simulierte Geräte zum Entwickeln und Testen von ue Bar | nein – Debug-Builds und eigenes ZIP |
 | [Hallo](samples/HelloPlugin) | Beispiel-Plugin: eine Zähler-Kachel, Ausgangspunkt für eigene | nein – Beispiel im Quellcode |
 

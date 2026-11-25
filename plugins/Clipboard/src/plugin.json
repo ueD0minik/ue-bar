@@ -1,0 +1,17 @@
+{
+  "id": "clipboard",
+  "name": {
+    "en": "Clipboard",
+    "de": "Zwischenablage"
+  },
+  "description": {
+    "en": "Clipboard history with Win+V: text, images and files, search, keep, pin – encrypted on this PC only, password managers left out.",
+    "de": "Zwischenablage-Verlauf mit Win+V: Text, Bilder und Dateien, Suche, Merken, Anpinnen – verschlüsselt nur auf diesem PC, Passwortmanager ausgenommen."
+  },
+  "version": "1.5.0",
+  "author": "Dominik Poschinger",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/ueD0minik/ue-bar",
+  "sdkVersion": "1.7",
+  "entryAssembly": "UeBar.Modules.Clipboard.dll"
+}

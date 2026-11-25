@@ -44,6 +44,8 @@ public partial class App : Application
     private UiWatchdog? _watchdog;
     private ExtrasController? _extras;
     private GlobalHotkeys? _hotkeys;
+    private UeBar.App.ClipHistory.ClipboardWatcher? _clipboardWatcher;
+    private UeBar.App.ClipHistory.KeyboardHook? _keyboardHook;
     private UeBar.App.Pins.PinController? _pins;
     private bool _exiting;
     private long? _exitStarted;
@@ -171,6 +173,17 @@ public partial class App : Application
             _registry.Host.ScreenAreaPicker = picker;
             var saveDialog = new SaveDialog(Dispatcher, settings, _log);
             _registry.Host.SaveDialog = saveDialog.AskAsync;
+
+            // P2-6: clipboard history support for plugins – watching (only while someone watches), writing with the
+            // writer remembered, pasting into the window in front, the choice popup and the keyboard hook (only while
+            // a hotkey is taken over).
+            _clipboardWatcher = new UeBar.App.ClipHistory.ClipboardWatcher(Dispatcher, _log, clipboard);
+            _keyboardHook = new UeBar.App.ClipHistory.KeyboardHook(_log);
+            _registry.Host.ClipboardWatcher = _clipboardWatcher;
+            _registry.Host.ClipboardWriter = clipboard;
+            _registry.Host.Paste = new UeBar.App.ClipHistory.PasteService(Dispatcher, clipboard, _log);
+            _registry.Host.ChoicePopup = new UeBar.App.ClipHistory.ChoicePopupHost(Dispatcher, _log);
+            _registry.Host.HotkeyTakeover = _keyboardHook;
 
             // Plugins (SPEC 4.4): find them, ask for every one that does not come with ue Bar (first time
             // and whenever its files changed), load them, hand their modules to the registry. A broken
@@ -658,6 +671,10 @@ public partial class App : Application
                 _pins = null;
                 _hotkeys?.Dispose();
                 _hotkeys = null;
+                _keyboardHook?.Dispose();
+                _keyboardHook = null;
+                _clipboardWatcher?.Dispose();
+                _clipboardWatcher = null;
                 _bar?.Dispose();
                 _bar = null;
             })

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Plugin "clipboard" (P2-6): clipboard history with Win+V, stored encrypted (DPAPI) on this PC only. References
+       only UeBar.Sdk; watching, the choice popup, pasting and the keyboard hook come from the core (contract 1.7). -->
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>UeBar.Modules.Clipboard</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Private=false: the SDK always comes from the app, never from the plugin folder -->
+    <ProjectReference Include="..\..\..\src\UeBar.Sdk\UeBar.Sdk.csproj" Private="false" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="UeBar.Modules.Clipboard.Tests" />
+  </ItemGroup>
+  <Import Project="..\..\..\src\UeBar.Sdk\build\UeBar.Sdk.targets" />
+</Project>

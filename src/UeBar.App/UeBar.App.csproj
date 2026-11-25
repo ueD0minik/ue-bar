@@ -44,6 +44,7 @@
     <BundledPlugin Include="..\..\plugins\Timer\src\UeBar.Modules.Timer.csproj" />
     <BundledPlugin Include="..\..\plugins\QuickAccess\src\UeBar.Modules.QuickAccess.csproj" />
     <BundledPlugin Include="..\..\plugins\Screenshot\src\UeBar.Modules.Screenshot.csproj" />
+    <BundledPlugin Include="..\..\plugins\Clipboard\src\UeBar.Modules.Clipboard.csproj" />
     <BundledPlugin Include="..\..\plugins\Dummy\src\UeBar.Modules.Dummy.csproj" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
   <Import Project="..\..\build\BundledPlugins.targets" />

@@ -1318,4 +1318,19 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Pins_Stored" xml:space="preserve">
     <value>Gespeicherte Pins: {0} ({1})</value>
   </data>
+  <data name="Hook_Retrying" xml:space="preserve">
+    <value>Der Tastaturhook ließ sich noch nicht anlegen – neuer Versuch läuft.</value>
+  </data>
+  <data name="Hook_Failed" xml:space="preserve">
+    <value>Windows hat den Tastaturhook nicht erlaubt. Stattdessen gilt das Ersatzkürzel.</value>
+  </data>
+  <data name="Choice_Search" xml:space="preserve">
+    <value>Suchen …</value>
+  </data>
+  <data name="Choice_Empty" xml:space="preserve">
+    <value>Nichts gefunden</value>
+  </data>
+  <data name="Choice_Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
 </root>

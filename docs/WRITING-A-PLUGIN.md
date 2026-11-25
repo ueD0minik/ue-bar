@@ -33,7 +33,7 @@ in a release is called `ueBar-plugin-<id>-<version>.zip`.
 ```powershell
 dotnet new classlib -n MyPlugin -f net10.0
 cd MyPlugin
-dotnet add package UeBar.Sdk --version 1.6.0
+dotnet add package UeBar.Sdk --version 1.7.0
 ```
 
 - Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF. A plugin that needs
@@ -66,7 +66,7 @@ Next to the `.csproj`:
   "author": "Your Name",
   "license": "GPL-3.0-or-later",
   "homepage": "https://example.org/myplugin",
-  "sdkVersion": "1.6",
+  "sdkVersion": "1.7",
   "entryAssembly": "MyPlugin.dll"
 }
 ```
@@ -314,6 +314,72 @@ if (context is IFileSaveDialog dialog)
 - **"Save as"** (`IFileSaveDialog`) is the Windows dialog, shown by the core. It starts in the folder the
   user picked last time for your plugin (remembered per PC); your plugin writes the file itself.
 
+### Choice popup, pasting, clipboard, taking over a hotkey, tray entries (1.7)
+
+The clipboard history is built only on these – your plugin can use them the same way:
+
+```csharp
+if (context is IChoicePopup popup)
+{
+    var choice = await popup.ShowChoicesAsync(new ChoicePopupRequest(
+    [
+        new ChoiceItem("1", "Meeting on Thursday") { Detail = "2 min ago · Word", Icon = "U+E8E4", Group = "Recent" },
+        new ChoiceItem("2", "Image 640 × 360") { ImagePng = thumbnail, IsMarked = true },
+    ])
+    {
+        Title = "Snippets",
+        Actions =
+        [
+            new("paste", "Paste"),                                          // Enter and a click
+            new("plain", "As plain text", "Shift+Enter"),
+            new("keep", "Keep", "Ctrl+M") { KeepOpen = true },             // the popup stays open …
+        ],
+        OnAction = async (c, ct) => new ChoicePopupUpdate(NewItems()),     // … and shows the new list
+        Placement = ChoicePlacement.Caret,
+    }, ct);
+    // choice: ItemId, ActionId, Target (the window that was in front) – null = Esc / clicked elsewhere
+
+    if (choice is { ActionId: "paste" } && context is IPasteService paste)
+    {
+        await paste.PasteAsync(new ClipboardContent { Text = "…", Html = "…" }, choice.Target, ct);
+    }
+}
+
+if (context is IClipboardWatcher watcher)
+{
+    _watch = watcher.WatchClipboard(new ClipboardWatchOptions { Images = true, MaxImageBytes = 10 << 20 }, change =>
+    {
+        // change.Content (Text, Html, Rtf, ImagePng, Files), Source (app name and icon), ThumbnailPng,
+        // WrittenByModule ("clipboard" = your own pasting). Comes on a background thread through the guard.
+    });
+}
+
+if (context is IHotkeyTakeoverService hotkeys)
+{
+    _winV = hotkeys.TakeOverHotkey("Win+V", OpenHistory); // State: Active / Retrying / Failed (+ Problem)
+}
+```
+
+- **The popup** looks like the quick search: typing searches (every word must appear in the title, detail or
+  `SearchText`), arrow keys select, `Enter`/click = the first action, `Esc` closes. Actions bring their keys
+  (`"Shift+Enter"`, `"Ctrl+C"`, `"Delete"` …) – shown at the bottom and in the tooltips, never system-wide. It
+  appears at the text cursor of the window in front (or at the mouse), on the right monitor and scale. One popup
+  at a time: a second call closes it – the same hotkey opens and closes it.
+- **Pasting** (`IPasteService`) puts the content on the clipboard, gives the focus back to the target window,
+  waits until the user has let go of Shift/Ctrl/Alt/Win and sends `Ctrl + V`.
+- **Watching** (`IClipboardWatcher`) is event driven; the core reads only what you ask for (images only without
+  text, size limits). Content marked by password managers (`ExcludeClipboardContentFromMonitorProcessing`,
+  `CanIncludeInClipboardHistory` = 0, `Clipboard Viewer Ignore`) is never read and never reported. Never log
+  clipboard content – only kind and size.
+- **Writing everything at once** (`IClipboardWriter`): text, HTML, RTF, image and files in one go. Since 1.7,
+  `IClipboardAccess` writes through it as well, so a watcher can tell which plugin wrote.
+- **Taking over a hotkey** that Windows keeps for itself (`Win + V`) uses a lean keyboard hook of the core on its
+  own thread – only while a takeover exists. Offer a normal `Hotkey` setting as a replacement: if Windows does not
+  allow the hook, `State` becomes `Failed` with a `Problem` you can show. Dispose to give the hotkey back;
+  stopping the plugin does that, too.
+- **Tray entries** (`ITrayMenuProvider`): one or two entries in the tray menu, read when the menu opens, e.g.
+  "Pause clipboard history" with a check mark.
+
 ### Entries of a settings list as tiles (1.5)
 
 With `ISettingListTiles.CreateTileForListEntry(fieldKey, entry)` the settings page offers "Also add as
@@ -421,7 +487,7 @@ checksum of the plugin's code files (`.dll`, `.exe`, `*.deps.json`, `plugin.json
 - The **major** version changes only for an unavoidable breaking change. Plugins for another major
   version are not loaded – Settings → Plugins says why.
 
-A plugin that needs `1.6` is not loaded by a ue Bar that offers `1.5` (it says "update ue Bar").
+A plugin that needs `1.7` is not loaded by a ue Bar that offers `1.6` (it says "update ue Bar").
 
 ## Rules
 

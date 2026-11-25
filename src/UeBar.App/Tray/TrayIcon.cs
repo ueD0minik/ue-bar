@@ -143,6 +143,7 @@ internal sealed class TrayIcon : IDisposable
         var release = new Forms.ToolStripMenuItem(Loc.Get("Tray_PinsClickable")) { Enabled = AnyClickThroughPins?.Invoke() ?? false };
         release.Click += (_, _) => _dispatcher.BeginInvoke(() => ReleasePins?.Invoke());
         _menu.Items.Add(release);
+        AddPluginEntries();
 
         _menu.Items.Add(BuildLayoutMenu());
 
@@ -160,6 +161,27 @@ internal sealed class TrayIcon : IDisposable
         _menu.Items.Add(exit);
 
         _menu.ResumeLayout();
+    }
+
+    /// <summary>Entries of running plugins (P2-6, <see cref="ITrayMenuProvider"/>), e.g. "Pause clipboard history".</summary>
+    private void AddPluginEntries()
+    {
+        foreach (var (module, _) in _registry.GetCapabilities<ITrayMenuProvider>())
+        {
+            var entries = _registry.Invoke(module.Id, "Tray entries", m => ((ITrayMenuProvider)m).TrayMenuEntries, reportFaults: false).Value ?? [];
+            foreach (var entry in entries.Take(3))
+            {
+                var item = new Forms.ToolStripMenuItem(Truncate(entry.Label, 80)) { Enabled = entry.IsEnabled, Checked = entry.Checked == true };
+                var moduleId = module.Id;
+                var entryId = entry.Id;
+                item.Click += (_, _) => _ = _registry.InvokeAsync(moduleId, $"Tray entry {entryId}", async (m, ct) =>
+                {
+                    await ((ITrayMenuProvider)m).RunTrayMenuEntryAsync(entryId, ct).ConfigureAwait(false);
+                    return true;
+                });
+                _menu.Items.Add(item);
+            }
+        }
     }
 
     private Forms.ToolStripMenuItem BuildLayoutMenu()

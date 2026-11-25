@@ -8,8 +8,8 @@ search. Inspired by the "Now Bar" of Samsung One UI. What the tiles show comes f
 **plugins** – [Home Assistant](plugins/HomeAssistant/README.md), [Windows](plugins/Windows/README.md)
 (volume, media, Wi-Fi, Bluetooth, batteries, system values of this PC), [Timer](plugins/Timer/README.md)
 (timers, stopwatch, Pomodoro), [Quick access](plugins/QuickAccess/README.md) (apps, files,
-folders, web pages as tiles) and [Screenshot](plugins/Screenshot/README.md) (capture, pin, recognize
-text) come with ue Bar; more can be added without rebuilding the app. Notes and screenshots can be
+folders, web pages as tiles), [Screenshot](plugins/Screenshot/README.md) (capture, pin, recognize
+text) and [Clipboard](plugins/Clipboard/README.md) (history with `Win + V`) come with ue Bar; more can be added without rebuilding the app. Notes and screenshots can be
 **pinned** on the screen as small windows that stay on top.
 
 ![Panel with tiles of an example home](docs/images/panel.png)
@@ -117,6 +117,7 @@ as a ZIP with **Settings → Plugins → Add plugin …**.
 | [Timer](plugins/Timer/README.md) | Timers with presets and names, stopwatch, Pomodoro (can start actions of other plugins); `t 10` in the quick search, time left in the pill | yes |
 | [Quick access](plugins/QuickAccess/README.md) | Start menu apps, files, Office templates (new document), folders, web pages and own commands as tiles with their real icons – also up to six in one tile; drag and drop, quick search | yes |
 | [Screenshot](plugins/Screenshot/README.md) | Capture an area, window or screen (`Win + Alt + S`), then pin, copy, save or recognize the text (Windows OCR, offline) | yes |
+| [Clipboard](plugins/Clipboard/README.md) | Clipboard history with `Win + V`: text, images, files; search, paste into the previous window, keep, pin – encrypted on this PC only, password managers left out | yes |
 | [Test module](plugins/Dummy/README.md) | Simulated devices for developing and testing ue Bar | no – debug builds and a separate ZIP |
 | [Hello](samples/HelloPlugin) | Sample plugin: a counter tile, the starting point for your own | no – sample in the source |
 

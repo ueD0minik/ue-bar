@@ -189,6 +189,40 @@ Recognized text (Screenshot plugin, `OcrLayout`) is rebuilt from the word boxes:
 are joined (Windows returns a bullet "•" as its own line), spaces only where the boxes have a gap, type size
 by width per character, hanging indents of list items, tables only for runs of rows with the same structure.
 
+Contract 1.7 (1.5.0) – what a clipboard history needs, all generic (the Clipboard plugin uses nothing else):
+
+- **Watching the clipboard** (`IClipboardWatcher`, `ClipboardWatcher` in the app): a message-only window with
+  `AddClipboardFormatListener`, created only while some plugin watches. After `WM_CLIPBOARDUPDATE` it waits
+  120 ms (apps write in steps, one read per change, `GetClipboardSequenceNumber`), then checks the privacy
+  marks **before reading anything** (`ClipboardPrivacy` in `UeBar.Bar`: `ExcludeClipboardContentFromMonitorProcessing`,
+  `CanIncludeInClipboardHistory` = 0, `Clipboard Viewer Ignore` → nothing is read, nobody is told). It reads only
+  what the watchers asked for – images only without text or files, size limits – and the source app from
+  `GetClipboardOwner` (or the window in front; never our own process). Image pixels are copied to plain bytes on
+  the UI thread; PNG and preview picture are encoded on the pool. The change goes to each module on the pool
+  through the guard; stopping the module ends its watch. The log holds kind and size only.
+- **Who wrote it:** `IClipboardAccess` and `IClipboardWriter` write through `ClipboardAccess` in the app, which
+  remembers the sequence number after its write together with the module; the watcher reports it as
+  `WrittenByModule` – so a history knows its own pasting.
+- **Pasting** (`IPasteService`, `PasteService`): content to the clipboard, `SetForegroundWindow` on the target (we
+  may, because our popup had the focus; fallback `AttachThreadInput`), wait until Shift/Ctrl/Alt/Win are released
+  (at most 1.5 s, then they are released for the target), `Ctrl + V` with `SendInput`.
+- **Choice popup** (`IChoicePopup`, `ChoicePopupHost`): a small WPF window in the look of the quick search,
+  activated (it takes the keyboard), topmost, closes when it loses the focus. Search, keys, reselection after a
+  change and placement are logic in `UeBar.Bar` (`ChoiceSearch`, `ChoiceKeys`, `KeyChord`, `ChoicePlacementRules`):
+  under the caret of the window in front (`GetGUIThreadInfo`), above it without room, else at the mouse, always
+  inside the work area of that monitor, sized for its scale. Actions with `KeepOpen` call the module through the
+  guard (5 s) and show the new list.
+- **Taking over a hotkey** (`IHotkeyTakeoverService`, `KeyboardHook`): a `WH_KEYBOARD_LL` hook on an own thread with
+  its own message loop, set only while a takeover exists. The callback only asks `KeyHookFilter` (pure logic:
+  modifiers tracked from the events, injected keys never fire, key repeat and key up of the hotkey are swallowed)
+  and returns; the press goes out on the pool. For Win hotkeys a meaningless key (0xE8) is sent while Win is still
+  down, so releasing Win does not open the start menu. `HookSchedule`: tries at start, after 2 s and 10 s, then
+  "failed" (the module shows its replacement hotkey); a working hook is set again every 5 minutes, because Windows
+  silently removes hooks that answer too slowly.
+- **Tray entries** (`ITrayMenuProvider`): read when the tray menu opens, through the guard.
+- The Clipboard plugin stores its history in its data folder, every file encrypted with DPAPI (`ClipStore`), and
+  publishes only metadata on the bus.
+
 ## Tiles are data
 
 So that a module needs no WPF code, a tile describes its content as data made from elements,
@@ -284,6 +318,8 @@ behavior can change freely as long as the contract stays the same.
   tile's element list it retries if the list was changed at the same moment; a module itself makes
   sure that two of its threads never change the same tile at once.
 - A UI watchdog writes a small dump to the log folder if the UI thread hangs.
+- Clipboard watching costs nothing between changes (a message window, no polling). The keyboard hook for a
+  taken-over hotkey has its own thread that only waits for messages; its callback decides and returns at once.
 
 ## Languages
 

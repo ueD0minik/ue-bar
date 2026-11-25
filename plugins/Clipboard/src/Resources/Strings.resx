@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Clip_ModuleName" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="Clip_TileName" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="Clip_PopupTitle" xml:space="preserve">
+    <value>Clipboard history</value>
+  </data>
+  <data name="Clip_Search" xml:space="preserve">
+    <value>Type to search …</value>
+  </data>
+  <data name="Clip_Empty" xml:space="preserve">
+    <value>Nothing here yet. Copy something with Ctrl + C.</value>
+  </data>
+  <data name="Clip_NoHit" xml:space="preserve">
+    <value>Nothing found.</value>
+  </data>
+  <data name="Clip_GroupKept" xml:space="preserve">
+    <value>Kept</value>
+  </data>
+  <data name="Clip_GroupRecent" xml:space="preserve">
+    <value>Recent</value>
+  </data>
+  <data name="Clip_ActionPaste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="Clip_ActionPlain" xml:space="preserve">
+    <value>As plain text</value>
+  </data>
+  <data name="Clip_ActionCopy" xml:space="preserve">
+    <value>Copy only</value>
+  </data>
+  <data name="Clip_ActionKeep" xml:space="preserve">
+    <value>Keep</value>
+  </data>
+  <data name="Clip_ActionPin" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="Clip_ActionDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Clip_Paused" xml:space="preserve">
+    <value>History paused – new copies are not stored.</value>
+  </data>
+  <data name="Clip_PausedShort" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="Clip_Count" xml:space="preserve">
+    <value>{0} entries</value>
+  </data>
+  <data name="Clip_CountOne" xml:space="preserve">
+    <value>1 entry</value>
+  </data>
+  <data name="Clip_Image" xml:space="preserve">
+    <value>Image {0} × {1}</value>
+  </data>
+  <data name="Clip_ImageShort" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="Clip_Files" xml:space="preserve">
+    <value>{0} files</value>
+  </data>
+  <data name="Clip_From" xml:space="preserve">
+    <value>from {0}</value>
+  </data>
+  <data name="Clip_JustNow" xml:space="preserve">
+    <value>just now</value>
+  </data>
+  <data name="Clip_MinutesAgo" xml:space="preserve">
+    <value>{0} min ago</value>
+  </data>
+  <data name="Clip_HoursAgo" xml:space="preserve">
+    <value>{0} h ago</value>
+  </data>
+  <data name="Clip_DaysAgo" xml:space="preserve">
+    <value>{0} d ago</value>
+  </data>
+  <data name="Clip_Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="Clip_PasteFailed" xml:space="preserve">
+    <value>Not pasted – the entry is on the clipboard now (Ctrl + V).</value>
+  </data>
+  <data name="Clip_CopyFailed" xml:space="preserve">
+    <value>Could not copy</value>
+  </data>
+  <data name="Clip_PinFailed" xml:space="preserve">
+    <value>Could not pin</value>
+  </data>
+  <data name="Clip_Gone" xml:space="preserve">
+    <value>This entry is gone.</value>
+  </data>
+  <data name="Clip_TileAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Clip_TilePause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="Clip_TileResume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="Clip_TrayPause" xml:space="preserve">
+    <value>Pause clipboard history</value>
+  </data>
+  <data name="Clip_Command" xml:space="preserve">
+    <value>Clipboard: cb &lt;search&gt; copies the best hit · cb pause · cb clear</value>
+  </data>
+  <data name="Clip_CommandPaused" xml:space="preserve">
+    <value>Clipboard history paused</value>
+  </data>
+  <data name="Clip_CommandResumed" xml:space="preserve">
+    <value>Clipboard history is on again</value>
+  </data>
+  <data name="Clip_CommandCleared" xml:space="preserve">
+    <value>History emptied: {0} removed, kept ones stay</value>
+  </data>
+  <data name="Clip_CommandNoHit" xml:space="preserve">
+    <value>Nothing found for “{0}”</value>
+  </data>
+  <data name="Clip_CommandCopied" xml:space="preserve">
+    <value>Copied: {0}</value>
+  </data>
+  <data name="Clip_CommandOpen" xml:space="preserve">
+    <value>Open the history</value>
+  </data>
+  <data name="Clip_BusChanged" xml:space="preserve">
+    <value>Something was copied – only kind, size and app, never the content</value>
+  </data>
+  <data name="Clip_BusCopyText" xml:space="preserve">
+    <value>Put text on the clipboard ({"text": "…"})</value>
+  </data>
+  <data name="Clip_BusRecent" xml:space="preserve">
+    <value>The latest text entries ({"count": 5}) – only if the clipboard plugin's settings allow it</value>
+  </data>
+  <data name="Clip_BusNotShared" xml:space="preserve">
+    <value>Contents are not shared (setting of the clipboard plugin)</value>
+  </data>
+  <data name="Clip_SettingWinV" xml:space="preserve">
+    <value>Take over Win+V</value>
+  </data>
+  <data name="Clip_SettingWinV_Hint" xml:space="preserve">
+    <value>Win+V opens this history instead of the one of Windows. Off = Windows gets Win+V back. If the Windows history stays on as well, both store what you copy – you can switch it off in Windows, but you do not have to.</value>
+  </data>
+  <data name="Clip_SettingHotkey" xml:space="preserve">
+    <value>Replacement hotkey</value>
+  </data>
+  <data name="Clip_SettingHotkey_Hint" xml:space="preserve">
+    <value>Always active, also when Win+V is not taken over.</value>
+  </data>
+  <data name="Clip_HookTitle" xml:space="preserve">
+    <value>Win+V</value>
+  </data>
+  <data name="Clip_HookActive" xml:space="preserve">
+    <value>Win+V is taken over and opens this history.</value>
+  </data>
+  <data name="Clip_HookOff" xml:space="preserve">
+    <value>Win+V belongs to Windows. Open this history with {0}.</value>
+  </data>
+  <data name="Clip_HookStarting" xml:space="preserve">
+    <value>Win+V is being taken over …</value>
+  </data>
+  <data name="Clip_HookProblem" xml:space="preserve">
+    <value>Win+V could not be taken over: {0} Use {1}.</value>
+  </data>
+  <data name="Clip_SettingEntries" xml:space="preserve">
+    <value>Number of entries</value>
+  </data>
+  <data name="Clip_SettingEntries_Hint" xml:space="preserve">
+    <value>Kept entries (★) do not count.</value>
+  </data>
+  <data name="Clip_SettingDays" xml:space="preserve">
+    <value>Days to keep</value>
+  </data>
+  <data name="Clip_SettingDays_Hint" xml:space="preserve">
+    <value>Older entries are deleted, kept ones stay.</value>
+  </data>
+  <data name="Clip_SettingImages" xml:space="preserve">
+    <value>Store images</value>
+  </data>
+  <data name="Clip_SettingImageMb" xml:space="preserve">
+    <value>Largest image (MB)</value>
+  </data>
+  <data name="Clip_SettingTotalMb" xml:space="preserve">
+    <value>Total size (MB)</value>
+  </data>
+  <data name="Clip_SettingTotalMb_Hint" xml:space="preserve">
+    <value>When the history gets larger, the oldest entries that are not kept are deleted.</value>
+  </data>
+  <data name="Clip_SettingExcluded" xml:space="preserve">
+    <value>Excluded apps</value>
+  </data>
+  <data name="Clip_SettingExcluded_Hint" xml:space="preserve">
+    <value>Nothing copied in these apps is ever stored (program name, e.g. KeePass). Password managers that mark their copies as private are skipped anyway.</value>
+  </data>
+  <data name="Clip_SettingExcludedApp" xml:space="preserve">
+    <value>Program</value>
+  </data>
+  <data name="Clip_SettingExcludedAdd" xml:space="preserve">
+    <value>Add app</value>
+  </data>
+  <data name="Clip_SettingShare" xml:space="preserve">
+    <value>Share contents with other plugins</value>
+  </data>
+  <data name="Clip_SettingShare_Hint" xml:space="preserve">
+    <value>Off = other plugins only learn that something was copied (kind, size, app), never what. On = plugins with a bus permission may read the latest texts.</value>
+  </data>
+  <data name="Clip_SettingPause" xml:space="preserve">
+    <value>Pause history</value>
+  </data>
+  <data name="Clip_SettingPause_Hint" xml:space="preserve">
+    <value>Until you resume or ue Bar restarts.</value>
+  </data>
+  <data name="Clip_SettingPausedNow" xml:space="preserve">
+    <value>Paused right now.</value>
+  </data>
+  <data name="Clip_ButtonPause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="Clip_ButtonResume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="Clip_SettingClear" xml:space="preserve">
+    <value>Clear history</value>
+  </data>
+  <data name="Clip_SettingClear_Hint" xml:space="preserve">
+    <value>Kept entries (★) stay.</value>
+  </data>
+  <data name="Clip_ButtonClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Clip_SettingClearAll" xml:space="preserve">
+    <value>Clear everything</value>
+  </data>
+  <data name="Clip_SettingClearAll_Hint" xml:space="preserve">
+    <value>Also the kept entries (★).</value>
+  </data>
+  <data name="Clip_ButtonClearAll" xml:space="preserve">
+    <value>Clear everything</value>
+  </data>
+  <data name="Clip_Cleared" xml:space="preserve">
+    <value>{0} entries deleted.</value>
+  </data>
+  <data name="Clip_SettingStored" xml:space="preserve">
+    <value>Stored: {0} entries ({1})</value>
+  </data>
+  <data name="Clip_SettingStored_Hint" xml:space="preserve">
+    <value>Encrypted for your Windows user, only on this PC, never synced: {0}</value>
+  </data>
+  <data name="Clip_ButtonFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="Clip_FolderOpened" xml:space="preserve">
+    <value>Folder opened.</value>
+  </data>
+  <data name="Clip_NotAvailable" xml:space="preserve">
+    <value>This ue Bar cannot watch the clipboard (needs version 1.5 or newer).</value>
+  </data>
+</root>

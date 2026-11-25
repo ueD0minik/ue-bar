@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Clip_ModuleName" xml:space="preserve">
+    <value>Zwischenablage</value>
+  </data>
+  <data name="Clip_TileName" xml:space="preserve">
+    <value>Zwischenablage</value>
+  </data>
+  <data name="Clip_PopupTitle" xml:space="preserve">
+    <value>Zwischenablage-Verlauf</value>
+  </data>
+  <data name="Clip_Search" xml:space="preserve">
+    <value>Tippen zum Suchen …</value>
+  </data>
+  <data name="Clip_Empty" xml:space="preserve">
+    <value>Noch nichts da. Kopiere etwas mit Strg + C.</value>
+  </data>
+  <data name="Clip_NoHit" xml:space="preserve">
+    <value>Nichts gefunden.</value>
+  </data>
+  <data name="Clip_GroupKept" xml:space="preserve">
+    <value>Gemerkt</value>
+  </data>
+  <data name="Clip_GroupRecent" xml:space="preserve">
+    <value>Zuletzt</value>
+  </data>
+  <data name="Clip_ActionPaste" xml:space="preserve">
+    <value>Einfügen</value>
+  </data>
+  <data name="Clip_ActionPlain" xml:space="preserve">
+    <value>Als Text</value>
+  </data>
+  <data name="Clip_ActionCopy" xml:space="preserve">
+    <value>Nur kopieren</value>
+  </data>
+  <data name="Clip_ActionKeep" xml:space="preserve">
+    <value>Merken</value>
+  </data>
+  <data name="Clip_ActionPin" xml:space="preserve">
+    <value>Anpinnen</value>
+  </data>
+  <data name="Clip_ActionDelete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="Clip_Paused" xml:space="preserve">
+    <value>Verlauf pausiert – neue Kopien werden nicht gespeichert.</value>
+  </data>
+  <data name="Clip_PausedShort" xml:space="preserve">
+    <value>Pausiert</value>
+  </data>
+  <data name="Clip_Count" xml:space="preserve">
+    <value>{0} Einträge</value>
+  </data>
+  <data name="Clip_CountOne" xml:space="preserve">
+    <value>1 Eintrag</value>
+  </data>
+  <data name="Clip_Image" xml:space="preserve">
+    <value>Bild {0} × {1}</value>
+  </data>
+  <data name="Clip_ImageShort" xml:space="preserve">
+    <value>Bild</value>
+  </data>
+  <data name="Clip_Files" xml:space="preserve">
+    <value>{0} Dateien</value>
+  </data>
+  <data name="Clip_From" xml:space="preserve">
+    <value>aus {0}</value>
+  </data>
+  <data name="Clip_JustNow" xml:space="preserve">
+    <value>gerade eben</value>
+  </data>
+  <data name="Clip_MinutesAgo" xml:space="preserve">
+    <value>vor {0} min</value>
+  </data>
+  <data name="Clip_HoursAgo" xml:space="preserve">
+    <value>vor {0} h</value>
+  </data>
+  <data name="Clip_DaysAgo" xml:space="preserve">
+    <value>vor {0} Tg.</value>
+  </data>
+  <data name="Clip_Copied" xml:space="preserve">
+    <value>Kopiert</value>
+  </data>
+  <data name="Clip_PasteFailed" xml:space="preserve">
+    <value>Nicht eingefügt – der Eintrag liegt jetzt in der Zwischenablage (Strg + V).</value>
+  </data>
+  <data name="Clip_CopyFailed" xml:space="preserve">
+    <value>Kopieren ging nicht</value>
+  </data>
+  <data name="Clip_PinFailed" xml:space="preserve">
+    <value>Anpinnen ging nicht</value>
+  </data>
+  <data name="Clip_Gone" xml:space="preserve">
+    <value>Dieser Eintrag ist nicht mehr da.</value>
+  </data>
+  <data name="Clip_TileAll" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="Clip_TilePause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="Clip_TileResume" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="Clip_TrayPause" xml:space="preserve">
+    <value>Zwischenablage-Verlauf pausieren</value>
+  </data>
+  <data name="Clip_Command" xml:space="preserve">
+    <value>Zwischenablage: cb &lt;Suche&gt; kopiert den besten Treffer · cb pause · cb leeren</value>
+  </data>
+  <data name="Clip_CommandPaused" xml:space="preserve">
+    <value>Zwischenablage-Verlauf pausiert</value>
+  </data>
+  <data name="Clip_CommandResumed" xml:space="preserve">
+    <value>Zwischenablage-Verlauf läuft wieder</value>
+  </data>
+  <data name="Clip_CommandCleared" xml:space="preserve">
+    <value>Verlauf geleert: {0} entfernt, Gemerkte bleiben</value>
+  </data>
+  <data name="Clip_CommandNoHit" xml:space="preserve">
+    <value>Nichts gefunden für „{0}“</value>
+  </data>
+  <data name="Clip_CommandCopied" xml:space="preserve">
+    <value>Kopiert: {0}</value>
+  </data>
+  <data name="Clip_CommandOpen" xml:space="preserve">
+    <value>Verlauf öffnen</value>
+  </data>
+  <data name="Clip_BusChanged" xml:space="preserve">
+    <value>Etwas wurde kopiert – nur Art, Größe und App, nie der Inhalt</value>
+  </data>
+  <data name="Clip_BusCopyText" xml:space="preserve">
+    <value>Text in die Zwischenablage legen ({"text": "…"})</value>
+  </data>
+  <data name="Clip_BusRecent" xml:space="preserve">
+    <value>Die neuesten Text-Einträge ({"count": 5}) – nur wenn die Einstellungen des Zwischenablage-Plugins es erlauben</value>
+  </data>
+  <data name="Clip_BusNotShared" xml:space="preserve">
+    <value>Inhalte werden nicht geteilt (Einstellung des Zwischenablage-Plugins)</value>
+  </data>
+  <data name="Clip_SettingWinV" xml:space="preserve">
+    <value>Win+V übernehmen</value>
+  </data>
+  <data name="Clip_SettingWinV_Hint" xml:space="preserve">
+    <value>Win+V öffnet diesen Verlauf statt den von Windows. Aus = Windows bekommt Win+V zurück. Läuft der Windows-Verlauf weiter, speichern beide – man kann ihn in Windows ausschalten, muss aber nicht.</value>
+  </data>
+  <data name="Clip_SettingHotkey" xml:space="preserve">
+    <value>Ersatzkürzel</value>
+  </data>
+  <data name="Clip_SettingHotkey_Hint" xml:space="preserve">
+    <value>Immer aktiv, auch wenn Win+V nicht übernommen ist.</value>
+  </data>
+  <data name="Clip_HookTitle" xml:space="preserve">
+    <value>Win+V</value>
+  </data>
+  <data name="Clip_HookActive" xml:space="preserve">
+    <value>Win+V ist übernommen und öffnet diesen Verlauf.</value>
+  </data>
+  <data name="Clip_HookOff" xml:space="preserve">
+    <value>Win+V gehört Windows. Diesen Verlauf öffnest du mit {0}.</value>
+  </data>
+  <data name="Clip_HookStarting" xml:space="preserve">
+    <value>Win+V wird übernommen …</value>
+  </data>
+  <data name="Clip_HookProblem" xml:space="preserve">
+    <value>Win+V ließ sich nicht übernehmen: {0} Nimm {1}.</value>
+  </data>
+  <data name="Clip_SettingEntries" xml:space="preserve">
+    <value>Anzahl Einträge</value>
+  </data>
+  <data name="Clip_SettingEntries_Hint" xml:space="preserve">
+    <value>Gemerkte Einträge (★) zählen nicht mit.</value>
+  </data>
+  <data name="Clip_SettingDays" xml:space="preserve">
+    <value>Tage aufbewahren</value>
+  </data>
+  <data name="Clip_SettingDays_Hint" xml:space="preserve">
+    <value>Ältere Einträge werden gelöscht, gemerkte bleiben.</value>
+  </data>
+  <data name="Clip_SettingImages" xml:space="preserve">
+    <value>Bilder speichern</value>
+  </data>
+  <data name="Clip_SettingImageMb" xml:space="preserve">
+    <value>Größtes Bild (MB)</value>
+  </data>
+  <data name="Clip_SettingTotalMb" xml:space="preserve">
+    <value>Gesamtgröße (MB)</value>
+  </data>
+  <data name="Clip_SettingTotalMb_Hint" xml:space="preserve">
+    <value>Wird der Verlauf größer, werden die ältesten nicht gemerkten Einträge gelöscht.</value>
+  </data>
+  <data name="Clip_SettingExcluded" xml:space="preserve">
+    <value>Ausgeschlossene Apps</value>
+  </data>
+  <data name="Clip_SettingExcluded_Hint" xml:space="preserve">
+    <value>Was in diesen Apps kopiert wird, wird nie gespeichert (Programmname, z. B. KeePass). Passwortmanager, die ihre Kopien als privat kennzeichnen, sind ohnehin ausgenommen.</value>
+  </data>
+  <data name="Clip_SettingExcludedApp" xml:space="preserve">
+    <value>Programm</value>
+  </data>
+  <data name="Clip_SettingExcludedAdd" xml:space="preserve">
+    <value>App hinzufügen</value>
+  </data>
+  <data name="Clip_SettingShare" xml:space="preserve">
+    <value>Inhalte mit anderen Plugins teilen</value>
+  </data>
+  <data name="Clip_SettingShare_Hint" xml:space="preserve">
+    <value>Aus = andere Plugins erfahren nur, dass etwas kopiert wurde (Art, Größe, App), nie was. An = Plugins mit Bus-Freigabe dürfen die neuesten Texte lesen.</value>
+  </data>
+  <data name="Clip_SettingPause" xml:space="preserve">
+    <value>Verlauf pausieren</value>
+  </data>
+  <data name="Clip_SettingPause_Hint" xml:space="preserve">
+    <value>Bis du fortsetzt oder ue Bar neu startet.</value>
+  </data>
+  <data name="Clip_SettingPausedNow" xml:space="preserve">
+    <value>Gerade pausiert.</value>
+  </data>
+  <data name="Clip_ButtonPause" xml:space="preserve">
+    <value>Pausieren</value>
+  </data>
+  <data name="Clip_ButtonResume" xml:space="preserve">
+    <value>Fortsetzen</value>
+  </data>
+  <data name="Clip_SettingClear" xml:space="preserve">
+    <value>Verlauf leeren</value>
+  </data>
+  <data name="Clip_SettingClear_Hint" xml:space="preserve">
+    <value>Gemerkte Einträge (★) bleiben.</value>
+  </data>
+  <data name="Clip_ButtonClear" xml:space="preserve">
+    <value>Leeren</value>
+  </data>
+  <data name="Clip_SettingClearAll" xml:space="preserve">
+    <value>Alles leeren</value>
+  </data>
+  <data name="Clip_SettingClearAll_Hint" xml:space="preserve">
+    <value>Auch die gemerkten Einträge (★).</value>
+  </data>
+  <data name="Clip_ButtonClearAll" xml:space="preserve">
+    <value>Alles leeren</value>
+  </data>
+  <data name="Clip_Cleared" xml:space="preserve">
+    <value>{0} Einträge gelöscht.</value>
+  </data>
+  <data name="Clip_SettingStored" xml:space="preserve">
+    <value>Gespeichert: {0} Einträge ({1})</value>
+  </data>
+  <data name="Clip_SettingStored_Hint" xml:space="preserve">
+    <value>Verschlüsselt für deinen Windows-Benutzer, nur auf diesem PC, nie synchronisiert: {0}</value>
+  </data>
+  <data name="Clip_ButtonFolder" xml:space="preserve">
+    <value>Ordner öffnen</value>
+  </data>
+  <data name="Clip_FolderOpened" xml:space="preserve">
+    <value>Ordner geöffnet.</value>
+  </data>
+  <data name="Clip_NotAvailable" xml:space="preserve">
+    <value>Diese ue Bar kann die Zwischenablage nicht beobachten (braucht Version 1.5 oder neuer).</value>
+  </data>
+</root>
