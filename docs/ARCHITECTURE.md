@@ -220,6 +220,18 @@ Contract 1.7 (1.5.0) – what a clipboard history needs, all generic (the Clipbo
   "failed" (the module shows its replacement hotkey); a working hook is set again every 5 minutes, because Windows
   silently removes hooks that answer too slowly.
 - **Tray entries** (`ITrayMenuProvider`): read when the tray menu opens, through the guard.
+- **Where the popup appears** (1.5.1, `CaretLocator` in `UeBar.Bar`, `AutomationCaret` in the app): first
+  `GetGUIThreadInfo` (decisive where it gives a position), then accessibility – the MSAA caret object of the focused
+  window (Chromium, Electron) and the UI Automation text pattern of the focused element (WinUI/XAML, WebView2, UWP in
+  another process than its frame) – on its own thread with a hard limit of 150 ms, then the mouse. Only when opening;
+  while an earlier lookup still hangs, none is started.
+
+Window screenshots (1.5.1): in mode "window" the picker takes the clicked window's own picture instead of cutting the
+frozen screen – Windows.Graphics.Capture through the plain COM ABI (`GraphicsCapture` in the app: D3D11 device, capture
+item for the window, free-threaded frame pool, one frame, staging texture; no projection assembly in the app), else
+`PrintWindow` with `PW_RENDERFULLCONTENT`, else the frozen screen with a notice at the action bar. The rules
+(`WindowCaptureRules` in `UeBar.Bar`) cut to the DWM frame, make the picture opaque and the Windows 11 corners
+transparent, and treat an all-black result as failed.
 - The Clipboard plugin stores its history in its data folder, every file encrypted with DPAPI (`ClipStore`), and
   publishes only metadata on the bus.
 

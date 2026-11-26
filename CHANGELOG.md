@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.5.1 – Window screenshots without overlapping windows, history at the text cursor everywhere
+
+Fixes only; plugin interface unchanged (1.7).
+
+### Fixed
+- **Screenshot "Window" showed windows lying in front of it** (e.g. a small chat window over a maximized browser): it
+  was cut from the frozen screen. Now the window's own picture is taken – Windows.Graphics.Capture (one frame, no
+  recording, no cursor, without the yellow frame where Windows allows it), else `PrintWindow` with
+  `PW_RENDERFULLCONTENT`. Only if both fail (some protected or GPU content) is it cut from the screen as before, and
+  the bar says "overlapping windows are in the picture". No invisible frame, no shadow; rounded corners on Windows 11
+  are transparent. Area mode is unchanged.
+- **The clipboard history appeared at the mouse in Chrome, Edge, Electron apps (Claude app, Obsidian, Discord,
+  Spotify …), Explorer's address bar and search box, Windows search and the search box of Settings.** These apps do not
+  report their text cursor the old way. Now: old way first (Notepad, Office, Photoshop stay exactly as they were), then
+  accessibility – the caret object (MSAA) and the UI Automation text pattern of the focused element, on its own thread,
+  at most 150 ms, only when opening, never moving the focus – then the mouse. A lookup that hangs is given up and never
+  started twice.
+
+### Measured (by hand on this PC)
+- Window capture with Windows.Graphics.Capture: own test windows and Edge (also after 3 s completely covered, as under
+  the picker) – only the clicked window, 150–220 ms. `PrintWindow` as the second way also leaves out what is in front.
+- Text cursor: Edge 16–48 ms (caret object), Explorer address bar and search box, Windows search, Settings search box
+  3–5 ms (100–145 ms on the very first call after a start).
+
+### Tests
+- Bar +10 (which windows can be picked, cutting off the invisible frame – also when the capture already has the visible
+  size, as found in the real test –, corners, empty captures, order of the capture ways; caret order, 150 ms limit,
+  no second lookup while one hangs, implausible positions). Total 847.
+
 ## 1.5.0 – Clipboard history with Win + V
 
 **Plugin interface (`CoreApiVersion`): 1.7** – extended (SDK package 1.7.0); plugins for 1.0–1.6 keep loading.

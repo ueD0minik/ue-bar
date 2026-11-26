@@ -31,6 +31,7 @@ internal sealed class ChoicePopupHost(Dispatcher dispatcher, IUeLogger log) : IH
     private const double PopupWidth = 440;
     private const double ListHeight = 420;
 
+    private readonly CaretLocator _caretLocator = new();
     private Session? _open;
 
     public Task<ChoicePopupResult?> ShowAsync(string moduleId, ChoicePopupRequest request, CancellationToken cancellationToken)
@@ -46,8 +47,8 @@ internal sealed class ChoicePopupHost(Dispatcher dispatcher, IUeLogger log) : IH
             }
 
             var target = PasteService.TargetOf(Win32.GetForegroundWindow());
-            var caret = request.Placement == ChoicePlacement.Caret && target is { } t ? CaretOf(new IntPtr(t.WindowHandle)) : null;
-            var session = new Session(this, moduleId, request, target, caret, done, log);
+            var (caret, source) = request.Placement == ChoicePlacement.Caret && target is { } t ? FindCaret(new IntPtr(t.WindowHandle)) : (null, CaretSource.Mouse);
+            var session = new Session(this, moduleId, request, target, caret, source, done, log);
             _open = session;
             cancellationToken.Register(() => dispatcher.BeginInvoke(() => session.Close(null)));
             session.Show();
@@ -61,6 +62,23 @@ internal sealed class ChoicePopupHost(Dispatcher dispatcher, IUeLogger log) : IH
         {
             _open = null;
         }
+    }
+
+    /// <summary>
+    /// P2-6-Fix 1: the old interface first (where it gives a position, it stays decisive), then accessibility on its own
+    /// thread for at most 150 ms, then the mouse.
+    /// </summary>
+    private (PixelRect? Caret, CaretSource Source) FindCaret(IntPtr window)
+    {
+        var started = Environment.TickCount64;
+        var thread = ClipInterop.GetWindowThreadProcessId(window, out _);
+        var info = new ClipInterop.GUITHREADINFO { cbSize = System.Runtime.InteropServices.Marshal.SizeOf<ClipInterop.GUITHREADINFO>() };
+        var focus = thread != 0 && ClipInterop.GetGUIThreadInfo(thread, ref info) ? info.hwndFocus : IntPtr.Zero;
+        PixelRect? bounds = Win32.WindowBounds(window) is { } r ? PixelRect.FromEdges(r.Left, r.Top, r.Right, r.Bottom) : null;
+        AutomationCaret.Trace ??= step => log.Debug(null, $"Caret lookup: {step}");
+        var found = _caretLocator.Locate(() => CaretOf(window), () => AutomationCaret.Find(window, focus), bounds);
+        log.Debug(null, $"Caret: {found.Source} in {Environment.TickCount64 - started} ms{(found.Source == CaretSource.Mouse ? $" ({_caretLocator.LastProblem})" : "")}");
+        return found;
     }
 
     /// <summary>The caret of a window's thread on the screen, if the app uses the system caret.</summary>
@@ -93,6 +111,7 @@ internal sealed class ChoicePopupHost(Dispatcher dispatcher, IUeLogger log) : IH
         private readonly ChoicePopupRequest _request;
         private readonly PasteTarget? _target;
         private readonly PixelRect? _caret;
+        private readonly CaretSource _source;
         private readonly TaskCompletionSource<ChoicePopupResult?> _done;
         private readonly IUeLogger _log;
         private readonly Window _window;
@@ -109,13 +128,14 @@ internal sealed class ChoicePopupHost(Dispatcher dispatcher, IUeLogger log) : IH
         private bool _closed;
         private IntPtr _hwnd;
 
-        public Session(ChoicePopupHost host, string moduleId, ChoicePopupRequest request, PasteTarget? target, PixelRect? caret, TaskCompletionSource<ChoicePopupResult?> done, IUeLogger log)
+        public Session(ChoicePopupHost host, string moduleId, ChoicePopupRequest request, PasteTarget? target, PixelRect? caret, CaretSource source, TaskCompletionSource<ChoicePopupResult?> done, IUeLogger log)
         {
             _host = host;
             _moduleId = moduleId;
             _request = request;
             _target = target;
             _caret = caret;
+            _source = source;
             _done = done;
             _log = log;
             _items = request.Items;
@@ -173,7 +193,7 @@ internal sealed class ChoicePopupHost(Dispatcher dispatcher, IUeLogger log) : IH
             PasteService.Focus(_hwnd);
             _search.Focus();
             Keyboard.Focus(_search);
-            _log.Info(_moduleId, $"Choice popup open ({_items.Count} rows, at {(_caret is null ? "mouse" : "caret")})");
+            _log.Info(_moduleId, $"Choice popup open ({_items.Count} rows, at {_source})");
         }
 
         public void Close(ChoicePopupResult? result)

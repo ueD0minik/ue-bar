@@ -19,6 +19,13 @@ are left out. The plugin comes with ue Bar (plugin ID `clipboard`), is on by def
 The history opens at the text cursor of the window you were in (or at the mouse, if the app does not tell where
 its cursor is), on that monitor and in its scaling. The same hotkey again closes it.
 
+**Where it appears:** at the text cursor. ue Bar first asks Windows the old way (Notepad, Word, Excel, PowerPoint,
+Photoshop …); apps that do not answer there – Chrome, Edge, Electron apps such as the Claude app, Obsidian, Discord or
+Spotify, Explorer's address bar and search box, Windows search, the search box of Settings – are asked through
+accessibility (UI Automation), at most 150 ms and only when the history opens. If neither knows a position, the
+history opens at the mouse. The very first time after a start an app may take a little longer and the history appears
+at the mouse once.
+
 | Key | What it does |
 |---|---|
 | `Enter` or a click | Paste into the window you were in: focus back, the entry on the clipboard, `Ctrl + V` |

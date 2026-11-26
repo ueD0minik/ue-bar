@@ -1333,4 +1333,7 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Choice_Close" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="Pick_OverlapIncluded" xml:space="preserve">
+    <value>This window could not be taken on its own – overlapping windows are in the picture.</value>
+  </data>
 </root>

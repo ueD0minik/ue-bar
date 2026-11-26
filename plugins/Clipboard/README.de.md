@@ -21,6 +21,14 @@ ue Bar (Plugin-ID `clipboard`), ist standardmäßig an und braucht keine Einrich
 Der Verlauf erscheint an der Textmarke des Fensters, in dem du warst (oder an der Maus, wenn die App ihre
 Textmarke nicht verrät), auf diesem Monitor und in seiner Skalierung. Dasselbe Kürzel noch einmal schließt ihn.
 
+**Wo er erscheint:** an der Textmarke. ue Bar fragt Windows zuerst auf dem alten Weg (Editor, Word, Excel,
+PowerPoint, Photoshop …); Programme, die dort nichts melden – Chrome, Edge, Electron-Apps wie die Claude-App,
+Obsidian, Discord oder Spotify, Adressleiste und Suchfeld im Explorer, die Windows-Suche, das Suchfeld der
+Einstellungen –, werden über die Barrierefreiheit (UI Automation) gefragt, höchstens 150 ms lang und nur beim Öffnen.
+Kennt keiner eine Position, erscheint der Verlauf an der Maus. Beim allerersten Mal nach einem Start braucht ein
+Programm manchmal etwas länger, dann erscheint der Verlauf einmal an der Maus.
+
+
 | Taste | Wirkung |
 |---|---|
 | `Enter` oder Klick | In das vorherige Fenster einfügen: Fokus zurück, Eintrag in die Zwischenablage, `Strg + V` |

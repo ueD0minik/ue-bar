@@ -5,6 +5,8 @@
     <UseWPF>true</UseWPF>
     <!-- Only for the tray icon (NotifyIcon). WPF has none of its own. -->
     <UseWindowsForms>true</UseWindowsForms>
+    <!-- P2-6-Fix 1: Windows.Graphics.Capture through the plain COM ABI (function pointers) -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>ueBar</AssemblyName>
     <RootNamespace>UeBar.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>

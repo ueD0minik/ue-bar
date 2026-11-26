@@ -26,6 +26,17 @@ The screen freezes and darkens:
 
 `Esc` or a right click cancels.
 
+### What "Window" shows
+
+**Window** takes only the content of the window you click – also when another window lies in front of it (a small
+chat window over a maximized browser is not in the picture). Without the invisible frame and the shadow; on Windows 11
+the rounded corners are transparent. Minimized and hidden windows cannot be picked. ue Bar asks Windows for the
+window's own picture (Windows.Graphics.Capture, else `PrintWindow`). A few windows refuse that (some protected or
+GPU content) – then the picture is cut from the screen, and the bar says "overlapping windows are in the picture".
+
+**Area** stays as it was: everything you see in the rectangle belongs to it, also windows in front. A click without
+dragging in area mode also takes the visible part of the screen.
+
 ## After capturing
 
 A small bar appears at the area: **Pin · Copy · Save ˅ · Recognize text** – keys while it is shown:

@@ -27,6 +27,18 @@ Der Bildschirm friert ein und wird abgedunkelt:
 
 `Esc` oder Rechtsklick bricht ab.
 
+### Was „Fenster“ zeigt
+
+**Fenster** nimmt nur den Inhalt des angeklickten Fensters auf – auch wenn ein anderes Fenster davor liegt (ein
+kleines Chat-Fenster über einem maximierten Browser ist nicht auf dem Bild). Ohne unsichtbaren Rahmen und ohne
+Schatten; unter Windows 11 sind die abgerundeten Ecken durchsichtig. Minimierte und ausgeblendete Fenster lassen sich
+nicht auswählen. ue Bar holt sich das Bild des Fensters von Windows (Windows.Graphics.Capture, sonst `PrintWindow`).
+Wenige Fenster verweigern das (manche geschützten oder GPU-Inhalte) – dann wird das Bild aus dem Bildschirm
+ausgeschnitten, und die Leiste sagt „überlappende Fenster sind mit drauf“.
+
+**Bereich** bleibt wie bisher: Alles, was im Rechteck zu sehen ist, gehört dazu, auch Fenster davor. Ein Klick ohne
+Ziehen nimmt im Bereich-Modus ebenfalls den sichtbaren Bildschirmausschnitt.
+
 ## Nach der Aufnahme
 
 Am Bereich erscheint eine kleine Leiste: **Anpinnen · Kopieren · Speichern ˅ · Text erkennen**

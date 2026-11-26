@@ -115,6 +115,8 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
         private PixelRect? _selection;
         private ScreenWindow? _selectedWindow;
         private bool _waitingForAction;
+        private CapturedPixels? _windowShot;
+        private int _selectionGeneration;
 
         public PickSession(ScreenAreaRequest request, IReadOnlyList<MonitorInfo> monitors, PixelRect desktop, BitmapSource frozen, IReadOnlyList<ScreenWindow> windows, IUeLogger log)
         {
@@ -214,6 +216,8 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
             _dragging = true;
             _selection = null;
             _selectedWindow = null;
+            _windowShot = null;
+            _selectionGeneration++; // a window capture still running belongs to the old pick
             overlay.CaptureMouse();
             Refresh();
         }
@@ -282,12 +286,52 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
         {
             _selection = area;
             _selectedWindow = window;
+            _windowShot = null;
             foreach (var overlay in _overlays)
             {
                 overlay.ShowHover(null);
             }
 
             Refresh();
+            if (_request.Mode == ScreenAreaMode.Window && window is not null)
+            {
+                _ = CaptureWindowThenOfferAsync(area, window);
+                return;
+            }
+
+            Offer(area, null);
+        }
+
+        /// <summary>
+        /// P2-6-Fix 1: mode "window" – only the window's own content, also if something lies in front of it. Taken now
+        /// (not from the frozen screen); if Windows cannot give it, the frozen screen is used and the bar says so.
+        /// </summary>
+        private async Task CaptureWindowThenOfferAsync(PixelRect area, ScreenWindow window)
+        {
+            var generation = ++_selectionGeneration;
+            var scale = MonitorAt(area.Center).Scale;
+            var started = Environment.TickCount64;
+            var shot = await Task.Run(() => WindowCapture.Capture(window.Handle, scale, message => _log.Info(null, message)));
+            if (generation != _selectionGeneration || _done.Task.IsCompleted)
+            {
+                return; // picked something else meanwhile, or closed
+            }
+
+            if (shot is { } s)
+            {
+                _windowShot = s.Image;
+                _log.Info(null, $"Window capture: {s.Method}, {s.Image.Width}×{s.Image.Height} in {Environment.TickCount64 - started} ms");
+                Offer(area, null);
+            }
+            else
+            {
+                _log.Info(null, "Window capture: not possible – cut from the screen (windows in front are included)");
+                Offer(area, Loc.Get("Pick_OverlapIncluded"));
+            }
+        }
+
+        private void Offer(PixelRect area, string? notice)
+        {
             if (_request.Actions.Count == 0)
             {
                 Finish(null);
@@ -296,7 +340,7 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
 
             _waitingForAction = true;
             var main = _overlays.OrderByDescending(o => Overlap(o.Monitor.Bounds, area)).First();
-            main.ShowActions(_request.Actions, area);
+            main.ShowActions(_request.Actions, area, notice);
         }
 
         private void Refresh()
@@ -357,7 +401,7 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
             byte[]? png = null;
             try
             {
-                png = ScreenGrab.Png(_frozen, new Int32Rect(area.X - _desktop.X, area.Y - _desktop.Y, area.Width, area.Height));
+                png = _windowShot is { } shot ? ScreenGrab.Png(shot) : ScreenGrab.Png(_frozen, new Int32Rect(area.X - _desktop.X, area.Y - _desktop.Y, area.Width, area.Height));
             }
             catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or OutOfMemoryException)
             {

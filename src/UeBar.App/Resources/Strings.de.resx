@@ -1333,4 +1333,7 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Choice_Close" xml:space="preserve">
     <value>Schließen</value>
   </data>
+  <data name="Pick_OverlapIncluded" xml:space="preserve">
+    <value>Dieses Fenster ließ sich nicht einzeln aufnehmen – überlappende Fenster sind mit drauf.</value>
+  </data>
 </root>

@@ -32,6 +32,7 @@ internal sealed class AreaOverlay : Window
     private readonly Border _hint;
     private readonly Border _bar = new() { CornerRadius = new CornerRadius(18), Padding = new Thickness(6), Visibility = Visibility.Collapsed };
     private readonly StackPanel _buttons = new() { Orientation = Orientation.Horizontal };
+    private readonly TextBlock _notice = new() { FontSize = 12, Margin = new Thickness(8, 2, 8, 6), TextWrapping = TextWrapping.Wrap, MaxWidth = 520, Visibility = Visibility.Collapsed };
     private IntPtr _hwnd;
 
     public AreaOverlay(MonitorInfo monitor, BitmapSource image, string hint)
@@ -59,7 +60,8 @@ internal sealed class AreaOverlay : Window
         _hover.Stroke = accent;
         _size.Child = _sizeText;
         _bar.Background = (Brush)Application.Current.FindResource("PanelBrush");
-        _bar.Child = _buttons;
+        _notice.Foreground = (Brush)Application.Current.FindResource("TextBrush");
+        _bar.Child = new StackPanel { Children = { _notice, _buttons } }; // P2-6-Fix 1: a short notice above the buttons
 
         var hintText = new TextBlock { Text = hint, FontSize = 13, Foreground = Brushes.White };
         _hint = new Border
@@ -176,9 +178,11 @@ internal sealed class AreaOverlay : Window
     }
 
     /// <summary>Action bar at the picked area (only on the overlay that holds most of it).</summary>
-    public void ShowActions(IReadOnlyList<ScreenAreaAction> actions, PixelRect area)
+    public void ShowActions(IReadOnlyList<ScreenAreaAction> actions, PixelRect area, string? notice = null)
     {
         _buttons.Children.Clear();
+        _notice.Text = notice ?? "";
+        _notice.Visibility = string.IsNullOrWhiteSpace(notice) ? Visibility.Collapsed : Visibility.Visible;
         var first = true;
         foreach (var action in actions)
         {

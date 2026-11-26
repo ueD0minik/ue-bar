@@ -44,6 +44,17 @@ internal static class ScreenGrab
         }
     }
 
+    /// <summary>The picture of a single window (P2-6-Fix 1) as PNG – with transparent rounded corners.</summary>
+    public static byte[] Png(CapturedPixels image)
+    {
+        var source = BitmapSource.Create(image.Width, image.Height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, image.Bgra, image.Stride);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(source));
+        using var stream = new MemoryStream();
+        encoder.Save(stream);
+        return stream.ToArray();
+    }
+
     /// <summary>A part of a capture (coordinates relative to the capture) as PNG.</summary>
     public static byte[] Png(BitmapSource capture, Int32Rect part)
     {

@@ -8,7 +8,7 @@
     "en": "Timers with presets and names, a stopwatch with laps and Pomodoro. Quick command \"t 10\"; the pill shows the time left.",
     "de": "Timer mit Voreinstellungen und Namen, eine Stoppuhr mit Runden und Pomodoro. Schnellbefehl „t 10“; die Pill zeigt die Restzeit."
   },
-  "version": "1.5.0",
+  "version": "1.5.1",
   "author": "Dominik Poschinger",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/ueD0minik/ue-bar",
