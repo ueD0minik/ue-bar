@@ -28,6 +28,8 @@ Einstellungen –, werden über die Barrierefreiheit (UI Automation) gefragt, h�
 Kennt keiner eine Position, erscheint der Verlauf an der Maus. Beim allerersten Mal nach einem Start braucht ein
 Programm manchmal etwas länger, dann erscheint der Verlauf einmal an der Maus.
 
+**Startmenü:** Im Startmenü erscheint der Verlauf zwar an der Textmarke, aber **hinter** dem Startmenü – Windows hält
+das Startmenü auf einer Ebene, über die kein normales Programm kommt.
 
 | Taste | Wirkung |
 |---|---|

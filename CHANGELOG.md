@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.5.2 – A click takes the window, Ctrl + A takes the screen, no false hang alarm after sleep
+
+Fixes only; plugin interface unchanged (1.7).
+
+### Fixed
+- **A click in area mode (`Win + Alt + S`) now takes the window** under the mouse the same way as the window mode –
+  its own content without what lies in front (Windows.Graphics.Capture, else `PrintWindow`, else cut with a notice).
+  The window is framed while the mouse moves over it; dragging (from 5 px) still takes everything visible in the
+  rectangle. A maximized window no longer brings its 8 px beyond the monitor into the picture.
+- **Transparent corners on the clipboard:** the PNG keeps them; programs that only read the old bitmap format get the
+  corners in the window's color instead of black.
+- **False alarm "UI thread not responding for 3255 s" after sleep:** the watchdog pauses while Windows sleeps and starts
+  over after a long gap between its own ticks (Modern Standby pauses the whole app) – no report, no memory dump. A dump
+  that fails no longer leaves an empty file; empty and surplus dumps are removed at start.
+- **Memory after heavy use:** screenshots (a frozen copy of every monitor), clipboard images, the choice popup and the
+  caret lookup left native memory behind that an idle app did not free for hours (151 MB on 26.11.). 5 s after such
+  work the memory is cleaned once (collect, finalizers, give back to Windows).
+- **Start right after logging in (30–50 s):** registering the plugins no longer blocks the UI thread (it took up to 10 s
+  per plugin while Windows was busy logging in), no hang dumps while starting, and the autostart entry now starts with
+  `--autostart`: the app waits until it is 10 s old before it starts working. Existing entries are updated.
+
+### New
+- **`Ctrl + A` while picking a screen area** takes the whole monitor under the mouse (in its scaling); the bar follows as
+  usual, so `Ctrl + A` → `Ctrl + C` copies the whole screen. The hint at the top says so.
+
+### Measured
+- Load in a test instance (release build), twice in a row: 200 × the choice popup with the caret lookup in Edge,
+  20 Full-HD images on the clipboard, 50 window screenshots by click. Idle 58.8 MB private, peak 112–129 MB,
+  **one minute after the load 74.5 MB (round 1) and 78.9 MB (round 2)** – part of the +9 MB is the history itself.
+  All 400 popups at the caret, all 100 clicks taken as the window's own picture (140–180 ms).
+
+### Tests
+- Bar +8 (click or drag at the threshold, Ctrl+A picks the right monitor with size and scale, maximized window without
+  the overhang, corners for old programs, the watchdog: real hang once, 54 minutes of sleep, suspend/resume, display
+  off). Total 855.
+
 ## 1.5.1 – Window screenshots without overlapping windows, history at the text cursor everywhere
 
 Fixes only; plugin interface unchanged (1.7).

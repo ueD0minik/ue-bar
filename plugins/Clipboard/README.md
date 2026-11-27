@@ -26,6 +26,9 @@ accessibility (UI Automation), at most 150 ms and only when the history opens. I
 history opens at the mouse. The very first time after a start an app may take a little longer and the history appears
 at the mouse once.
 
+**Start menu:** in the start menu the history appears at the text cursor, but **behind** the start menu – Windows keeps
+the start menu on a layer no normal program can get above.
+
 | Key | What it does |
 |---|---|
 | `Enter` or a click | Paste into the window you were in: focus back, the entry on the clipboard, `Ctrl + V` |

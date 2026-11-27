@@ -104,7 +104,7 @@ Name: "{userprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"; Comment: "{cm:Ic
 
 [Registry]
 ; The same value the app switches in its settings (SPEC 3).
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "ueBar"; ValueData: """{app}\{#AppExe}"""; Tasks: autostart
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "ueBar"; ValueData: """{app}\{#AppExe}"" --autostart"; Tasks: autostart
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:RunNow}"; Flags: nowait postinstall skipifsilent

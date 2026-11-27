@@ -1124,13 +1124,13 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
     <value>Kein Tastenkürzel</value>
   </data>
   <data name="Pick_HintRegion" xml:space="preserve">
-    <value>Bereich ziehen · Klick = Fenster · Esc oder Rechtsklick = Abbrechen</value>
+    <value>Bereich ziehen · Klick = Fenster · Strg + A = ganzer Bildschirm · Esc = Abbrechen</value>
   </data>
   <data name="Pick_HintScreen" xml:space="preserve">
     <value>Bildschirm anklicken · Esc oder Rechtsklick = Abbrechen</value>
   </data>
   <data name="Pick_HintWindow" xml:space="preserve">
-    <value>Fenster anklicken · Esc oder Rechtsklick = Abbrechen</value>
+    <value>Fenster anklicken · Strg + A = ganzer Bildschirm · Esc = Abbrechen</value>
   </data>
   <data name="Pin_ClickThrough" xml:space="preserve">
     <value>Klicks durchlassen</value>

@@ -217,4 +217,93 @@ public static class WindowCaptureRules
 
         return null;
     }
+
+    /// <summary>
+    /// A maximized window reaches about 8 px beyond its monitor (its invisible frame). Cuts the picture – which covers
+    /// <paramref name="frame"/> on the screen – to the part on <paramref name="monitor"/>. Returns the picture and the
+    /// screen rectangle it now covers; unchanged if it lies completely on the monitor.
+    /// </summary>
+    public static (CapturedPixels Image, PixelRect Bounds) ClipToMonitor(CapturedPixels image, PixelRect frame, PixelRect monitor)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+        var left = Math.Max(frame.X, monitor.X);
+        var top = Math.Max(frame.Y, monitor.Y);
+        var right = Math.Min(frame.Right, monitor.Right);
+        var bottom = Math.Min(frame.Bottom, monitor.Bottom);
+        if (right <= left || bottom <= top || (left == frame.X && top == frame.Y && right == frame.Right && bottom == frame.Bottom))
+        {
+            return (image, frame);
+        }
+
+        // Pixels of the picture per screen pixel (the picture may be a little larger or smaller than the frame).
+        var sx = frame.Width > 0 ? (double)image.Width / frame.Width : 1;
+        var sy = frame.Height > 0 ? (double)image.Height / frame.Height : 1;
+        var part = PixelRect.FromEdges(
+            Math.Clamp((int)Math.Round((left - frame.X) * sx), 0, image.Width),
+            Math.Clamp((int)Math.Round((top - frame.Y) * sy), 0, image.Height),
+            Math.Clamp((int)Math.Round((right - frame.X) * sx), 0, image.Width),
+            Math.Clamp((int)Math.Round((bottom - frame.Y) * sy), 0, image.Height));
+        return part.IsEmpty ? (image, frame) : (Crop(image, part), PixelRect.FromEdges(left, top, right, bottom));
+    }
+
+    /// <summary>
+    /// For programs that only read the old bitmap format (no transparency): the transparent corners get the color of
+    /// the window's edge next to them instead of black – the top corners the color in the middle of the top row, the
+    /// bottom corners that of the bottom row. Returns a new picture; the original keeps its transparency for PNG.
+    /// </summary>
+    public static CapturedPixels FlattenCorners(CapturedPixels image)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+        var data = (byte[])image.Bgra.Clone();
+        var result = new CapturedPixels(data, image.Width, image.Height);
+        if (image.Width == 0 || image.Height == 0)
+        {
+            return result;
+        }
+
+        var top = EdgeColor(image, 0);
+        var bottom = EdgeColor(image, image.Height - 1);
+        for (var y = 0; y < image.Height; y++)
+        {
+            var (b, g, r) = y < image.Height / 2 ? top : bottom;
+            for (var x = 0; x < image.Width; x++)
+            {
+                var at = (y * image.Stride) + (x * 4);
+                var alpha = data[at + 3];
+                if (alpha == 255)
+                {
+                    continue;
+                }
+
+                // Corner pixels are stored with color 0 where fully transparent, else as they were: blend over the edge color.
+                data[at] = (byte)(((data[at] * alpha) + (b * (255 - alpha))) / 255);
+                data[at + 1] = (byte)(((data[at + 1] * alpha) + (g * (255 - alpha))) / 255);
+                data[at + 2] = (byte)(((data[at + 2] * alpha) + (r * (255 - alpha))) / 255);
+                data[at + 3] = 255;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>True if any pixel is not fully opaque.</summary>
+    public static bool HasTransparency(CapturedPixels image)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+        for (var i = 3; i < image.Bgra.Length; i += 4)
+        {
+            if (image.Bgra[i] != 255)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static (byte B, byte G, byte R) EdgeColor(CapturedPixels image, int y)
+    {
+        var at = (y * image.Stride) + (image.Width / 2 * 4);
+        return (image.Bgra[at], image.Bgra[at + 1], image.Bgra[at + 2]);
+    }
 }

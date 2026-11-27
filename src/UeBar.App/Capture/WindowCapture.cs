@@ -18,7 +18,7 @@ internal static class WindowCapture
 {
     private static readonly TimeSpan Limit = TimeSpan.FromSeconds(2);
 
-    public static (CapturedPixels Image, WindowCaptureMethod Method)? Capture(IntPtr hwnd, double scale, Action<string> log)
+    public static (CapturedPixels Image, WindowCaptureMethod Method, PixelRect Bounds)? Capture(IntPtr hwnd, double scale, PixelRect monitor, Action<string> log)
     {
         if (!Win32.GetWindowRect(hwnd, out var r) || Win32.WindowBounds(hwnd) is not { } f)
         {
@@ -51,11 +51,12 @@ internal static class WindowCapture
             return null;
         }
 
-        var image = WindowCaptureRules.Crop(result.Image, visible);
+        // P2-6-Fix 2: a maximized window reaches beyond its monitor – that part is not on the picture.
+        var (image, bounds) = WindowCaptureRules.ClipToMonitor(WindowCaptureRules.Crop(result.Image, visible), frame, monitor);
         var windows11 = Environment.OSVersion.Version.Build >= 22000;
         int? preference = PinInterop.DwmGetWindowAttribute(hwnd, PinInterop.DWMWA_WINDOW_CORNER_PREFERENCE, out int value, sizeof(int)) == 0 ? value : null;
         WindowCaptureRules.CleanEdges(image, WindowCaptureRules.CornerRadiusPixels(windows11, Win32.IsZoomed(hwnd), preference, scale));
-        return (image, result.Method);
+        return (image, result.Method, bounds);
     }
 
     /// <summary>The window draws itself into a bitmap of its full rectangle.</summary>

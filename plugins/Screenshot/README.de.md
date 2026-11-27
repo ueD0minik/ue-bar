@@ -21,7 +21,7 @@ Der Bildschirm friert ein und wird abgedunkelt:
 
 | Modus | So geht's |
 |---|---|
-| **Bereich** (Standard) | Rechteck ziehen – auch über mehrere Monitore, mit jeder Skalierung. Ein Klick ohne Ziehen nimmt das Fenster unter der Maus. |
+| **Bereich** (Standard) | Rechteck **ziehen** – auch über mehrere Monitore, mit jeder Skalierung: alles Sichtbare darin. Ein **Klick** ohne Ziehen (bis 4 px) nimmt das **Fenster** unter der Maus – seinen eigenen Inhalt, wie der Fenster-Modus; beim Überfahren ist es umrahmt. |
 | **Fenster** | Fenster anklicken (das unter der Maus ist umrahmt). |
 | **Bildschirm** | Der Monitor unter der Maus wird sofort genommen; Klick auf einen anderen wechselt. |
 
@@ -36,8 +36,16 @@ nicht auswählen. ue Bar holt sich das Bild des Fensters von Windows (Windows.Gr
 Wenige Fenster verweigern das (manche geschützten oder GPU-Inhalte) – dann wird das Bild aus dem Bildschirm
 ausgeschnitten, und die Leiste sagt „überlappende Fenster sind mit drauf“.
 
-**Bereich** bleibt wie bisher: Alles, was im Rechteck zu sehen ist, gehört dazu, auch Fenster davor. Ein Klick ohne
-Ziehen nimmt im Bereich-Modus ebenfalls den sichtbaren Bildschirmausschnitt.
+**Bereich**: Ziehen nimmt alles, was im Rechteck zu sehen ist, auch Fenster davor. Ein Klick nimmt das Fenster auf
+demselben Weg wie der Fenster-Modus (also seinen eigenen Inhalt, ohne das, was davor liegt).
+
+**`Strg + A`** während der Auswahl nimmt den **ganzen Monitor unter der Maus** (alles Sichtbare, in der Skalierung dieses
+Monitors) – danach kommt wie immer die Leiste, `Strg + A` → `Strg + C` kopiert also den ganzen Bildschirm. Der Hinweis
+oben sagt es.
+
+In der Zwischenablage liegt eine Fensteraufnahme als PNG mit durchsichtigen Ecken; Programme, die nur das alte
+Bitmap-Format lesen, bekommen die Ecken in der Fensterfarbe statt in Schwarz. Gespeicherte Dateien und Pins behalten
+die Transparenz.
 
 ## Nach der Aufnahme
 

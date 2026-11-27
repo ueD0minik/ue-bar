@@ -43,7 +43,6 @@ internal sealed class ClipboardWatcher : IHostClipboardWatcher, IDisposable
     private uint _lastSequence;
     private int _changes;
     private int _skippedPrivate;
-    private int _imageGeneration;
 
     public ClipboardWatcher(Dispatcher dispatcher, IUeLogger log, ClipboardAccess writer)
     {
@@ -465,7 +464,7 @@ internal sealed class ClipboardWatcher : IHostClipboardWatcher, IDisposable
                     thumbnail = Encode(Thumbnail(image, options.ThumbnailSize));
                 }
 
-                CompactSoon();
+                MemoryTrim.Soon("clipboard image");
             }
 
             var content = new ClipboardContent { Text = raw.Text, Html = raw.Html, Rtf = raw.Rtf, Files = raw.Files, ImagePng = png };
@@ -518,27 +517,6 @@ internal sealed class ClipboardWatcher : IHostClipboardWatcher, IDisposable
         {
             _log.Warn(null, $"Clipboard image could not be prepared: {ex.GetType().Name} {ex.Message}");
         }
-    }
-
-    /// <summary>
-    /// An image leaves large buffers behind (pixels, PNG, the plugin's encrypted copy). An idle app allocates nothing,
-    /// so the runtime would keep them for a long time: 5 s after the last image the memory is cleaned once (large
-    /// objects compacted). Images are rare – this costs a few milliseconds now and then, never in a loop.
-    /// </summary>
-    private void CompactSoon()
-    {
-        var generation = Interlocked.Increment(ref _imageGeneration);
-        _ = Task.Delay(TimeSpan.FromSeconds(5)).ContinueWith(_ =>
-        {
-            if (Volatile.Read(ref _imageGeneration) != generation)
-            {
-                return; // another image came – that one cleans up
-            }
-
-            System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
-            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true); // also gives freed memory back to Windows
-            _log.Debug(null, $"Memory cleaned after clipboard images ({GC.GetTotalMemory(false) / (1024 * 1024)} MB in use)");
-        }, TaskScheduler.Default);
     }
 
     private static string Kind(ClipboardContent content, bool skipped) =>

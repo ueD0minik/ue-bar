@@ -47,7 +47,15 @@ internal static class Autostart
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string ValueName = "ueBar";
 
-    private static string Command => $"\"{Environment.ProcessPath}\"";
+    /// <summary>P2-6-Fix 2: started by Windows at logon – the app waits a moment (see <see cref="Delay"/>).</summary>
+    public const string Argument = "--autostart";
+
+    /// <summary>Right after logging in Windows is busy for a while; starting a little later is faster and calmer.</summary>
+    public static readonly TimeSpan Delay = TimeSpan.FromSeconds(10);
+
+    private static string Command => $"\"{Environment.ProcessPath}\" {Argument}";
+
+    private static string OldCommand => $"\"{Environment.ProcessPath}\"";
 
     public static bool IsEnabled
     {
@@ -64,7 +72,53 @@ internal static class Autostart
         get
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKey);
-            return key?.GetValue(ValueName) is string value && !string.Equals(value.Trim(), Command, StringComparison.OrdinalIgnoreCase);
+            return key?.GetValue(ValueName) is string value && !string.Equals(value.Trim(), Command, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(value.Trim(), OldCommand, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    /// <summary>An entry of 1.5.1 or older (this exe without the argument) gets the argument – nothing else is touched.</summary>
+    public static void Upgrade(IUeLogger log)
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
+            if (key?.GetValue(ValueName) is string value && string.Equals(value.Trim(), OldCommand, StringComparison.OrdinalIgnoreCase))
+            {
+                key.SetValue(ValueName, Command);
+                log.Info(null, $"Autostart entry now starts with {Argument} (delayed start after logging in)");
+            }
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or System.IO.IOException)
+        {
+            log.Warn(null, $"Autostart entry could not be updated: {ex.Message}");
+        }
+    }
+
+    /// <summary>Started at logon: wait until the process is <see cref="Delay"/> old (Windows is still busy logging in).</summary>
+    public static async Task WaitAfterLogonAsync(string[] args, IUeLogger log)
+    {
+        if (!args.Contains(Argument, StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        TimeSpan age;
+        try
+        {
+            using var process = System.Diagnostics.Process.GetCurrentProcess();
+            age = DateTime.Now - process.StartTime;
+        }
+        catch (InvalidOperationException)
+        {
+            age = TimeSpan.Zero;
+        }
+
+        var wait = Delay - age;
+        if (wait > TimeSpan.Zero)
+        {
+            log.Info(null, $"Started with Windows: waiting {wait.TotalSeconds:0.0} s until logging in has settled");
+            await Task.Delay(wait);
         }
     }
 

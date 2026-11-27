@@ -58,10 +58,36 @@ internal sealed class ClipboardAccess(Dispatcher dispatcher, IUeLogger log) : IC
             var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
             var frame = decoder.Frames[0];
             frame.Freeze();
-            data.SetImage(frame);
+            data.SetImage(OpaqueForBitmap(frame));
         }
 
         data.SetData("PNG", new MemoryStream(png), autoConvert: false);
+    }
+
+    /// <summary>
+    /// P2-6-Fix 2: the old bitmap format has no transparency – transparent corners (window screenshots on Windows 11)
+    /// would turn black. They get the color of the window's edge instead; the PNG next to it keeps the transparency.
+    /// </summary>
+    private static BitmapSource OpaqueForBitmap(BitmapSource image)
+    {
+        if (image.Format != System.Windows.Media.PixelFormats.Bgra32 && image.Format != System.Windows.Media.PixelFormats.Pbgra32)
+        {
+            return image; // no alpha channel at all
+        }
+
+        var stride = image.PixelWidth * 4;
+        var bytes = new byte[stride * image.PixelHeight];
+        new FormatConvertedBitmap(image, System.Windows.Media.PixelFormats.Bgra32, null, 0).CopyPixels(bytes, stride, 0);
+        var pixels = new UeBar.Bar.CapturedPixels(bytes, image.PixelWidth, image.PixelHeight);
+        if (!UeBar.Bar.WindowCaptureRules.HasTransparency(pixels))
+        {
+            return image;
+        }
+
+        var flat = UeBar.Bar.WindowCaptureRules.FlattenCorners(pixels);
+        var result = BitmapSource.Create(flat.Width, flat.Height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, flat.Bgra, flat.Stride);
+        result.Freeze();
+        return result;
     }
 
     /// <summary>Every part the content has, so each app can take the richest one it knows.</summary>

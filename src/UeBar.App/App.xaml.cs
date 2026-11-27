@@ -89,6 +89,9 @@ public partial class App : Application
         // Restart after a plugin change: wait until the previous process has released the lock.
         await AppRestart.WaitForPredecessorAsync(e.Args, _log);
 
+        // P2-6-Fix 2: started with Windows – let logging in settle first (the start took 30–50 s right after logon).
+        await UeBar.App.Settings.Autostart.WaitAfterLogonAsync(e.Args, _log);
+
         _singleInstance = SingleInstance.TryAcquire();
         if (_singleInstance is null && !await HandleOtherInstanceAsync())
         {
@@ -97,6 +100,7 @@ public partial class App : Application
         }
 
         _singleInstance!.StartServer(Dispatcher, BuildVariant, _log);
+        UeBar.App.Settings.Autostart.Upgrade(_log); // P2-6-Fix 2: old entries get --autostart
         _singleInstance.SecondInstanceStarted += request =>
             _tray?.ShowInfo(Loc.Get("App_AlreadyRunning"), Loc.Get("App_SecondStartIgnored"));
 
@@ -107,6 +111,7 @@ public partial class App : Application
             await ExitAsync("installer");
         }), null, Timeout.Infinite, executeOnlyOnce: true);
 
+        MemoryTrim.Log = _log;
         _watchdog = new UiWatchdog(Dispatcher, _log, paths.Logs);
         _watchdog.Start();
 
@@ -200,8 +205,12 @@ public partial class App : Application
             }
 
             await plugins.LoadAsync();
-            plugins.RegisterAll(_registry);
             Step("plugins loaded");
+
+            // P2-6-Fix 2: registering reads names and tile types of every plugin (their resources) – right after logging in
+            // that took up to 10 s per plugin and blocked the UI thread. Off it, and measured on its own.
+            await Task.Run(() => plugins.RegisterAll(_registry));
+            Step("plugins registered");
 
             _tiles = new TileHost(_registry, _log);
             await _registry.StartAllAsync();
@@ -396,6 +405,7 @@ public partial class App : Application
             _heartbeat.Start();
             Step("extras, settings, tray");
             _log.Info(null, $"Start finished (ue Bar {AppInfo.Version}{(AppInfo.IsPortable ? ", portable" : "")}) after {(DateTime.Now - System.Diagnostics.Process.GetCurrentProcess().StartTime).TotalSeconds:0.0} s: {string.Join(", ", steps)}");
+            _watchdog?.StartupFinished(); // P2-6-Fix 2: hang dumps only after the start
 
 #if DEBUG
             // Debug only: deliberately trigger a hang to check the UI watchdog.

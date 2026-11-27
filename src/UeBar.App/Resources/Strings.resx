@@ -1124,13 +1124,13 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
     <value>No hotkey</value>
   </data>
   <data name="Pick_HintRegion" xml:space="preserve">
-    <value>Drag an area · click = window · Esc or right click = cancel</value>
+    <value>Drag an area · click = window · Ctrl + A = whole screen · Esc = cancel</value>
   </data>
   <data name="Pick_HintScreen" xml:space="preserve">
     <value>Click a screen · Esc or right click = cancel</value>
   </data>
   <data name="Pick_HintWindow" xml:space="preserve">
-    <value>Click a window · Esc or right click = cancel</value>
+    <value>Click a window · Ctrl + A = whole screen · Esc = cancel</value>
   </data>
   <data name="Pin_ClickThrough" xml:space="preserve">
     <value>Let clicks through</value>

@@ -96,6 +96,7 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
         {
             // Whatever happened: no overlay may stay behind (it would catch the mouse and cover the bar).
             session?.Close();
+            UeBar.App.Infrastructure.MemoryTrim.Soon("a screenshot"); // P2-6-Fix 2: the frozen copy of every monitor (native image memory)
         }
     }
 
@@ -293,7 +294,8 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
             }
 
             Refresh();
-            if (_request.Mode == ScreenAreaMode.Window && window is not null)
+            // P2-6-Fix 2: a click without dragging in area mode takes the window the same way as the window mode.
+            if (_request.Mode is ScreenAreaMode.Window or ScreenAreaMode.Region && window is not null)
             {
                 _ = CaptureWindowThenOfferAsync(area, window);
                 return;
@@ -309,9 +311,10 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
         private async Task CaptureWindowThenOfferAsync(PixelRect area, ScreenWindow window)
         {
             var generation = ++_selectionGeneration;
-            var scale = MonitorAt(area.Center).Scale;
+            var monitor = MonitorAt(area.Center);
+            var how = _request.Mode == ScreenAreaMode.Window ? "mode" : "click";
             var started = Environment.TickCount64;
-            var shot = await Task.Run(() => WindowCapture.Capture(window.Handle, scale, message => _log.Info(null, message)));
+            var shot = await Task.Run(() => WindowCapture.Capture(window.Handle, monitor.Scale, monitor.Bounds, message => _log.Info(null, message)));
             if (generation != _selectionGeneration || _done.Task.IsCompleted)
             {
                 return; // picked something else meanwhile, or closed
@@ -320,12 +323,15 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
             if (shot is { } s)
             {
                 _windowShot = s.Image;
-                _log.Info(null, $"Window capture: {s.Method}, {s.Image.Width}×{s.Image.Height} in {Environment.TickCount64 - started} ms");
+                _selection = s.Bounds; // without the part beyond the monitor (maximized windows)
+                area = s.Bounds;
+                Refresh();
+                _log.Info(null, $"Screen area: Window ({how}) {s.Image.Width}×{s.Image.Height} via {s.Method} in {Environment.TickCount64 - started} ms");
                 Offer(area, null);
             }
             else
             {
-                _log.Info(null, "Window capture: not possible – cut from the screen (windows in front are included)");
+                _log.Info(null, $"Screen area: Window ({how}) – no own picture, cut from the screen (windows in front are included)");
                 Offer(area, Loc.Get("Pick_OverlapIncluded"));
             }
         }
@@ -360,6 +366,21 @@ internal sealed class ScreenAreaPicker(Dispatcher dispatcher, IUeLogger log, Fun
             {
                 e.Handled = true;
                 Cancel();
+            }
+            else if (!_dragging && PickerKeys.IsSelectAll(Keyboard.Modifiers == ModifierKeys.Control ? HotkeyModifiers.Control : HotkeyModifiers.None, KeyInterop.VirtualKeyFromKey(e.Key))
+                && PickerKeys.SelectAllMonitor(Cursor(), _monitors) is { } whole)
+            {
+                // P2-6-Fix 2: Ctrl+A = the whole monitor under the mouse, everything visible (like dragging it all).
+                e.Handled = true;
+                _selectionGeneration++;
+                _waitingForAction = false;
+                foreach (var o in _overlays)
+                {
+                    o.HideActions();
+                }
+
+                _log.Info(null, $"Screen area: whole screen (Ctrl+A) {whole.Bounds.Width}×{whole.Bounds.Height} at {whole.Scale * 100:0} %");
+                Select(whole.Bounds, null);
             }
             else if (_waitingForAction && _request.Actions.Count > 0)
             {

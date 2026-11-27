@@ -329,7 +329,12 @@ behavior can change freely as long as the contract stays the same.
 - Modules report changes on any thread; the app marshals them to the UI thread. When it copies a
   tile's element list it retries if the list was changed at the same moment; a module itself makes
   sure that two of its threads never change the same tile at once.
-- A UI watchdog writes a small dump to the log folder if the UI thread hangs.
+- A UI watchdog writes a small dump to the log folder if the UI thread hangs. Its decision is `HangClock`
+  (`UeBar.Bar`): paused while Windows sleeps, and a long gap between its own ticks (Modern Standby pauses the whole
+  app) starts it over instead of counting as a hang. No dumps until the start has finished.
+- After heavy image or accessibility work (screenshots, clipboard images, the choice popup, the caret lookup)
+  `MemoryTrim` cleans the memory once after 5 quiet seconds – native buffers are freed only when their .NET objects
+  are finalized, and an idle app would not collect for hours.
 - Clipboard watching costs nothing between changes (a message window, no polling). The keyboard hook for a
   taken-over hotkey has its own thread that only waits for messages; its callback decides and returns at once.
 

@@ -20,7 +20,7 @@ The screen freezes and darkens:
 
 | Mode | How |
 |---|---|
-| **Area** (default) | Drag a rectangle – also across monitors, with any scaling. A click without dragging takes the window under the mouse. |
+| **Area** (default) | **Drag** a rectangle – also across monitors, with any scaling: everything visible in it. A **click** without dragging (up to 4 px) takes the **window** under the mouse – its own content, like the window mode; it is framed while you move the mouse. |
 | **Window** | Click a window (the one under the mouse is framed). |
 | **Screen** | The monitor under the mouse is taken right away; click another one to change. |
 
@@ -34,8 +34,14 @@ the rounded corners are transparent. Minimized and hidden windows cannot be pick
 window's own picture (Windows.Graphics.Capture, else `PrintWindow`). A few windows refuse that (some protected or
 GPU content) – then the picture is cut from the screen, and the bar says "overlapping windows are in the picture".
 
-**Area** stays as it was: everything you see in the rectangle belongs to it, also windows in front. A click without
-dragging in area mode also takes the visible part of the screen.
+**Area**: dragging takes everything you see in the rectangle, also windows in front. A click takes the window the same
+way as the window mode (also its own content, without what lies in front).
+
+**`Ctrl + A`** while picking takes the **whole monitor under the mouse** (everything visible, in that monitor's scaling) –
+then the bar appears as usual, so `Ctrl + A` → `Ctrl + C` copies the whole screen. The hint at the top says so.
+
+On the clipboard a window screenshot is stored as PNG with transparent corners; programs that only read the old bitmap
+format get the corners in the window's color instead of black. Saved files and pins keep the transparency.
 
 ## After capturing
 

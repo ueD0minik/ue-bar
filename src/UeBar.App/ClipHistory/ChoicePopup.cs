@@ -207,6 +207,7 @@ internal sealed class ChoicePopupHost(Dispatcher dispatcher, IUeLogger log) : IH
             _host.Closed(this);
             _window.Close();
             _done.TrySetResult(result);
+                UeBar.App.Infrastructure.MemoryTrim.Soon("the choice popup"); // P2-6-Fix 2: its pictures and the accessibility objects of the caret lookup
         }
 
         private Window BuildWindow()

@@ -42,4 +42,11 @@ public static class PickerKeys
         Hotkey.TryParse(shortcut) is { } key ? $"{label} ({key.DisplayText})"
         : string.Equals(shortcut, "Enter", StringComparison.OrdinalIgnoreCase) ? $"{label} ({BarText.KeyName("Enter")})"
         : label;
+
+    /// <summary>Ctrl+A in the picker (P2-6-Fix 2): the whole monitor under the mouse.</summary>
+    public static bool IsSelectAll(HotkeyModifiers modifiers, int virtualKey) => modifiers == HotkeyModifiers.Control && virtualKey == 'A';
+
+    /// <summary>The monitor Ctrl+A takes: the one under the mouse, else the primary one.</summary>
+    public static MonitorInfo? SelectAllMonitor(PixelPoint? mouse, IReadOnlyList<MonitorInfo> monitors) =>
+        (mouse is { } p ? PinGeometry.MonitorAt(p, monitors) : null) ?? PinGeometry.Primary(monitors);
 }
