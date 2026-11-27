@@ -1336,4 +1336,34 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Pick_OverlapIncluded" xml:space="preserve">
     <value>Dieses Fenster ließ sich nicht einzeln aufnehmen – überlappende Fenster sind mit drauf.</value>
   </data>
+  <data name="Privacy_Heading" xml:space="preserve">
+    <value>Datenschutz</value>
+  </data>
+  <data name="Privacy_Name" xml:space="preserve">
+    <value>Datenschutz</value>
+  </data>
+  <data name="Privacy_Switch" xml:space="preserve">
+    <value>Vor Bildschirmaufnahmen verbergen</value>
+  </data>
+  <data name="Privacy_Switch_Hint" xml:space="preserve">
+    <value>Alle Fenster der ue Bar – Bar, Pins, Win+V-Auswahl, Schnellsuche, Einstellungen, Menüs und Popups – fehlen, wenn der Bildschirm geteilt oder aufgenommen wird (Teams, Discord, OBS, Snipping Tool, Unterricht). Schnell umschalten: Tray-Menü oder der Schnellbefehl privat.</value>
+  </data>
+  <data name="Privacy_Switch_Limits" xml:space="preserve">
+    <value>Kein Schutz vor Schadsoftware, die unter deinem eigenen Konto läuft. Solange es an ist, kannst auch du die ue Bar nicht aufnehmen (für Bilder davon ausschalten), und Remotedesktop oder Remotehilfe sehen sie nicht. Windows-Dialoge wie „Speichern unter“ bleiben sichtbar. Der eigene Screenshot (Win+Alt+S) funktioniert weiter.</value>
+  </data>
+  <data name="Privacy_Black_Hint" xml:space="preserve">
+    <value>Diese Windows-Version kann die Fenster auf Aufnahmen nur als schwarze Fläche zeigen (ganz verbergen geht ab Windows 10 Version 2004).</value>
+  </data>
+  <data name="Privacy_NotAvailable" xml:space="preserve">
+    <value>Diese Windows-Version kann Fenster nicht vor Bildschirmaufnahmen verbergen.</value>
+  </data>
+  <data name="Privacy_Switch_TrayTip" xml:space="preserve">
+    <value>Bar, Pins und Popups fehlen bei Bildschirmfreigabe und Aufnahmen</value>
+  </data>
+  <data name="Privacy_TrayTip" xml:space="preserve">
+    <value>vor Bildschirmaufnahmen verborgen</value>
+  </data>
+  <data name="Privacy_StatusTip" xml:space="preserve">
+    <value>Vor Bildschirmaufnahmen verborgen</value>
+  </data>
 </root>

@@ -195,4 +195,22 @@
   <data name="Pin_TooMany" xml:space="preserve">
     <value>Höchstens {0} Pins – schließ zuerst einen.</value>
   </data>
+  <data name="Privacy_QuickCommand" xml:space="preserve">
+    <value>Vor Bildschirmaufnahmen verbergen an/aus (privat, privat an, privat aus)</value>
+  </data>
+  <data name="Privacy_BusAction" xml:space="preserve">
+    <value>Vor Bildschirmaufnahmen verbergen: { state: on | off | toggle } → { hidden }</value>
+  </data>
+  <data name="Privacy_NotAvailable" xml:space="preserve">
+    <value>Diese Windows-Version kann Fenster nicht vor Bildschirmaufnahmen verbergen.</value>
+  </data>
+  <data name="Privacy_Usage" xml:space="preserve">
+    <value>So geht's: privat (umschalten), privat an, privat aus</value>
+  </data>
+  <data name="Privacy_NowOn" xml:space="preserve">
+    <value>Die ue Bar ist jetzt vor Bildschirmaufnahmen verborgen.</value>
+  </data>
+  <data name="Privacy_NowOff" xml:space="preserve">
+    <value>Die ue Bar ist auf Bildschirmaufnahmen wieder sichtbar.</value>
+  </data>
 </root>

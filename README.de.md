@@ -32,6 +32,32 @@ Screenshots lassen sich als kleine Fenster, die immer obenauf bleiben, auf dem B
 - **Deutsch und Englisch**, im laufenden Betrieb umschaltbar. Zahlen und Uhrzeiten nach der
   Windows-Region.
 - OLED-Schutz (Abdunkeln, Pixel-Shift), eingeklappt sparsam mit Ressourcen.
+- **Vor Bildschirmaufnahmen verbergen** bei Bildschirmfreigabe und Aufnahmen (siehe unten).
+
+## Vor Bildschirmaufnahmen verbergen
+
+Wenn du deinen Bildschirm teilst (Teams, Discord, Unterricht) oder aufnimmst (OBS, Snipping Tool),
+kann die ue Bar draußen bleiben: Alle Fenster der App – die Bar mit der Pill, Pins, die
+`Win + V`-Auswahl, Schnellsuche, Einstellungen und Willkommens-Assistent, eigene Benachrichtigungen
+und Rückmeldungen, Kontextmenüs, Tooltips und Popups – fehlen auf der Aufnahme; die anderen sehen,
+was dahinter liegt. Du selbst siehst und bedienst alles wie gewohnt.
+
+- **Standard: aus.** Umschalten unter **Einstellungen → Allgemein → Datenschutz**, mit einem Klick im
+  **Tray-Menü** (**Vor Bildschirmaufnahmen verbergen**, mit Häkchen), mit dem Schnellbefehl
+  **`privat`** (`privat an` / `privat aus`) – oder aus Automationen über die Bus-Aktion
+  `privacy.capture_hidden` (`{ "state": "on" | "off" | "toggle" }`, mit Freigabe wie jede Aktion; z. B.
+  einschalten, wenn OBS startet). Wirkt sofort auf alle offenen Fenster, ohne Neustart.
+- Solange es an ist, zeigt ein kleines durchgestrichenes Auge im Kopf des offenen Panels und der
+  Tray-Tooltip den Zustand. Eingeklappt wird nichts zusätzlich angezeigt.
+- **Was es nicht tut:** Es ist kein Schutz vor Schadsoftware, die unter deinem eigenen Konto läuft –
+  so ein Programm kann weiterhin lesen, was die ue Bar zeigt. Es hält die Fenster nur aus
+  Bildschirmfreigaben und Aufnahmen heraus.
+- **Folgen:** Solange es an ist, kannst auch du die ue Bar nicht fotografieren – für Bilder der Bar
+  vorher ausschalten. Remotedesktop und Remotehilfe sehen die Bar ebenfalls nicht. Windows-eigene
+  Dialoge (z. B. **Speichern unter**) bleiben sichtbar. Der eigene Screenshot (`Win + Alt + S`)
+  funktioniert weiter – auf seinem Bild fehlt einfach die ue Bar.
+- Braucht Windows 10 Version 2004 oder neuer; ältere Versionen zeigen die Fenster auf Aufnahmen nur
+  als schwarze Fläche (das steht dann in den Einstellungen).
 
 ## Pins
 

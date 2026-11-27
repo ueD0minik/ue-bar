@@ -200,6 +200,9 @@ public sealed class HardcodedTextTests
         ("OcrLayout.cs", "bis"),
         ("OcrLayout.cs", "sowie"),
         ("OcrLayout.cs", "bzw."),
+        // P2-7: words the quick command "privat an/aus" understands in every UI language – input, not UI text
+        ("CapturePrivacyCommands.cs", "ein"),
+        ("CapturePrivacyCommands.cs", "aus"),
     ];
 
     private static readonly Regex Literal = new(@"(?<![A-Za-z0-9_])\$?@?""((?:[^""\\]|\\.)*)""", RegexOptions.Compiled);

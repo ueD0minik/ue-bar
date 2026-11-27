@@ -142,7 +142,9 @@ internal sealed partial class BarWindow : Window
         }
 
         var ex = (long)Win32.GetWindowLongPtr(_hwnd, Win32.GWL_EXSTYLE);
-        var affinity = PinInterop.GetWindowDisplayAffinity(_hwnd, out var value) && value != 0;
+        // P2-7: an affinity is only a problem if it is not the one "hide from screen captures" wants.
+        var expected = UeBar.App.Infrastructure.CaptureProtection.Current?.ExpectedAffinity ?? 0;
+        var affinity = PinInterop.GetWindowDisplayAffinity(_hwnd, out var value) && value != expected;
         return new BarWindowFacts(PinInterop.IsWindowVisible(_hwnd), PinInterop.IsCloaked(_hwnd), Root.Opacity, (ex & Win32.WS_EX_TOPMOST) != 0, affinity);
     }
 
@@ -162,7 +164,7 @@ internal sealed partial class BarWindow : Window
 
         var off = 0;
         _ = PinInterop.DwmSetWindowAttribute(_hwnd, PinInterop.DWMWA_CLOAK, ref off, sizeof(int));
-        _ = PinInterop.SetWindowDisplayAffinity(_hwnd, 0);
+        _ = PinInterop.SetWindowDisplayAffinity(_hwnd, UeBar.App.Infrastructure.CaptureProtection.Current?.ExpectedAffinity ?? 0); // P2-7: keeps "hide from captures"
         if (show && !IsVisible)
         {
             Show();

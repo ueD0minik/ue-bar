@@ -66,7 +66,12 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <ItemsControl Grid.Column="1" ItemsSource="{Binding ModuleDots}" VerticalAlignment="Center" Margin="8,0">
+            <!-- P2-7: hidden from screen captures (only here in the open panel, never in the pill) -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Style="{StaticResource IconText}" FontSize="13" Margin="8,0,0,0" Foreground="{StaticResource SubTextBrush}"
+                       Text="&#xED1A;" ToolTip="{l:T Privacy_StatusTip}" Background="Transparent"
+                       Visibility="{Binding IsCaptureHidden, Converter={StaticResource BoolToVisibility}}" />
+            <ItemsControl ItemsSource="{Binding ModuleDots}" VerticalAlignment="Center" Margin="8,0">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />
@@ -80,6 +85,7 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            </StackPanel>
 
             <!-- P2-5: pins on the screen -->
             <Button Grid.Column="2" Width="32" Height="32" Padding="0" Margin="0,0,6,0" Command="{Binding TogglePinsCommand}" ToolTip="{l:T Pins_PanelName}"

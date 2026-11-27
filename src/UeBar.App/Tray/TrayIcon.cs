@@ -87,11 +87,33 @@ internal sealed class TrayIcon : IDisposable
     /// <summary>State of the layout sync for the display in the menu (M5b).</summary>
     public Func<UeBar.Core.Layout.LayoutSyncStatus>? LayoutStatus { get; set; }
 
+    /// <summary>P2-7: "Hide from screen captures" – the checked entry in the menu and the tooltip follow it.</summary>
+    public UeBar.App.Infrastructure.CaptureProtection? Privacy
+    {
+        get;
+        set
+        {
+            if (field is not null)
+            {
+                field.Changed -= OnPrivacyChanged;
+            }
+
+            field = value;
+            if (value is not null)
+            {
+                value.Changed += OnPrivacyChanged;
+            }
+
+            UpdateTooltip();
+        }
+    }
+
     public void ShowInfo(string title, string text) =>
         _notifyIcon.ShowBalloonTip(3000, title, text, Forms.ToolTipIcon.Info);
 
     public void Dispose()
     {
+        Privacy = null;
         _registry.ModuleStatusChanged -= OnModuleStatusChanged;
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
@@ -115,8 +137,15 @@ internal sealed class TrayIcon : IDisposable
         });
     }
 
+    private void OnPrivacyChanged(object? sender, EventArgs e) => _dispatcher.BeginInvoke(UpdateTooltip);
+
+    /// <summary>The tooltip says it while the windows are hidden from captures (the tray icon itself belongs to Windows).</summary>
+    private void UpdateTooltip() =>
+        _notifyIcon.Text = Privacy?.IsHidden == true ? Truncate($"ue Bar · {Loc.Get("Privacy_TrayTip")}", 127) : "ue Bar";
+
     private void BuildMenu()
     {
+        UpdateTooltip(); // also follows a language switch
         _menu.SuspendLayout();
         _menu.Items.Clear();
 
@@ -143,6 +172,17 @@ internal sealed class TrayIcon : IDisposable
         var release = new Forms.ToolStripMenuItem(Loc.Get("Tray_PinsClickable")) { Enabled = AnyClickThroughPins?.Invoke() ?? false };
         release.Click += (_, _) => _dispatcher.BeginInvoke(() => ReleasePins?.Invoke());
         _menu.Items.Add(release);
+
+        // P2-7: one click switches "hide from screen captures".
+        if (Privacy is { } privacy)
+        {
+            var hidden = privacy.IsHidden;
+            var capture = new Forms.ToolStripMenuItem(Loc.Get("Privacy_Switch")) { Checked = hidden, Enabled = privacy.IsAvailable };
+            capture.ToolTipText = privacy.IsAvailable ? Loc.Get("Privacy_Switch_TrayTip") : Loc.Get("Privacy_NotAvailable");
+            capture.Click += (_, _) => _dispatcher.BeginInvoke(() => privacy.Set(!hidden, "tray"));
+            _menu.Items.Add(capture);
+        }
+
         AddPluginEntries();
 
         _menu.Items.Add(BuildLayoutMenu());

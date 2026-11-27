@@ -37,6 +37,9 @@ public sealed class GeneralSettings
     /// <summary>UI language (R1): "system" (default; German if Windows is German, otherwise English), "de" or "en".</summary>
     public string? Language { get; set; }
 
+    /// <summary>P2-7: every window of the app (bar, pins, popups …) is left out of screen captures. Default off.</summary>
+    public bool HideFromCapture { get; set; }
+
     [System.Text.Json.Serialization.JsonIgnore]
     public int EffectiveColumns => Math.Clamp(Columns, MinColumns, MaxColumns);
 

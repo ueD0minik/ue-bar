@@ -420,6 +420,10 @@ plugins that come with ue Bar share one copy in `plugins\.shared\`.
 The host's own actions on the module bus have the provider ID `pins`: `pins.create_text`
 `{ "text", "title"? }` → `{ "id" }` creates a text pin that belongs to the calling plugin (with the
 user's permission, like every action). The ID `pins` is reserved – no plugin may use it.
+Since 1.6.0 there is also the provider ID `privacy` (reserved as well): `privacy.capture_hidden`
+`{ "state": "on" | "off" | "toggle" }` → `{ "hidden": true | false }` switches "Hide from screen captures"
+(missing `state` = toggle). Plugins never have to do anything for that setting – every window of the
+process is covered by the host, also the ones a plugin opens.
 
 **Windows APIs (C#/WinRT):** target `net10.0-windows10.0.19041.0` (or later) like the Windows and the
 Screenshot plugin. `WinRT.Runtime.dll` and `Microsoft.Windows.SDK.NET.dll` may exist only once per

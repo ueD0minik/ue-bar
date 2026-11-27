@@ -123,7 +123,7 @@ public sealed class CaptureSafetyTests
     {
         Assert.Empty(BarWindowHealth.Problems(new BarWindowFacts(true, false, 1, true, false)));
         Assert.Equal(
-            ["not visible", "cloaked", "opacity 0", "not topmost", "display affinity set"],
+            ["not visible", "cloaked", "opacity 0", "not topmost", "unexpected display affinity"],
             BarWindowHealth.Problems(new BarWindowFacts(false, true, 0, false, true)));
         Assert.Equal(["opacity 0"], BarWindowHealth.Problems(new BarWindowFacts(true, false, 0, true, false))); // what 1.4.0 left behind
     }

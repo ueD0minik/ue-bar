@@ -52,6 +52,5 @@
   <Import Project="..\..\build\BundledPlugins.targets" />
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.750501" />
   </ItemGroup>
 </Project>

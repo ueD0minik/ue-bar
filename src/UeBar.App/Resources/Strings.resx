@@ -1336,4 +1336,34 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Pick_OverlapIncluded" xml:space="preserve">
     <value>This window could not be taken on its own – overlapping windows are in the picture.</value>
   </data>
+  <data name="Privacy_Heading" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Privacy_Name" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Privacy_Switch" xml:space="preserve">
+    <value>Hide from screen captures</value>
+  </data>
+  <data name="Privacy_Switch_Hint" xml:space="preserve">
+    <value>All windows of ue Bar – bar, pins, Win+V choice, quick search, settings, menus and popups – are missing when the screen is shared or recorded (Teams, Discord, OBS, Snipping Tool, lessons). Switch quickly: tray menu or the quick command privat.</value>
+  </data>
+  <data name="Privacy_Switch_Limits" xml:space="preserve">
+    <value>This is no protection against malware running under your own account. While it is on, ue Bar cannot be captured by you either (switch it off for pictures of it), and remote desktop or remote help do not see it. Windows dialogs such as "Save as" stay visible. The own screenshot (Win+Alt+S) keeps working.</value>
+  </data>
+  <data name="Privacy_Black_Hint" xml:space="preserve">
+    <value>This Windows version can only show the windows as a black area on captures (hiding them completely needs Windows 10 version 2004 or newer).</value>
+  </data>
+  <data name="Privacy_NotAvailable" xml:space="preserve">
+    <value>This Windows version cannot hide windows from screen captures.</value>
+  </data>
+  <data name="Privacy_Switch_TrayTip" xml:space="preserve">
+    <value>Bar, pins and popups are missing on screen sharing and recordings</value>
+  </data>
+  <data name="Privacy_TrayTip" xml:space="preserve">
+    <value>hidden from screen captures</value>
+  </data>
+  <data name="Privacy_StatusTip" xml:space="preserve">
+    <value>Hidden from screen captures</value>
+  </data>
 </root>

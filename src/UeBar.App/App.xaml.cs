@@ -47,6 +47,7 @@ public partial class App : Application
     private UeBar.App.ClipHistory.ClipboardWatcher? _clipboardWatcher;
     private UeBar.App.ClipHistory.KeyboardHook? _keyboardHook;
     private UeBar.App.Pins.PinController? _pins;
+    private CaptureProtection? _privacy;
     private bool _exiting;
     private long? _exitStarted;
     private volatile string _exitStage = "not started";
@@ -143,6 +144,11 @@ public partial class App : Application
             Loc.Apply(general.Current.Language);
             _log.Info(null, $"UI language: {Loc.Culture.Name} (setting: {UeBar.Core.Localization.UiLanguages.Normalize(general.Current.Language)})");
 
+            // P2-7: "hide from screen captures" before the first window (also the plugin trust dialog).
+            _privacy = new CaptureProtection(Dispatcher, general, _log);
+            _privacy.Start();
+            var privacy = _privacy;
+
             // Background cleanup (M7): hang dumps – only the last 3 (logs: 7 days, FileLogger).
             if (FileRetention.KeepNewest(paths.Logs, "*.dmp", 3) is > 0 and var removed)
             {
@@ -238,9 +244,17 @@ public partial class App : Application
             // Extras (M6): notifications, Now Playing, Assist, quick search – through core services.
             var quickCommands = new QuickCommandService(_registry, _log)
             {
-                HostDisplayName = id => id == UeBar.Core.Pins.PinManager.HostId ? Loc.Get("Pins_PanelName") : null,
+                HostDisplayName = id => id switch
+                {
+                    UeBar.Core.Pins.PinManager.HostId => Loc.Get("Pins_PanelName"),
+                    UeBar.Core.Privacy.CapturePrivacyCommands.HostId => Loc.Get("Privacy_Name"),
+                    _ => null,
+                },
             };
             UeBar.Core.Pins.PinCommands.Register(pinManager, quickCommands, bus);
+            UeBar.Core.Privacy.CapturePrivacyCommands.Register(privacy, quickCommands, bus);
+            viewModel.IsCaptureHidden = privacy.IsHidden;
+            privacy.Changed += (_, _) => viewModel.IsCaptureHidden = privacy.IsHidden;
             _pins = new UeBar.App.Pins.PinController(pinManager, settings, _hotkeys, clipboard, Dispatcher, _log);
             _pins.SaveDialog = saveDialog;
             _pins.Start();
@@ -275,6 +289,7 @@ public partial class App : Application
             var bar = _bar;
             var layout = _layout;
             _tray = new TrayIcon(_registry, _bar, Dispatcher);
+            _tray.Privacy = privacy;
             var tray = _tray;
             _tray.ExitRequested += async (_, _) => await ExitAsync("tray");
             _tray.ExportLayout = _layout.Export;
@@ -334,6 +349,7 @@ public partial class App : Application
                 Settings = settings,
                 General = general,
                 Bar = bar,
+                Privacy = privacy,
                 Registry = registry,
                 Bus = bus,
                 LayoutSource = _remoteLayout,
@@ -411,11 +427,16 @@ public partial class App : Application
             // Debug only: deliberately trigger a hang to check the UI watchdog.
             if (int.TryParse(Environment.GetEnvironmentVariable("UEBAR_TEST_HANG"), out var hangSeconds) && hangSeconds > 0)
             {
-                _ = Dispatcher.BeginInvoke(() =>
+                // UEBAR_TEST_HANG_DELAY (P2-7): only after the start grace – then a real hang dump is written.
+                var hangDelay = int.TryParse(Environment.GetEnvironmentVariable("UEBAR_TEST_HANG_DELAY"), out var d) && d > 0 ? d : 0;
+                var hangTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.ApplicationIdle) { Interval = TimeSpan.FromSeconds(Math.Max(hangDelay, 0.1)) };
+                hangTimer.Tick += (_, _) =>
                 {
+                    hangTimer.Stop();
                     _log.Warn(null, $"TEST: blocking UI thread {hangSeconds} s");
                     Thread.Sleep(TimeSpan.FromSeconds(hangSeconds));
-                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                };
+                hangTimer.Start();
             }
 
             // Debug only: "Reset bar" like from the tray, every N seconds (test without mouse).
@@ -424,6 +445,14 @@ public partial class App : Application
                 var resetTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(resetSeconds) };
                 resetTimer.Tick += (_, _) => _ = _tray.ResetBar?.Invoke();
                 resetTimer.Start();
+            }
+
+            // Debug only: switch "hide from screen captures" every N seconds (P2-7, check with a screen copy from outside).
+            if (int.TryParse(Environment.GetEnvironmentVariable("UEBAR_TEST_PRIVACY_TOGGLE"), out var privacySeconds) && privacySeconds > 0)
+            {
+                var privacyTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(privacySeconds) };
+                privacyTimer.Tick += (_, _) => privacy.Toggle("test timer");
+                privacyTimer.Start();
             }
 #endif
         }
@@ -490,6 +519,12 @@ public partial class App : Application
     /// </summary>
     static App()
     {
+        // P2-7: the hidden helper start that writes a hang dump of the main process – nothing else of the app runs.
+        if (HangDumpCommand.TryParse(Environment.GetCommandLineArgs().Skip(1).ToList(), out var dumpProcess, out var dumpPath))
+        {
+            Environment.Exit(HangDump.RunHelper(dumpProcess, dumpPath));
+        }
+
         CultureOverride = ApplyCultureOverride();
     }
 
@@ -687,6 +722,8 @@ public partial class App : Application
                 _clipboardWatcher = null;
                 _bar?.Dispose();
                 _bar = null;
+                _privacy?.Dispose();
+                _privacy = null;
             })
             .Add("plugins", async _ =>
             {

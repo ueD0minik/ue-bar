@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.6.0 – Hide from screen captures
+
+New function; plugin interface unchanged (1.7) – plugins do nothing for it.
+
+### New
+- **Hide from screen captures** (off by default): every window of ue Bar – bar with pill, pins, the `Win + V` choice,
+  quick search and Assist, settings and welcome, own notifications and feedback, the pin list, context menus,
+  tooltips and popups, edit dialogs, the tray menu – is missing when the screen is shared or recorded (Teams, Discord,
+  OBS, Snipping Tool); the capture shows what lies behind. Applies at once to all open windows and to every window that
+  appears later, without a restart. Switch it under **Settings → General → Privacy**, in the **tray menu** (with a check
+  mark), with the quick command **`privat`** (`privat on` / `privat off`), or through the bus action
+  `privacy.capture_hidden` (`{ "state": "on" | "off" | "toggle" }`, with permission – e.g. from a Home Assistant
+  automation). While it is on, a crossed-out eye in the header of the open panel and the tray tooltip say so (nothing
+  while collapsed). Windows 10 2004 or newer hides the windows completely, older versions show a black area (the
+  settings say so). Not covered: Windows' own dialogs (Save as). The own screenshot (`Win + Alt + S`) keeps working –
+  its picture simply has no ue Bar in it. No protection against malware under the own account.
+
+### Fixed
+- **A terminal window popped up after waking up:** it was the hang dump – the runtime wrote it with its console program
+  `createdump.exe`, and Windows opened a terminal for it (25./26.11., exactly at the times of the false alarms that 1.5.2
+  already fixed). Dumps of real hangs are now written by a hidden second start of `ueBar.exe` (`CreateNoWindow`, no
+  console) with `MiniDumpWriteDump` – same content (stacks of all threads), no window. The packages
+  `Microsoft.Diagnostics.NETCore.Client` and its two `Microsoft.Extensions.*` dependencies are gone from the install.
+
+### Checked for real
+- Screen copies from outside in a test instance: with the setting on, pin, settings, the `Win + V` choice and the action
+  feedback are missing (only the background behind them); off, they are there; switching on → off → on works at once.
+  A newly opened `Win + V` choice is not even on a single frame (copied ~50 times per second while it opens). The
+  screenshot overlay stays usable, its frozen picture has no pin in it, `Ctrl + A` saves the whole screen.
+- A real hang in the test instance: dump in 0.9 s (24 MB, as before, stacks readable with `dotnet-dump`), no window.
+
+### Measured
+- Memory, third load round with a **fixed history size** (20 entries, filled before the start; release build; each
+  round 200 × the choice popup in Edge, 20 Full-HD images, 50 window screenshots): one minute after the load
+  **74.3 MB (round 1), 84.2 MB (round 2), 85.7 MB (round 3)** private, two minutes after 76.0 / 87.1 / 86.0 MB. The
+  growth stops after round 2 – a level the app settles at after heavy use, not a leak. Nothing to fix.
+
+### Tests
+- Bar +8 (way per Windows version, all open windows on/off live, new windows, fallback to black and greyed out,
+  overlay and Windows dialogs left alone, the bar check, the dump start without a window and its arguments),
+  Core +13 (quick command `privat`, bus action with permission, reserved ID `privacy`). Total 876.
+
 ## 1.5.2 – A click takes the window, Ctrl + A takes the screen, no false hang alarm after sleep
 
 Fixes only; plugin interface unchanged (1.7).

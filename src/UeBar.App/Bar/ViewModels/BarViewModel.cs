@@ -459,6 +459,13 @@ internal sealed class BarViewModel : ObservableObject
 
     public bool HasHistory => NotificationHistory.Count > 0;
 
+    /// <summary>P2-7: "hide from screen captures" is on – a quiet icon in the header of the open panel (never in the pill).</summary>
+    public bool IsCaptureHidden
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+
     /// <summary>Bell: show the history instead of the tabs.</summary>
     public bool ShowHistory
     {

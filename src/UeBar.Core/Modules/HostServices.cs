@@ -36,8 +36,12 @@ public sealed class HostServices
     /// <summary>Hotkeys taken over from Windows with a keyboard hook (P2-6).</summary>
     public IHostHotkeyTakeover? HotkeyTakeover { get; set; }
 
-    /// <summary>IDs the host uses itself (bus owner of the pins) – no module may take them.</summary>
-    public static IReadOnlySet<string> ReservedIds { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { PinManager.HostId };
+    /// <summary>IDs the host uses itself (bus owner of the pins, of "hide from screen captures") – no module may take them.</summary>
+    public static IReadOnlySet<string> ReservedIds { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        PinManager.HostId,
+        UeBar.Core.Privacy.CapturePrivacyCommands.HostId,
+    };
 }
 
 /// <summary>The app's clipboard watcher (P2-6). <paramref name="changed"/> may be called on any thread.</summary>

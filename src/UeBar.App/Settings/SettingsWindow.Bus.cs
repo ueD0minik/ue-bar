@@ -109,5 +109,11 @@ internal sealed partial class SettingsWindow
         return Card(Row(text, request.Reason, Buttons(allow, decline), controlBelow: true));
     }
 
-    private string DisplayNameOf(string moduleId) => _host.Registry.Find(moduleId)?.DisplayName ?? moduleId;
+    private string DisplayNameOf(string moduleId) => _host.Registry.Find(moduleId)?.DisplayName ?? moduleId switch
+    {
+        // Parts of the app that publish on the bus themselves (P2-5 pins, P2-7 privacy).
+        UeBar.Core.Pins.PinManager.HostId => Loc.Get("Pins_PanelName"),
+        UeBar.Core.Privacy.CapturePrivacyCommands.HostId => Loc.Get("Privacy_Name"),
+        _ => moduleId,
+    };
 }

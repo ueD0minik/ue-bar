@@ -195,4 +195,22 @@
   <data name="Pin_TooMany" xml:space="preserve">
     <value>At most {0} pins – close one first.</value>
   </data>
+  <data name="Privacy_QuickCommand" xml:space="preserve">
+    <value>Hide from screen captures on/off (privat, privat on, privat off)</value>
+  </data>
+  <data name="Privacy_BusAction" xml:space="preserve">
+    <value>Hide from screen captures: { state: on | off | toggle } → { hidden }</value>
+  </data>
+  <data name="Privacy_NotAvailable" xml:space="preserve">
+    <value>This Windows cannot hide windows from screen captures.</value>
+  </data>
+  <data name="Privacy_Usage" xml:space="preserve">
+    <value>Use: privat (switch over), privat on, privat off</value>
+  </data>
+  <data name="Privacy_NowOn" xml:space="preserve">
+    <value>ue Bar is now hidden from screen captures.</value>
+  </data>
+  <data name="Privacy_NowOff" xml:space="preserve">
+    <value>ue Bar is visible on screen captures again.</value>
+  </data>
 </root>

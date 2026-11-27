@@ -11,9 +11,6 @@ permissive licenses that may be combined with GPL-3.0 code.
 |---|---|---|---|
 | .NET 10 runtime and WPF (Windows Desktop runtime) | 10.0 | MIT | © .NET Foundation and contributors |
 | [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) | 8.4.2 | MIT | © .NET Foundation and contributors |
-| [Microsoft.Diagnostics.NETCore.Client](https://github.com/dotnet/diagnostics) | 0.2.750501 | MIT | © Microsoft Corporation |
-| [Microsoft.Extensions.DependencyInjection.Abstractions](https://github.com/dotnet/runtime) | 8.0.2 | MIT | © Microsoft Corporation |
-| [Microsoft.Extensions.Logging.Abstractions](https://github.com/dotnet/runtime) | 8.0.3 | MIT | © Microsoft Corporation |
 
 ### Windows plugin (`plugins\windows\`)
 
@@ -28,9 +25,6 @@ nothing of Windows itself is shipped.
 
 The installer is framework-dependent: it downloads the .NET 10 Desktop Runtime from Microsoft
 if it is missing. The portable single executable contains the .NET runtime (self-contained).
-
-The two `Microsoft.Extensions.*` packages come in as dependencies of
-`Microsoft.Diagnostics.NETCore.Client` (used to write a small dump when the UI thread hangs).
 
 ## Build and test tools (not shipped)
 

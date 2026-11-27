@@ -31,6 +31,32 @@ text) and [Clipboard](plugins/Clipboard/README.md) (history with `Win + V`) come
 - **Pins**: notes and screenshots as small windows on top of everything (see below).
 - **German and English**, switchable at runtime. Numbers and times follow your Windows region.
 - OLED protection (dimming, pixel shift), light on resources when collapsed.
+- **Hide from screen captures** for screen sharing and recordings (see below).
+
+## Hide from screen captures
+
+When you share your screen (Teams, Discord, lessons) or record it (OBS, Snipping Tool), ue Bar can
+stay out of the picture: every window of the app – the bar with the pill, pins, the `Win + V`
+choice, quick search, settings and welcome, own notifications and feedback, context menus, tooltips
+and popups – is missing from the capture; the others see what lies behind it. You keep seeing and
+using everything as usual.
+
+- **Off by default.** Switch it under **Settings → General → Privacy**, with one click in the **tray
+  menu** (**Hide from screen captures**, with a check mark), with the quick command **`privat`**
+  (`privat on` / `privat off`) – or from automations through the bus action
+  `privacy.capture_hidden` (`{ "state": "on" | "off" | "toggle" }`, with a permission like every action;
+  for example to switch it on when OBS starts). It works at once on all open windows, no restart.
+- While it is on, a small crossed-out eye shows in the header of the open panel and the tray tooltip
+  says so. Nothing extra is shown while the bar is collapsed.
+- **What it does not do:** it is no protection against malware running under your own account – such
+  a program can still read what ue Bar shows. It only keeps the windows out of screen sharing and
+  recordings.
+- **Side effects:** while it is on, you cannot take pictures of ue Bar yourself either – switch it off
+  for screenshots of the bar. Remote desktop and remote help do not see the bar either. Windows'
+  own dialogs (such as **Save as**) stay visible. The own screenshot (`Win + Alt + S`) keeps working –
+  its picture simply does not contain ue Bar.
+- Needs Windows 10 version 2004 or newer; older versions only show the windows as a black area on
+  captures (the settings say so).
 
 ## Pins
 

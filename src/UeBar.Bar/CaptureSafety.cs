@@ -38,7 +38,10 @@ public static class CaptureSafety
     }
 }
 
-/// <summary>What the bar window really looks like to Windows (P2-5-Fix 1, checked on every switch to pill/panel).</summary>
+/// <summary>
+/// What the bar window really looks like to Windows (P2-5-Fix 1, checked on every switch to pill/panel).
+/// <see cref="CaptureAffinity"/>: a display affinity other than the one "hide from screen captures" wants (P2-7).
+/// </summary>
 public readonly record struct BarWindowFacts(bool Visible, bool Cloaked, double Opacity, bool Topmost, bool CaptureAffinity);
 
 /// <summary>
@@ -72,7 +75,7 @@ public static class BarWindowHealth
 
         if (facts.CaptureAffinity)
         {
-            problems.Add("display affinity set");
+            problems.Add("unexpected display affinity");
         }
 
         return problems;

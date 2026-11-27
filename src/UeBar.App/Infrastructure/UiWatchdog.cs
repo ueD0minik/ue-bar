@@ -4,7 +4,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Threading;
-using Microsoft.Diagnostics.NETCore.Client;
 using Microsoft.Win32;
 using UeBar.Bar;
 using UeBar.Core.Logging;
@@ -22,6 +21,8 @@ namespace UeBar.App.Infrastructure;
 /// Sleep (P2-6-Fix 2): the decision is <see cref="HangClock"/> – while Windows sleeps nothing counts, and after a long
 /// gap between the watchdog's own ticks (Modern Standby pauses the whole app) it starts over instead of reporting the
 /// sleep as a hang. Failed dumps leave no empty file behind.
+/// P2-7: the dump is written by a hidden second start of the own exe (<see cref="HangDump"/>) – the runtime's way
+/// started the console program createdump.exe, and a terminal window popped up.
 /// </summary>
 internal sealed class UiWatchdog : IDisposable
 {
@@ -33,6 +34,9 @@ internal sealed class UiWatchdog : IDisposable
 
     /// <summary>Ticks come every second; a gap this long means the app (or Windows) did not run in between.</summary>
     public static readonly TimeSpan MaxTickGap = TimeSpan.FromSeconds(10);
+
+    /// <summary>The hidden dump helper gets this long (P2-7).</summary>
+    private static readonly TimeSpan DumpTimeout = TimeSpan.FromSeconds(60);
 
     private const int MaxDumps = 3;
     private const string DumpPattern = "haenger-*.dmp";
@@ -239,10 +243,16 @@ internal sealed class UiWatchdog : IDisposable
 
         Directory.CreateDirectory(_dumpDirectory);
         var path = Path.Combine(_dumpDirectory, $"haenger-{DateTime.Now:yyyyMMdd-HHmmss}-p{Environment.ProcessId}.dmp");
+        var started = Stopwatch.GetTimestamp();
         try
         {
-            new DiagnosticsClient(Environment.ProcessId).WriteDump(DumpType.Normal, path, logDumpGeneration: false);
-            _log.Error(null, $"Stacks of all threads saved: {path} (analyze: dotnet-dump analyze <file> → clrstack -all)");
+            var (success, message) = HangDump.Write(path, DumpTimeout);
+            if (!success)
+            {
+                throw new IOException(message);
+            }
+
+            _log.Error(null, $"Stacks of all threads saved in {Stopwatch.GetElapsedTime(started).TotalSeconds:0.0} s (no window): {path} (analyze: dotnet-dump analyze <file> → clrstack -all)");
         }
         catch (Exception ex)
         {

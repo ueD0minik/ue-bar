@@ -36,6 +36,9 @@ internal sealed class SettingsHost
 
     public required BarController Bar { get; init; }
 
+    /// <summary>P2-7: "Hide from screen captures".</summary>
+    public required UeBar.App.Infrastructure.CaptureProtection Privacy { get; init; }
+
     public required ModuleRegistry Registry { get; init; }
 
     /// <summary>Module bus: what the plugins publish (page "May use", P2-3).</summary>
@@ -139,10 +142,12 @@ internal sealed partial class SettingsWindow : Window
         _host.Registry.ModuleStatusChanged += OnModuleStatusChanged;
         _host.Settings.BusPolicy.RequestsChanged += OnBusRequestsChanged;
         UiCultureSource.Shared.Changed += OnLanguageChanged;
+        _host.Privacy.Changed += OnPrivacyChanged;
         SourceInitialized += (_, _) => DarkChrome(this);
         Closed += (_, _) =>
         {
             _refresh.Stop();
+            _host.Privacy.Changed -= OnPrivacyChanged;
             _host.Registry.ModuleStatusChanged -= OnModuleStatusChanged;
             _host.Settings.BusPolicy.RequestsChanged -= OnBusRequestsChanged;
             UiCultureSource.Shared.Changed -= OnLanguageChanged;
@@ -252,6 +257,7 @@ internal sealed partial class SettingsWindow : Window
     {
         _currentPage = key;
         _onRefresh = null;
+        _privacySwitch = null;
         SuspendAllHotkeys(false); // a recording on the previous page ends here
 
         foreach (var (k, b) in _navButtons)
@@ -377,7 +383,36 @@ internal sealed partial class SettingsWindow : Window
                 Combo(Enumerable.Range(GeneralSettings.MinColumns, GeneralSettings.MaxColumns - GeneralSettings.MinColumns + 1).Select(n => (Loc.F("General_ColumnsN", n), n)), g.EffectiveColumns,
                     n => UpdateGeneral(s => s.Columns = n), width: 160)),
             SwitchRow(Loc.Get("General_ReduceAnimations"), Loc.Get("General_ReduceAnimations_Hint"), _host.Bar.Settings.ReduceAnimations, v => _host.Bar.Update(s => s.ReduceAnimations = v))));
+
+        // P2-7: privacy – hide every window of ue Bar from screen captures.
+        page.Children.Add(SubHeading(Loc.Get("Privacy_Heading")));
+        var privacy = _host.Privacy;
+        var description = Loc.Get("Privacy_Switch_Hint");
+        if (!privacy.IsAvailable)
+        {
+            description = Loc.Get("Privacy_NotAvailable");
+        }
+        else if (privacy.Mode == CaptureShieldMode.Black)
+        {
+            description += " " + Loc.Get("Privacy_Black_Hint");
+        }
+
+        var capture = SwitchRow(Loc.Get("Privacy_Switch"), description, privacy.IsHidden, v => privacy.Set(v, "settings"));
+        capture.IsEnabled = privacy.IsAvailable;
+        _privacySwitch = capture as CheckBox;
+        page.Children.Add(Card(capture, Hint(Loc.Get("Privacy_Switch_Limits"))));
     }
+
+    /// <summary>The switch on the General page – follows a switch from the tray, the quick command or the bus.</summary>
+    private CheckBox? _privacySwitch;
+
+    private void OnPrivacyChanged(object? sender, EventArgs e) => Dispatcher.BeginInvoke(() =>
+    {
+        if (_privacySwitch is { } box && box.IsChecked != _host.Privacy.IsHidden)
+        {
+            box.IsChecked = _host.Privacy.IsHidden;
+        }
+    });
 
     private void SetAutostart(bool enabled)
     {

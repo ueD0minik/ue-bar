@@ -91,6 +91,11 @@ internal sealed class AreaOverlay : Window
         {
             _hwnd = new WindowInteropHelper(this).Handle;
             PinInterop.SetExStyle(_hwnd, Win32.WS_EX_TOOLWINDOW, Win32.WS_EX_APPWINDOW);
+            // P2-7: the exception from "hide from screen captures" – it only shows the frozen picture, in which the
+            // hidden windows are missing already; picking must work the same either way.
+            var protection = UeBar.App.Infrastructure.CaptureProtection.Current;
+            protection?.Exempt(_hwnd);
+            Closed += (_, _) => protection?.Release(_hwnd);
             PlaceExactly();
         };
         Loaded += (_, _) =>

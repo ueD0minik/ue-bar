@@ -167,7 +167,23 @@ Contract 1.5 (1.4.0) – pins and screenshots, all generic:
   Hiding the bar goes through `CaptureSafety` (`UeBar.Bar`): whatever happens (action, Esc, error,
   exception) the bar is restored afterwards and the overlays are closed. Every switch to pill/panel checks
   with `BarWindowHealth` that Windows really shows the bar (visible, not cloaked, opacity, topmost, no
-  display affinity) and repairs it with a warning otherwise; "Reset bar" restores all of it.
+  display affinity other than the wanted one) and repairs it with a warning otherwise; "Reset bar"
+  restores all of it.
+- **Hide from screen captures** (1.6.0): `CaptureProtection` (app) sets the display affinity
+  `WDA_EXCLUDEFROMCAPTURE` (Windows 10 2004+, else `WDA_MONITOR` = black) on every top-level window of the
+  process. One place for all, only while the setting is on: a thread hook (`WH_CALLWNDPROC`) on the UI thread
+  catches `WM_SHOWWINDOW` / `WM_WINDOWPOSCHANGING` with `SWP_SHOWWINDOW`, i.e. before Windows shows the window
+  (the out-of-context WinEvent alone came one frame late), and a WinEvent hook on `EVENT_OBJECT_SHOW` for the
+  own process catches windows of other threads; both hand the window to `CaptureShield` (`UeBar.Bar`, tested
+  with a fake);
+  switching applies to all open windows at once. Exceptions: the picking overlay (shows the frozen
+  picture, in which the hidden windows are already missing) and Windows dialogs (`#32770` and windows they
+  own). Switches: settings, tray, quick command `privat`, bus action `privacy.capture_hidden`
+  (`CapturePrivacyCommands` in the core, owner `privacy`, a reserved ID).
+- **Hang dumps** (1.6.0): the UI watchdog starts the own exe hidden (`ueBar.exe --hang-dump <pid> <file>`,
+  `CreateNoWindow`), which writes the dump with `MiniDumpWriteDump` from outside and ends (handled in the
+  static constructor of `App` before anything else). The runtime's own way started the console program
+  `createdump.exe`, and Windows opened a terminal window for it.
 - **Pins that let clicks through** get no mouse events. The existing mouse polling watches them
   (`PointerWatch`, only while such pins exist): over one it lights up, with Ctrl held it can be used for a
   moment.
