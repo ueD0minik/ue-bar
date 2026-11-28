@@ -33,7 +33,7 @@ in a release is called `ueBar-plugin-<id>-<version>.zip`.
 ```powershell
 dotnet new classlib -n MyPlugin -f net10.0
 cd MyPlugin
-dotnet add package UeBar.Sdk --version 1.7.0
+dotnet add package UeBar.Sdk --version 1.8.0
 ```
 
 - Target `net10.0` (not `net10.0-windows`): plugins do not reference WPF. A plugin that needs
@@ -66,7 +66,7 @@ Next to the `.csproj`:
   "author": "Your Name",
   "license": "GPL-3.0-or-later",
   "homepage": "https://example.org/myplugin",
-  "sdkVersion": "1.7",
+  "sdkVersion": "1.8",
   "entryAssembly": "MyPlugin.dll"
 }
 ```
