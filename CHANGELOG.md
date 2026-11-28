@@ -28,6 +28,9 @@ New functions; **plugin interface 1.8** (SDK package 1.8.0) – an extension, ev
   write-protected folder works. Such a plugin is confirmed like any added one (per PC and user) and never counts as
   bundled. Settings → Plugins lists it with the added ones ("next to the portable exe"), without "Remove".
 - Screenshot and Clipboard offer "Actions …" only when another plugin has actions for that content.
+- **Settings fields kept in memory only** (interface 1.8): `SettingField.StoreWhen` – a value (e.g. an API key) reaches
+  the disk only while another field allows it ("Remember on this PC"); otherwise it lives in memory until ue Bar ends,
+  and a stored one is removed.
 
 ### Changed
 - **Hide from screen captures is on by default.** New installations start with it; an existing installation is switched

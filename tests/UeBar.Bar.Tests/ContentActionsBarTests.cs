@@ -121,6 +121,17 @@ public sealed class ContentActionsBarTests : IDisposable
     }
 
     [Fact]
+    public void Every_clipboard_step_stays_on_the_calling_thread_even_after_real_waits()
+    {
+        // The clipboard only works on the STA UI thread: found in the real test, a wait must not move on to the pool.
+        var io = new FakeSelection { Clipboard = "alt", Marked = "markiert", HeldSteps = 2 };
+        var threads = new HashSet<int>();
+        io.Touched = () => threads.Add(Environment.CurrentManagedThreadId);
+        SingleThread.Run(() => SelectionCopier.CopyAsync(io, (d, ct) => Task.Delay(1, ct), default));
+        Assert.Single(threads);
+    }
+
+    [Fact]
     public async Task Nothing_marked_leaves_the_clipboard_alone()
     {
         var io = new FakeSelection { Clipboard = "alt", Marked = null };
@@ -183,6 +194,8 @@ public sealed class ContentActionsBarTests : IDisposable
 
         public bool CanSend { get; set; } = true;
 
+        public Action? Touched { get; set; }
+
         public int Copies { get; private set; }
 
         public int Restores { get; private set; }
@@ -193,10 +206,17 @@ public sealed class ContentActionsBarTests : IDisposable
 
         public bool ModifiersDown() => HeldSteps-- > 0;
 
-        public object? Snapshot() => Clipboard;
+        public object? Snapshot() => Touch(Clipboard);
+
+        private T Touch<T>(T value)
+        {
+            Touched?.Invoke();
+            return value;
+        }
 
         public bool Restore(object? snapshot)
         {
+            Touched?.Invoke();
             Restores++;
             Clipboard = (string?)snapshot;
             Sequence++;
@@ -205,6 +225,7 @@ public sealed class ContentActionsBarTests : IDisposable
 
         public bool SendCopy()
         {
+            Touched?.Invoke();
             if (!CanSend)
             {
                 return false;
@@ -221,6 +242,36 @@ public sealed class ContentActionsBarTests : IDisposable
             return true;
         }
 
-        public string? ReadText() => Clipboard;
+        public string? ReadText() => Touch(Clipboard);
     }
+}
+
+/// <summary>Runs async code on one thread with its own message loop – like the WPF UI thread.</summary>
+internal sealed class SingleThread : SynchronizationContext
+{
+    private readonly System.Collections.Concurrent.BlockingCollection<(SendOrPostCallback Callback, object? State)> _queue = [];
+
+    public static void Run(Func<Task> work)
+    {
+        var context = new SingleThread();
+        var previous = Current;
+        SetSynchronizationContext(context);
+        try
+        {
+            var task = work();
+            task.ContinueWith(_ => context._queue.CompleteAdding(), TaskScheduler.Default);
+            foreach (var (callback, state) in context._queue.GetConsumingEnumerable())
+            {
+                callback(state);
+            }
+
+            task.GetAwaiter().GetResult();
+        }
+        finally
+        {
+            SetSynchronizationContext(previous);
+        }
+    }
+
+    public override void Post(SendOrPostCallback d, object? state) => _queue.Add((d, state));
 }

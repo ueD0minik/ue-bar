@@ -247,6 +247,109 @@ public sealed class SettingsService : IModuleStateStore, IModuleSecretStore, IMo
         Save();
     }
 
+    /// <summary>
+    /// Contract 1.8: the settings fields of a module (for <see cref="SettingField.StoreWhen"/>); null = none known.
+    /// Set by the app, called outside the lock.
+    /// </summary>
+    public Func<string, IReadOnlyList<SettingField>?>? FieldsOf { get; set; }
+
+    /// <summary>Values that must not reach the disk (<see cref="SettingField.StoreWhen"/> not met) – memory only, gone at exit.</summary>
+    private readonly Dictionary<string, Dictionary<string, string>> _memoryOnly = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Moves values of fields with <see cref="SettingField.StoreWhen"/> between disk and memory as their condition says,
+    /// and saves when something left the disk. Called after every change and once per module at start.
+    /// </summary>
+    public void EnforceStoreRules(string moduleId)
+    {
+        if (EnforceStoreRules(moduleId, FieldsOf?.Invoke(moduleId)))
+        {
+            Save();
+        }
+    }
+
+    private void ForgetInMemory(string moduleId, string key)
+    {
+        if (_memoryOnly.TryGetValue(moduleId, out var memory))
+        {
+            memory.Remove(key);
+        }
+    }
+
+    private bool EnforceStoreRules(string moduleId, IReadOnlyList<SettingField>? fields)
+    {
+        if (fields is null || !fields.Any(f => !string.IsNullOrWhiteSpace(f.StoreWhen)))
+        {
+            return false;
+        }
+
+        var changed = false;
+        lock (_lock)
+        {
+            var entry = GetOrCreate(moduleId);
+            if (!_memoryOnly.TryGetValue(moduleId, out var memory))
+            {
+                memory = new Dictionary<string, string>(StringComparer.Ordinal);
+                _memoryOnly[moduleId] = memory;
+            }
+
+            string? ValueOf(string key) =>
+                memory.TryGetValue(key, out var m) ? m
+                : entry.Values.TryGetValue(key, out var v) ? v
+                : fields.FirstOrDefault(f => f.Key == key)?.DefaultValue;
+
+            foreach (var field in fields.Where(f => !string.IsNullOrWhiteSpace(f.StoreWhen)))
+            {
+                if (!field.IsStored(ValueOf))
+                {
+                    string? value = null;
+                    if (entry.Secrets.TryGetValue(field.Key, out var secret))
+                    {
+                        try
+                        {
+                            value = _protector?.Unprotect(secret);
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.Warn(moduleId, $"Secret '{field.Key}' could not be decrypted ({ex.GetType().Name})");
+                        }
+                    }
+                    else if (entry.Values.TryGetValue(field.Key, out var plain))
+                    {
+                        value = plain;
+                    }
+
+                    if (entry.Secrets.Remove(field.Key) | entry.Values.Remove(field.Key))
+                    {
+                        changed = true;
+                        _log.Info(moduleId, $"Setting '{field.Key}' kept in memory only (not stored on this PC)");
+                    }
+
+                    if (value is { Length: > 0 })
+                    {
+                        memory[field.Key] = value;
+                    }
+                }
+                else if (memory.Remove(field.Key, out var held))
+                {
+                    if (field.IsSecret && _protector is not null)
+                    {
+                        entry.Secrets[field.Key] = _protector.Protect(held);
+                    }
+                    else if (!field.IsSecret)
+                    {
+                        entry.Values[field.Key] = held;
+                    }
+
+                    changed = true;
+                    _log.Info(moduleId, $"Setting '{field.Key}' stored again");
+                }
+            }
+        }
+
+        return changed;
+    }
+
     public ModuleSettingValues GetModuleSettings(string moduleId)
     {
         lock (_lock)
@@ -272,6 +375,15 @@ public sealed class SettingsService : IModuleStateStore, IModuleSecretStore, IMo
                 {
                     // Deliberately logged without the value.
                     _log.Warn(moduleId, $"Secret '{key}' could not be decrypted ({ex.GetType().Name})");
+                }
+            }
+
+            // Contract 1.8: values that are kept in memory only (StoreWhen not met).
+            if (_memoryOnly.TryGetValue(moduleId, out var memory))
+            {
+                foreach (var (key, value) in memory)
+                {
+                    values[key] = value;
                 }
             }
 
@@ -324,6 +436,7 @@ public sealed class SettingsService : IModuleStateStore, IModuleSecretStore, IMo
             var entry = GetOrCreate(moduleId);
             entry.Values.Remove(key);
             entry.Secrets.Remove(key);
+            ForgetInMemory(moduleId, key);
             if (value is not null)
             {
                 if (isSecret)
@@ -342,6 +455,7 @@ public sealed class SettingsService : IModuleStateStore, IModuleSecretStore, IMo
             }
         }
 
+        EnforceStoreRules(moduleId, FieldsOf?.Invoke(moduleId)); // contract 1.8: some values never reach the disk
         Save();
     }
 
@@ -353,6 +467,11 @@ public sealed class SettingsService : IModuleStateStore, IModuleSecretStore, IMo
             var entry = GetOrCreate(moduleId);
             foreach (var (key, value, isSecret) in values)
             {
+                if (!(isSecret && value is null))
+                {
+                    ForgetInMemory(moduleId, key); // a new value replaces one kept in memory
+                }
+
                 if (isSecret)
                 {
                     if (value is null)
@@ -390,6 +509,7 @@ public sealed class SettingsService : IModuleStateStore, IModuleSecretStore, IMo
             }
         }
 
+        EnforceStoreRules(moduleId, FieldsOf?.Invoke(moduleId));
         Save();
     }
 

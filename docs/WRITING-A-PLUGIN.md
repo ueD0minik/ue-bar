@@ -246,6 +246,13 @@ From 1.5:
   [hotkeys](#hotkeys-15).
 - `Info` – a hint on the page: `Label` as heading (may be empty), `Description` as text. Stores nothing.
 
+From 1.8:
+
+- `StoreWhen = "rememberKey=true"` (same syntax as `ShowWhen`): the value reaches the disk only while the other field
+  has that value. Otherwise ue Bar keeps it in memory until it ends and removes a stored one – also when the switch is
+  turned off later. For keys on a shared or school PC: a `Toggle` "Remember on this PC" plus the `Password` field with
+  `StoreWhen`.
+
 With `ILiveModuleSettings` your `ApplySettingsAsync` is also called while the plugin runs; it must
 then be safe against your own work (a lock around the values is usually all it takes).
 

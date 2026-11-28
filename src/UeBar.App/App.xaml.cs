@@ -229,6 +229,14 @@ public partial class App : Application
             await Task.Run(() => plugins.RegisterAll(_registry));
             Step("plugins registered");
 
+            // P3-1 (contract 1.8): fields with StoreWhen – values that must stay off the disk are moved to memory.
+            var registryForFields = _registry;
+            settings.FieldsOf = id => registryForFields.Invoke(id, "Read settings fields", m => (m as IModuleSettings)?.SettingFields) is { Succeeded: true } read ? read.Value : null;
+            foreach (var module in _registry.Modules)
+            {
+                settings.EnforceStoreRules(module.Id);
+            }
+
             _tiles = new TileHost(_registry, _log);
             await _registry.StartAllAsync();
             Step("modules started");

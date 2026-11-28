@@ -94,6 +94,26 @@ public sealed record SettingField(
     /// </summary>
     public string? ShowWhen { get; init; }
 
+    /// <summary>
+    /// Contract 1.8: write the value to disk only while another field has one of these values (same syntax as
+    /// <see cref="ShowWhen"/>, e.g. <c>"rememberKey=true"</c>). Otherwise the core keeps it in memory only – until the
+    /// app ends – and removes a stored one, also when the condition stops holding later (a key that should not stay on
+    /// a shared PC). Secrets that are stored are encrypted as always. null = always stored.
+    /// </summary>
+    public string? StoreWhen { get; init; }
+
+    /// <summary>Whether <see cref="StoreWhen"/> is met (always true without it).</summary>
+    public bool IsStored(Func<string, string?> valueOf)
+    {
+        if (string.IsNullOrWhiteSpace(StoreWhen) || StoreWhen.IndexOf('=') is var at && at <= 0)
+        {
+            return true;
+        }
+
+        var value = valueOf(StoreWhen[..at].Trim()) ?? "";
+        return StoreWhen[(at + 1)..].Split('|', StringSplitOptions.TrimEntries).Contains(value, StringComparer.OrdinalIgnoreCase);
+    }
+
     /// <summary>Whether <see cref="ShowWhen"/> is met; <paramref name="valueOf"/> gives the current value of a key (or its default).</summary>
     public bool IsShown(Func<string, string?> valueOf)
     {

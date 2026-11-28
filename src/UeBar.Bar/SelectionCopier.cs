@@ -43,7 +43,8 @@ public sealed record SelectionCopyResult(SelectionCopyOutcome Outcome, string? T
 /// "Send marked text to …" (P3-1): copies the marking of the window in front with Ctrl+C and gives the clipboard its old
 /// content back right after – the user's clipboard looks as before. Waits until the keys of the hotkey are let go
 /// (at most 1.5 s), then until the app has copied (at most 0.8 s). The clipboard history of ue Bar ignores the
-/// moment (the app pauses it), Windows' history does not count the restored content again.
+/// moment (the app pauses it), Windows' history does not count the restored content again. Stays on the caller's thread
+/// (the clipboard needs the STA UI thread), so every await resumes there.
 /// </summary>
 public static class SelectionCopier
 {
@@ -62,7 +63,7 @@ public static class SelectionCopier
         for (var i = 0; i < KeyWaitSteps && io.ModifiersDown(); i++)
         {
             waited = true;
-            await delay(Step, cancellationToken).ConfigureAwait(false);
+            await delay(Step, cancellationToken).ConfigureAwait(true);
         }
 
         var before = io.Sequence;
@@ -81,7 +82,7 @@ public static class SelectionCopier
                 break;
             }
 
-            await delay(Step, cancellationToken).ConfigureAwait(false);
+            await delay(Step, cancellationToken).ConfigureAwait(true);
         }
 
         if (!changed)
@@ -91,7 +92,7 @@ public static class SelectionCopier
         }
 
         // Some apps write several formats one after the other – a moment for the rest.
-        await delay(Step * 2, cancellationToken).ConfigureAwait(false);
+        await delay(Step * 2, cancellationToken).ConfigureAwait(true);
         var text = io.ReadText();
         var restored = io.Restore(saved);
         return string.IsNullOrWhiteSpace(text)
