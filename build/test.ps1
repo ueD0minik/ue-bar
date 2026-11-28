@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+﻿# SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Dominik Poschinger
 # Tests with short output (P3-1): a summary per test project and only the failed tests with their messages.
 #   powershell -File app/build/test.ps1                  fast: without the categories Slow and Desktop
