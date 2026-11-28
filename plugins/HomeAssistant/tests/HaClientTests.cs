@@ -66,6 +66,7 @@ public class HaClientTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Nothing_reachable_shows_disconnected_with_next_attempt_and_retries()
     {
         await using var run = new RunningClient(Settings(BlackholeServer.ClosedPortUrl(), BlackholeServer.ClosedPortUrl()));

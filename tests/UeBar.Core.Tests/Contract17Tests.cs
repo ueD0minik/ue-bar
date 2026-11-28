@@ -13,13 +13,6 @@ namespace UeBar.Core.Tests;
 public sealed class Contract17Tests
 {
     [Fact]
-    public void Contract_is_1_7()
-    {
-        Assert.Equal(new Version(1, 7), CoreApiVersion.Version);
-        Assert.Equal("1.7", CoreApiVersion.Text);
-    }
-
-    [Fact]
     public async Task Watching_goes_through_the_guard_and_ends_when_the_module_stops()
     {
         await using var env = new TestEnv();

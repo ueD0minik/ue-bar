@@ -71,6 +71,7 @@ public sealed class RecordingTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Pasting_from_the_history_never_adds_an_entry()
     {
         await using var env = await new ClipEnv().StartAsync();
@@ -92,6 +93,7 @@ public sealed class RecordingTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Limits_count_age_and_size_spare_the_kept_entries()
     {
         await using var env = await new ClipEnv().StartAsync();
@@ -154,6 +156,7 @@ public sealed class RecordingTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Pause_stores_nothing_and_a_restart_ends_it()
     {
         await using var env = await new ClipEnv().StartAsync();
@@ -358,6 +361,7 @@ public sealed class RecordingTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Memory_and_time_with_100_entries_of_which_10_are_images()
     {
         await using var env = await new ClipEnv().StartAsync();

@@ -1,5 +1,53 @@
 # Changelog
 
+## 1.7.0 – Content actions, own dialogs, plugins next to the portable exe
+
+New functions; **plugin interface 1.8** (SDK package 1.8.0) – an extension, every plugin for 1.x keeps working.
+
+### New
+- **Content actions** (interface 1.8): plugins offer things to do with a text, an image or a file list
+  (`IContentActionProvider`) – "Summarize", "Translate", "Ask …". ue Bar shows them on the bar after a screenshot
+  (**Actions …**, `Ctrl + K`), in the `Win + V` history (`Ctrl + K` on an entry), in the menu of a pin (**Actions**) and
+  for the marked text of any window. A plugin gets content only when the user starts one of its actions; listing them
+  hands out nothing. Other plugins list and start them through `IContentActions` on the context.
+- **Answer window** in the bar design, drawn by the core (plugins need no WPF): Markdown (headings, lists, code, tables,
+  links – selectable), the answer streams in, a switcher for options (e.g. the model, for this one question), a field for
+  follow-ups, **Copy** (`Ctrl + Shift + C`), **Pin**, **Paste** into the window the content came from, **Stop**, **New
+  chat**. The conversation lives only in that window: closing, "New chat" and the provider's idle time (default 15 min)
+  forget it. The log names action, kind/size, duration and errors – never content. Hidden from screen captures.
+- **"Send marked text to …"** – new hotkey, default **`Win + Alt + C`** (Settings → General → Content actions): copies
+  the marking of the window in front (waits until the hotkey's keys are up), gives the clipboard its old content back at
+  once (not counted again in the Windows history; ue Bar's own history ignores the moment) and shows the text actions at
+  the text cursor. "Paste" in the answer goes back into that window.
+- **Own dialogs instead of the Windows message box**: every message and question of the app (info, warning, error,
+  yes/no, removing a plugin, importing a layout …) is a window of ue Bar – modal, `Enter` / `Esc` / `Tab`, German and
+  English – and therefore hidden from screen captures, like the plugin security warning. Left to Windows: file dialogs,
+  SmartScreen, the installer, and messages before the settings are loaded (another instance hangs, the start failed).
+- **Portable without installing**: the portable exe also loads plugins from `plugins\` **next to the exe** (unzip a
+  plugin ZIP there, e.g. on a stick or a school share). Nothing is copied or installed, no admin rights, a
+  write-protected folder works. Such a plugin is confirmed like any added one (per PC and user) and never counts as
+  bundled. Settings → Plugins lists it with the added ones ("next to the portable exe"), without "Remove".
+- Screenshot and Clipboard offer "Actions …" only when another plugin has actions for that content.
+
+### Changed
+- **Hide from screen captures is on by default.** New installations start with it; an existing installation is switched
+  on once by this update (settings version 3) – after that the user's choice counts.
+- The app icon is loaded with its assembly name (`/ueBar;component/…`), so it is found in tests as well.
+
+### Tests
+- Categories: `Slow` (OCR, plugin loading, repository scans, long waits) and `Desktop` (real windows, real clipboard).
+  `build/test.ps1` runs the fast ones with a short output (summary and only failed tests), `-Full` everything,
+  `-Desktop` only those. The CI runs everything, the Desktop tests in their own step.
+- New: content actions in the core (listing, starting, follow-ups, options, errors without faulting the module, nothing
+  without a start, nothing in the log), Markdown, "Send marked text to …" (copy, restore, nothing marked), dialog rules,
+  the migration of the capture setting, plugins next to the portable exe (approval, never bundled, bundled ID refused,
+  write-protected folder), Screenshot "Actions …" and Clipboard `Ctrl + K`; and a new test project with Desktop tests:
+  the own dialog with `Enter` / `Esc` / `Tab`, the dialog really gets the capture protection, the real clipboard comes
+  back (test texts marked so they never reach the clipboard history). A test makes sure there is no other
+  `MessageBox.Show`.
+- Full run 31 s instead of 72 s before (measured locally, test time only), fast run 15 s; 911 tests.
+
+
 ## 1.6.0 – Hide from screen captures
 
 New function; plugin interface unchanged (1.7) – plugins do nothing for it.

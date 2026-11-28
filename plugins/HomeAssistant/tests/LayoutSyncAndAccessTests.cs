@@ -469,6 +469,7 @@ public class LayoutSyncAndAccessTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Non_admin_layout_in_ha_works_because_user_data_is_allowed()
     {
         await using var server = new FakeHaServer { IsAdmin = false, UserName = "Sam" };

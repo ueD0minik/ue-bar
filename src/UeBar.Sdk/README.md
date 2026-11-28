@@ -7,10 +7,11 @@ A plugin is a class library that references **only this package**, implements `I
 with a `plugin.json`. It describes its tiles as data (`TileModel` with building blocks such as
 `TapAction`, `SliderElement`, `ValueDisplayElement`); ue Bar renders them. No WPF needed – also not
 for pins on the screen, picking a screen area or global hotkeys (interface 1.5), keys for the buttons of the picker bar (1.6),
-a choice popup with search, pasting into the previous window, watching the clipboard and taking over a hotkey like Win+V (1.7).
+a choice popup with search, pasting into the previous window, watching the clipboard and taking over a hotkey like Win+V (1.7),
+content actions ("Summarize", "Ask …") for texts, screenshots and clipboard entries with the answer window of ue Bar (1.8).
 
 ```xml
-<PackageReference Include="UeBar.Sdk" Version="1.7.0" />
+<PackageReference Include="UeBar.Sdk" Version="1.8.0" />
 ```
 
 ```

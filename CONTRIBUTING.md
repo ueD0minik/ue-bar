@@ -11,7 +11,7 @@ private before attaching it** (it never contains tokens, but it may contain enti
 ## Development
 
 - Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
-- `dotnet build` and `dotnet test` must pass with 0 warnings (warnings are errors).
+- `dotnet build` and `dotnet test` must pass with 0 warnings (warnings are errors). While working, `build/test.ps1` runs the fast tests; before a commit `build/test.ps1 -Full`. Mark tests that take more than about a second `[Trait("Category", "Slow")]`, tests with real windows, input, screen or clipboard `[Trait("Category", "Desktop")]` – and keep test texts out of the clipboard history (`CanIncludeInClipboardHistory = 0`).
 - Set `UEBAR_DATA_DIR` to a test folder while developing, so your real settings stay untouched.
   `UEBAR_CULTURE=en-US` sets the number/date format, `UEBAR_LOG_LEVEL=Debug` logs more.
 - The tests for Home Assistant run against a fake HA server with an example home; no real

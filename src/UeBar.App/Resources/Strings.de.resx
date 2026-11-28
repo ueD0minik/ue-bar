@@ -1366,4 +1366,136 @@ Seine Kacheln bleiben als Platzhalter im Layout, seine Einstellungen bleiben erh
   <data name="Privacy_StatusTip" xml:space="preserve">
     <value>Vor Bildschirmaufnahmen verborgen</value>
   </data>
+  <data name="Dialog_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Dialog_Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+  <data name="Dialog_No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Response_OptionTip" xml:space="preserve">
+    <value>Nur für diese Frage</value>
+  </data>
+  <data name="Response_NewChat" xml:space="preserve">
+    <value>Neuer Chat (vergisst alles)</value>
+  </data>
+  <data name="Response_Close" xml:space="preserve">
+    <value>Schließen (vergisst das Gespräch)</value>
+  </data>
+  <data name="Response_Paste" xml:space="preserve">
+    <value>Einfügen</value>
+  </data>
+  <data name="Response_PasteTip" xml:space="preserve">
+    <value>In das Fenster einfügen, aus dem es kam</value>
+  </data>
+  <data name="Response_Copy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="Response_CopyTip" xml:space="preserve">
+    <value>Antwort kopieren (Strg + Umschalt + C)</value>
+  </data>
+  <data name="Response_Pin" xml:space="preserve">
+    <value>Anpinnen</value>
+  </data>
+  <data name="Response_Stop" xml:space="preserve">
+    <value>Stopp</value>
+  </data>
+  <data name="Response_AskPlaceholder" xml:space="preserve">
+    <value>Deine Frage …</value>
+  </data>
+  <data name="Response_FollowUpPlaceholder" xml:space="preserve">
+    <value>Nachfragen … (Enter sendet)</value>
+  </data>
+  <data name="Response_Send" xml:space="preserve">
+    <value>Senden</value>
+  </data>
+  <data name="Response_Working" xml:space="preserve">
+    <value>Arbeitet …</value>
+  </data>
+  <data name="Response_Timeout" xml:space="preserve">
+    <value>Keine Antwort in der Zeit.</value>
+  </data>
+  <data name="Response_ModuleGone" xml:space="preserve">
+    <value>Das Plugin läuft nicht mehr.</value>
+  </data>
+  <data name="Response_Error" xml:space="preserve">
+    <value>Etwas ist schiefgegangen.</value>
+  </data>
+  <data name="Response_Copied" xml:space="preserve">
+    <value>Antwort kopiert</value>
+  </data>
+  <data name="Response_CopyFailed" xml:space="preserve">
+    <value>Kopieren fehlgeschlagen</value>
+  </data>
+  <data name="Response_PasteFailed" xml:space="preserve">
+    <value>Einfügen fehlgeschlagen – die Antwort liegt in der Zwischenablage</value>
+  </data>
+  <data name="Response_Pinned" xml:space="preserve">
+    <value>Antwort angepinnt</value>
+  </data>
+  <data name="Response_PinFailed" xml:space="preserve">
+    <value>Anpinnen fehlgeschlagen</value>
+  </data>
+  <data name="Response_Image" xml:space="preserve">
+    <value>Bild</value>
+  </data>
+  <data name="Actions_Title" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="Actions_Search" xml:space="preserve">
+    <value>Aktionen suchen …</value>
+  </data>
+  <data name="Actions_None" xml:space="preserve">
+    <value>Keine Aktionen</value>
+  </data>
+  <data name="Actions_Run" xml:space="preserve">
+    <value>Ausführen</value>
+  </data>
+  <data name="Actions_Text" xml:space="preserve">
+    <value>Text · {0} Zeichen</value>
+  </data>
+  <data name="Actions_Image" xml:space="preserve">
+    <value>Bild</value>
+  </data>
+  <data name="Actions_Files" xml:space="preserve">
+    <value>{0} Dateien</value>
+  </data>
+  <data name="Selection_NoActions" xml:space="preserve">
+    <value>Kein Plugin bietet Aktionen für Text an</value>
+  </data>
+  <data name="Selection_NoWindow" xml:space="preserve">
+    <value>Kein Fenster im Vordergrund</value>
+  </data>
+  <data name="Selection_Failed" xml:space="preserve">
+    <value>Der markierte Text konnte nicht kopiert werden</value>
+  </data>
+  <data name="Selection_Nothing" xml:space="preserve">
+    <value>Nichts markiert</value>
+  </data>
+  <data name="Selection_Heading" xml:space="preserve">
+    <value>Inhalts-Aktionen</value>
+  </data>
+  <data name="Selection_Hotkey" xml:space="preserve">
+    <value>Markierten Text an …</value>
+  </data>
+  <data name="Selection_Hotkey_Hint" xml:space="preserve">
+    <value>Kopiert den markierten Text des vorderen Fensters (die Zwischenablage wird wiederhergestellt) und zeigt die Aktionen der Plugins dafür. Standard {0}.</value>
+  </data>
+  <data name="Pin_Actions" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="Plugins_Detail_Origin" xml:space="preserve">
+    <value>Herkunft</value>
+  </data>
+  <data name="Plugins_Detail_Portable" xml:space="preserve">
+    <value>Neben der portablen exe – wird von dort benutzt, nicht installiert</value>
+  </data>
+  <data name="Response_Quote" xml:space="preserve">
+    <value>„{0}“</value>
+  </data>
 </root>

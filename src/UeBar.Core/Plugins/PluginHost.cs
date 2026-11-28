@@ -17,6 +17,12 @@ public enum PluginOrigin
 
     /// <summary>Added by the user (<c>%APPDATA%\ueBar\plugins</c>).</summary>
     Installed,
+
+    /// <summary>
+    /// P3-1: next to the portable exe (<c>&lt;exe folder&gt;\plugins</c>, e.g. on a USB stick) – used where it is, never
+    /// copied, never removed by the app, never trusted as bundled: confirmed like any added plugin.
+    /// </summary>
+    Portable,
 }
 
 public enum PluginState
@@ -104,6 +110,9 @@ public sealed class PluginHostOptions
 
     /// <summary>Folder with the plugins the user added.</summary>
     public required string UserDirectory { get; init; }
+
+    /// <summary>P3-1: plugins next to the portable exe (read only, may be write-protected); null = none.</summary>
+    public string? PortableDirectory { get; init; }
 
     /// <summary>Contract version of this app.</summary>
     public Version ApiVersion { get; init; } = CoreApiVersion.Version;
@@ -257,6 +266,16 @@ public sealed class PluginHost
         foreach (var directory in bundled)
         {
             found.Add(Timed(directory, () => Inspect(directory, PluginOrigin.Bundled, found)));
+        }
+
+        // P3-1: plugins next to the portable exe – after the bundled ones, before the user's.
+        if (_options.PortableDirectory is { Length: > 0 } portableRoot)
+        {
+            var portable = Step(null, "portable plugin folders listed", () => Folders(portableRoot).OrderBy(d => Path.GetFileName(d), StringComparer.OrdinalIgnoreCase).ToList());
+            foreach (var directory in portable)
+            {
+                found.Add(Timed(directory, () => Inspect(directory, PluginOrigin.Portable, found)));
+            }
         }
 
         var installed = Step(null, "user plugin folders listed", () => Folders(_options.UserDirectory).OrderBy(d => Path.GetFileName(d), StringComparer.OrdinalIgnoreCase).ToList());
@@ -511,7 +530,7 @@ public sealed class PluginHost
             if (first is not null)
             {
                 plugin.IsDuplicate = true;
-                problem = first.Origin == PluginOrigin.Bundled && origin == PluginOrigin.Installed
+                problem = first.Origin == PluginOrigin.Bundled && origin != PluginOrigin.Bundled
                     ? CoreText.T.Format("Plugin_BundledId", plugin.Id)
                     : CoreText.T.Format("Plugin_DuplicateId", plugin.Id, first.Directory);
             }

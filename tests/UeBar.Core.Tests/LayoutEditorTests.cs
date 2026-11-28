@@ -251,6 +251,7 @@ public class LayoutManagerTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Without_layout_setup_is_needed_and_setup_then_editing_sticks()
     {
         using var env = new Env();

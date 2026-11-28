@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
+using UeBar.App.Infrastructure;
 using UeBar.App.Localization;
 using System.IO;
 using System.Windows;
@@ -219,7 +220,7 @@ internal sealed class LayoutCoordinator
         {
             setup.IsBusy = false;
             _log.Error(null, "First start: layout could not be saved", ex);
-            MessageBox.Show(Loc.F("Layout_SaveFailed", ex.Message), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
+            UeDialog.Error(null, Loc.F("Layout_SaveFailed", ex.Message));
         }
     }
 
@@ -263,7 +264,7 @@ internal sealed class LayoutCoordinator
             catch (Exception ex)
             {
                 _log.Error(null, "Layout could not be saved", ex);
-                MessageBox.Show(Loc.F("Layout_SaveFailed", ex.Message), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
+                UeDialog.Error(null, Loc.F("Layout_SaveFailed", ex.Message));
                 return; // stay in edit mode, nothing gets lost
             }
         }
@@ -322,7 +323,7 @@ internal sealed class LayoutCoordinator
         catch (Exception ex)
         {
             _log.Error(null, "Export failed", ex);
-            MessageBox.Show(Loc.F("Layout_ExportFailed", ex.Message), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
+            UeDialog.Error(null, Loc.F("Layout_ExportFailed", ex.Message));
         }
     }
 
@@ -332,7 +333,7 @@ internal sealed class LayoutCoordinator
         {
             if (_session is not null)
             {
-                MessageBox.Show(Loc.Get("Layout_FinishEditFirst"), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Information);
+                UeDialog.Info(null, Loc.Get("Layout_FinishEditFirst"));
                 return;
             }
 
@@ -354,7 +355,7 @@ internal sealed class LayoutCoordinator
             }
             catch (InvalidDataException ex)
             {
-                MessageBox.Show(Loc.F("Layout_ImportInvalid", ex.Message), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                UeDialog.Warning(null, Loc.F("Layout_ImportInvalid", ex.Message));
                 return;
             }
 
@@ -369,7 +370,7 @@ internal sealed class LayoutCoordinator
                 text += "\n\n" + Loc.F("Layout_ImportUnknown", string.Join(", ", unknown));
             }
 
-            if (MessageBox.Show(text + "\n\n" + Loc.Get("Layout_ImportNow"), Loc.Get("Layout_ImportTitle"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            if (!UeDialog.Ask(null, text + "\n\n" + Loc.Get("Layout_ImportNow"), Loc.Get("Layout_ImportTitle")))
             {
                 return;
             }
@@ -380,7 +381,7 @@ internal sealed class LayoutCoordinator
         catch (Exception ex)
         {
             _log.Error(null, "Import failed", ex);
-            MessageBox.Show(Loc.F("Layout_ImportFailed", ex.Message), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
+            UeDialog.Error(null, Loc.F("Layout_ImportFailed", ex.Message));
         }
     }
 }

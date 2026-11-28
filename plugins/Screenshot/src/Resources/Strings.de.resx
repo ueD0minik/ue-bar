@@ -198,4 +198,7 @@
   <data name="Shot_OcrFormatLines" xml:space="preserve">
     <value>Zeilen wie im Bild</value>
   </data>
+  <data name="Shot_ActionActions" xml:space="preserve">
+    <value>Aktionen …</value>
+  </data>
 </root>

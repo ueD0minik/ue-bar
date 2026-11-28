@@ -9,6 +9,7 @@ using UeBar.Sdk;
 namespace UeBar.Modules.QuickAccess.Tests;
 
 /// <summary>The real plugin folder loads through the normal plugin loader – no special treatment in the core.</summary>
+[Trait("Category", "Slow")]
 public sealed class PluginLoadTests
 {
     private static string BuiltPlugin => Path.GetDirectoryName(typeof(QuickAccessModule).Assembly.Location)!;

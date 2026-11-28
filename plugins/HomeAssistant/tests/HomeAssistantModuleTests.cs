@@ -208,6 +208,7 @@ public class HomeAssistantModuleTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Settings_test_reports_each_url()
     {
         await using var server = new FakeHaServer();

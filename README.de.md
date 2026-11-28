@@ -33,6 +33,9 @@ Screenshots lassen sich als kleine Fenster, die immer obenauf bleiben, auf dem B
   Windows-Region.
 - OLED-Schutz (Abdunkeln, Pixel-Shift), eingeklappt sparsam mit Ressourcen.
 - **Vor Bildschirmaufnahmen verbergen** bei Bildschirmfreigabe und Aufnahmen (siehe unten).
+- **Inhalts-Aktionen**: Plugins können Aktionen für einen Text, einen Screenshot oder einen Eintrag der
+  Zwischenablage anbieten („Zusammenfassen“, „Fragen …“) – nach einem Screenshot, mit `Strg + K` im
+  `Win + V`-Verlauf, im Menü eines Pins und für den markierten Text jedes Fensters (`Win + Alt + C`, siehe unten).
 
 ## Vor Bildschirmaufnahmen verbergen
 
@@ -42,7 +45,8 @@ kann die ue Bar draußen bleiben: Alle Fenster der App – die Bar mit der Pill,
 und Rückmeldungen, Kontextmenüs, Tooltips und Popups – fehlen auf der Aufnahme; die anderen sehen,
 was dahinter liegt. Du selbst siehst und bedienst alles wie gewohnt.
 
-- **Standard: aus.** Umschalten unter **Einstellungen → Allgemein → Datenschutz**, mit einem Klick im
+- **Standard: an** (seit 1.7.0; eine bestehende Installation wird beim Update einmal eingeschaltet, danach gilt
+  deine Wahl). Umschalten unter **Einstellungen → Allgemein → Datenschutz**, mit einem Klick im
   **Tray-Menü** (**Vor Bildschirmaufnahmen verbergen**, mit Häkchen), mit dem Schnellbefehl
   **`privat`** (`privat an` / `privat aus`) – oder aus Automationen über die Bus-Aktion
   `privacy.capture_hidden` (`{ "state": "on" | "off" | "toggle" }`, mit Freigabe wie jede Aktion; z. B.
@@ -53,11 +57,29 @@ was dahinter liegt. Du selbst siehst und bedienst alles wie gewohnt.
   so ein Programm kann weiterhin lesen, was die ue Bar zeigt. Es hält die Fenster nur aus
   Bildschirmfreigaben und Aufnahmen heraus.
 - **Folgen:** Solange es an ist, kannst auch du die ue Bar nicht fotografieren – für Bilder der Bar
-  vorher ausschalten. Remotedesktop und Remotehilfe sehen die Bar ebenfalls nicht. Windows-eigene
-  Dialoge (z. B. **Speichern unter**) bleiben sichtbar. Der eigene Screenshot (`Win + Alt + S`)
+  vorher ausschalten. Remotedesktop und Remotehilfe sehen die Bar ebenfalls nicht. Meldungen und
+  Rückfragen der ue Bar sind eigene Fenster und werden ebenfalls verborgen. Sichtbar bleibt, was Windows gehört:
+  Datei-Dialoge (**Speichern unter**, **Öffnen**), SmartScreen, der Installer und die seltenen Meldungen, bevor die
+  Einstellungen geladen sind (eine andere Instanz hängt, der Start schlug fehl). Der eigene Screenshot (`Win + Alt + S`)
   funktioniert weiter – auf seinem Bild fehlt einfach die ue Bar.
 - Braucht Windows 10 Version 2004 oder neuer; ältere Versionen zeigen die Fenster auf Aufnahmen nur
   als schwarze Fläche (das steht dann in den Einstellungen).
+
+## Inhalts-Aktionen und „Markierten Text an …“
+
+Plugins können Aktionen für Inhalte anbieten – zum Beispiel das
+[Claude-Plugin](https://github.com/ueD0minik/ue-bar-plugins/tree/main/claude) („Claude fragen …“, „Zusammenfassen“,
+„Übersetzen“, „Korrigieren“). Sie erscheinen
+
+- in der Leiste nach einem Screenshot (**Aktionen …**, `Strg + K`),
+- im `Win + V`-Verlauf: Eintrag wählen, `Strg + K`,
+- im Menü eines Pins (**Aktionen**),
+- für den **markierten Text jedes Fensters**: `Win + Alt + C` (Einstellungen → Allgemein → Inhalts-Aktionen) kopiert die
+  Markierung, gibt der Zwischenablage sofort ihren alten Inhalt zurück und zeigt die Aktionen an der Textmarke.
+
+Die Antwort erscheint in einem Fenster der ue Bar: kopieren, anpinnen, **einfügen** in das Fenster, aus dem der Text
+kam (z. B. den korrigierten Text direkt zurück in Word), nachfragen. Ein Plugin bekommt Inhalte nur, wenn du eine
+seiner Aktionen startest; das Gespräch ist weg, sobald du das Fenster schließt.
 
 ## Pins
 
@@ -138,7 +160,9 @@ steht mit Grund unter **Einstellungen → Plugins** – die App läuft weiter, s
 einen Platzhalter. Mitgelieferte Plugins werden gegen eine beim Bau erzeugte Prüfsummenliste
 geprüft und laden ohne Nachfrage. Bei jedem anderen fragt ue Bar einmal (Name, Autor, Version,
 Quelle und eine deutliche Warnung) und wieder, wenn sich seine Dateien ändern. Hinzufügen als ZIP
-über **Einstellungen → Plugins → Plugin hinzufügen …**.
+über **Einstellungen → Plugins → Plugin hinzufügen …**. Die **portable** exe lädt zusätzlich Plugins aus einem
+Ordner `plugins\` neben sich – Plugin-ZIP dorthin entpacken, exe starten: nichts wird installiert, keine
+Admin-Rechte, ein schreibgeschützter Stick geht (bestätigt wird das Plugin trotzdem einmal pro PC und Benutzer).
 
 | Plugin | Was es macht | Mitgeliefert |
 |---|---|---|
@@ -150,6 +174,15 @@ Quelle und eine deutliche Warnung) und wieder, wenn sich seine Dateien ändern. 
 | [Zwischenablage](plugins/Clipboard/README.de.md) | Zwischenablage-Verlauf mit `Win + V`: Text, Bilder, Dateien; suchen, ins vorherige Fenster einfügen, merken, anpinnen – verschlüsselt nur auf diesem PC, Passwortmanager ausgenommen | ja |
 | [Test-Modul](plugins/Dummy/README.de.md) | Simulierte Geräte zum Entwickeln und Testen von ue Bar | nein – Debug-Builds und eigenes ZIP |
 | [Hallo](samples/HelloPlugin) | Beispiel-Plugin: eine Zähler-Kachel, Ausgangspunkt für eigene | nein – Beispiel im Quellcode |
+
+### Weitere Plugins
+
+Plugins, die nicht jeder braucht, liegen in **[ue-bar-plugins](https://github.com/ueD0minik/ue-bar-plugins)** – jedes
+mit eigener Version und einer ZIP in den Releases, nicht im Installer:
+
+| Plugin | Was es kann |
+|---|---|
+| [Claude](https://github.com/ueD0minik/ue-bar-plugins/tree/main/claude) | Claude in der Bar: Chat, `c <Frage>`, Inhalts-Aktionen (zum Screenshot fragen, zusammenfassen, übersetzen, korrigieren) – mit deinem Claude-Abo über Claude Code oder einem API-Schlüssel; nichts wird gespeichert |
 
 ### Plugins von anderen
 
@@ -165,6 +198,10 @@ dotnet build
 dotnet test
 dotnet run --project src/UeBar.App
 ```
+
+Tests mit knapper Ausgabe (Zusammenfassung je Projekt, nur fehlgeschlagene Tests): `build/test.ps1` lässt die schnellen
+laufen (ohne die Kategorien `Slow` und `Desktop`), `-Full` alle, `-Desktop` nur die mit echten Fenstern und der echten
+Zwischenablage (sie zeigen kurz Fenster; Testtexte landen nie im Windows-Zwischenablage-Verlauf). Das CI lässt alle laufen.
 
 Installer, portable Exe, SDK-Paket und Plugin-ZIPs (braucht
 [Inno Setup 6](https://jrsoftware.org/isinfo.php)):

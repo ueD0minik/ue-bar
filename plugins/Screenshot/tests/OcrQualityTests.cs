@@ -13,6 +13,7 @@ namespace UeBar.Modules.Screenshot.Tests;
 /// with and without preparing the image. Error rate = wrong words per 100 (word edit distance to the expected
 /// text). The recognized text must not be worse than Windows' own and must stay under 1 s. Which preparation ships is decided on the user's real screenshots (RealScreenshotTests).
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed partial class OcrQualityTests(ITestOutputHelper output)
 {
     /// <summary>Picture, language it is written in.</summary>

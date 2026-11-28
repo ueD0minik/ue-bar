@@ -270,4 +270,10 @@
   <data name="Clip_NotAvailable" xml:space="preserve">
     <value>This ue Bar cannot watch the clipboard (needs version 1.5 or newer).</value>
   </data>
+  <data name="Clip_ActionActions" xml:space="preserve">
+    <value>Actions …</value>
+  </data>
+  <data name="Clip_NoActions" xml:space="preserve">
+    <value>No plugin offers actions for this entry</value>
+  </data>
 </root>

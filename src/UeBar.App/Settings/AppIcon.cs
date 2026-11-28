@@ -19,7 +19,7 @@ internal static class AppIcon
     /// <summary>Icon for the tray in the matching size (DPI).</summary>
     public static Drawing.Icon TrayIcon()
     {
-        var info = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/ueBar.ico"))
+        var info = Application.GetResourceStream(new Uri("pack://application:,,,/ueBar;component/Assets/ueBar.ico"))
             ?? throw new InvalidOperationException("ueBar.ico missing from the resources");
         using var stream = info.Stream;
         return new Drawing.Icon(stream, System.Windows.Forms.SystemInformation.SmallIconSize);
@@ -29,7 +29,7 @@ internal static class AppIcon
     {
         var image = new BitmapImage();
         image.BeginInit();
-        image.UriSource = new Uri("pack://application:,,,/Assets/ueBar-256.png");
+        image.UriSource = new Uri("pack://application:,,,/ueBar;component/Assets/ueBar-256.png");
         image.CacheOption = BitmapCacheOption.OnLoad;
         image.EndInit();
         image.Freeze();

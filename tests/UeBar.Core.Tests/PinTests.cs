@@ -99,6 +99,7 @@ public sealed class PinManagerTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public void Limits_empty_text_no_image_too_many()
     {
         using var dir = new TempDirectory();

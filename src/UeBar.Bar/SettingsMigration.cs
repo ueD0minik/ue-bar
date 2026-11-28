@@ -10,22 +10,32 @@ namespace UeBar.Bar;
 public static class SettingsMigration
 {
     /// <summary>Version of settings.json this app writes.</summary>
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
 
     /// <summary>
     /// 1 → 2 (1.3.2, P2-4): the timer plugin of 1.3.1 had its own switches "also with Do not disturb" and
     /// "also in fullscreen". They became the bar settings for important notifications; a switched-off value
     /// is taken over, then the old keys are removed. Known exception: the only place where the app names a
     /// plugin's setting – there is no other owner for a setting that moved from a plugin into the bar.
+    /// 2 → 3 (1.7.0, P3-1): "hide from screen captures" is on by default now; an existing installation gets it
+    /// switched on once – afterwards the user's choice counts.
     /// </summary>
     public static void Run(SettingsService settings, IUeLogger log)
     {
-        if (settings.Current.Version >= CurrentVersion)
+        var version = settings.Current.Version;
+        if (version >= CurrentVersion)
         {
             return;
         }
 
-        if (settings.FileExisted)
+        if (!settings.FileExisted)
+        {
+            settings.Current.Version = CurrentVersion;
+            return;
+        }
+
+        var notes = new List<string>();
+        if (version < 2)
         {
             var timer = settings.GetModuleSettings(LegacyTimer.ModuleId);
             var bar = settings.GetSection<BarSettings>("bar");
@@ -44,15 +54,29 @@ public static class SettingsMigration
                 }
             }
 
-            settings.Current.Version = CurrentVersion;
             settings.SetSection("bar", bar);
-            log.Info(null, moved.Count == 0
-                ? $"settings.json updated to version {CurrentVersion}"
-                : $"settings.json updated to version {CurrentVersion}: timer switches moved to the bar settings ({string.Join(", ", moved)})");
-            return;
+            if (moved.Count > 0)
+            {
+                notes.Add($"timer switches moved to the bar settings ({string.Join(", ", moved)})");
+            }
+        }
+
+        if (version < 3)
+        {
+            var general = settings.GetSection<GeneralSettings>(GeneralSettings.SectionName);
+            if (!general.HideFromCapture)
+            {
+                general.HideFromCapture = true;
+                settings.SetSection(GeneralSettings.SectionName, general);
+                notes.Add("hide from screen captures switched on (new default)");
+            }
         }
 
         settings.Current.Version = CurrentVersion;
+        settings.SetSection("bar", settings.GetSection<BarSettings>("bar")); // writes the new version
+        log.Info(null, notes.Count == 0
+            ? $"settings.json updated to version {CurrentVersion}"
+            : $"settings.json updated to version {CurrentVersion}: {string.Join("; ", notes)}");
     }
 
     private static class LegacyTimer

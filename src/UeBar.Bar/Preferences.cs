@@ -37,8 +37,16 @@ public sealed class GeneralSettings
     /// <summary>UI language (R1): "system" (default; German if Windows is German, otherwise English), "de" or "en".</summary>
     public string? Language { get; set; }
 
-    /// <summary>P2-7: every window of the app (bar, pins, popups …) is left out of screen captures. Default off.</summary>
-    public bool HideFromCapture { get; set; }
+    /// <summary>
+    /// P2-7: every window of the app (bar, pins, popups, dialogs …) is left out of screen captures. Default on since 1.7.0
+    /// (P3-1; existing installations are switched on once by <see cref="SettingsMigration"/>).
+    /// </summary>
+    public bool HideFromCapture { get; set; } = true;
+
+    public const string DefaultSelectionHotkey = "Win+Alt+C";
+
+    /// <summary>P3-1: hotkey "Send marked text to …" (copies the marking of the window in front, then the list of content actions). Empty = none.</summary>
+    public string SelectionHotkey { get; set; } = DefaultSelectionHotkey;
 
     [System.Text.Json.Serialization.JsonIgnore]
     public int EffectiveColumns => Math.Clamp(Columns, MinColumns, MaxColumns);

@@ -14,6 +14,7 @@ namespace UeBar.Modules.Screenshot.Tests;
 /// text as <c>&lt;name&gt;.txt</c>. Error rate = wrong words per 100, in any order (a page with columns may be read in
 /// another order – that is not a recognition error); formatting marks and symbols (¶ · ¤ • ☐ ↗) do not count.
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed class RealScreenshotTests(ITestOutputHelper output)
 {
     /// <summary>The folder with the real screenshots, or null.</summary>

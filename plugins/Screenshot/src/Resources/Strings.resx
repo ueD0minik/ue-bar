@@ -198,4 +198,7 @@
   <data name="Shot_OcrFormatLines" xml:space="preserve">
     <value>Lines as in the image</value>
   </data>
+  <data name="Shot_ActionActions" xml:space="preserve">
+    <value>Actions …</value>
+  </data>
 </root>

@@ -52,6 +52,7 @@ places:
 |---|---|
 | `<app folder>\plugins\` | **bundled** plugins (Home Assistant), with a checksum list `bundled.sha256` written at build time |
 | `%APPDATA%\ueBar\plugins\` | plugins the **user** added (Settings → Plugins → Add plugin …) |
+| `<exe folder>\plugins\` | only for the **portable** exe (1.7.0): plugins next to it, used where they are (a stick, a school share), never copied, never trusted as bundled |
 
 The portable single exe carries the bundled plugins inside as a ZIP and unpacks them once per
 version to `%LOCALAPPDATA%\ueBar\builtin-plugins\<version>-<checksum>\`. Their checksum list is read
@@ -250,6 +251,30 @@ item for the window, free-threaded frame pool, one frame, staging texture; no pr
 transparent, and treat an all-black result as failed.
 - The Clipboard plugin stores its history in its data folder, every file encrypted with DPAPI (`ClipStore`), and
   publishes only metadata on the bus.
+
+### Content actions (1.8, P3-1)
+
+- **Core** (`ContentActionService`, `ContentActionSession` in `UeBar.Core`): collects the `IContentActionProvider`
+  of the running modules (lists through the guard, no content), starts an action and keeps the conversation of one
+  answer window in memory – turns, the answer coming in, status, options, the text for copy/paste/pin. Each turn calls
+  the provider through the guard (5 minutes, `reportFaults: false` – an error is shown in the window, the module does
+  not go to "Error"); a writer bound to the turn ignores late calls. A provider gets content only from `Run` – i.e.
+  after the user chose its action. Logs name action, kind/size, duration and errors, never content.
+- **App** (`ContentActions\`): the list of actions in the choice popup (`ContentActionUi`), the answer window
+  (`ResponseWindow`, Markdown through `MarkdownLite` in `UeBar.Bar` and a FlowDocument, redrawn once per frame while
+  streaming – no timer; one idle check per minute), and "Send marked text to …" (`SelectionAction`: waits until the
+  hotkey's keys are up, copies the marking with `Ctrl + C`, gives the clipboard its old content back marked
+  `CanIncludeInClipboardHistory = 0`; the own clipboard watcher reports nothing in between – logic in
+  `SelectionCopier`, `UeBar.Bar`). The pin menu gets "Actions"; Screenshot and Clipboard offer "Actions …" (`Ctrl + K`)
+  only when another plugin has actions for that kind.
+
+### Own dialogs (1.7.0)
+
+Every message and question of the app is a `UeDialog` (bar design, modal, Enter/Esc/Tab, texts from the resources;
+rules in `DialogRules`, `UeBar.Bar`) – a normal WPF window, so "hide from screen captures" covers it like every
+other window. The Windows message box is used only before the settings are loaded (`EarlyMessage`: another instance
+hangs, the start failed before the first window); a test makes sure no other `MessageBox.Show` exists. Windows' own
+windows stay as they are: file dialogs (Save as, Open), SmartScreen, the installer.
 
 ## Tiles are data
 

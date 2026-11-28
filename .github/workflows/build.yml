@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Dominik Poschinger
-# Build and test on every push and pull request.
+# Build and test on every push and pull request – all tests, the Desktop ones (real windows, the real clipboard)
+# in a step of their own, so a red run says at once which part it is. A version tag is set only after this is green.
 name: Build
 
 on:
@@ -24,8 +25,11 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release
 
-      - name: Test
-        run: dotnet test --configuration Release --no-build --logger "trx;LogFileName=results.trx"
+      - name: Test (without Desktop)
+        run: dotnet test --configuration Release --no-build --filter "Category!=Desktop" --logger "trx;LogFileName=results.trx"
+
+      - name: Test (Desktop)
+        run: dotnet test tests/UeBar.App.Tests --configuration Release --no-build --filter "Category=Desktop" --logger "trx;LogFileName=desktop.trx"
 
       - name: Upload test results
         if: always()

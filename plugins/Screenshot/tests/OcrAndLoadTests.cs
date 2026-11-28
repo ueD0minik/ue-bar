@@ -13,6 +13,7 @@ namespace UeBar.Modules.Screenshot.Tests;
 /// languages exist depends on the PC: with none the plugin must say so; German is checked with umlauts
 /// only where the German package is installed.
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed class WindowsOcrTests
 {
     private static byte[] Image(string name) => File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "images", name));
@@ -114,6 +115,7 @@ public sealed class WindowsOcrTests
 }
 
 /// <summary>The real plugin folder loads through the normal plugin loader – no special treatment in the core.</summary>
+[Trait("Category", "Slow")]
 public sealed class PluginLoadTests
 {
     private static string BuiltPlugin => Path.GetDirectoryName(typeof(ScreenshotModule).Assembly.Location)!;

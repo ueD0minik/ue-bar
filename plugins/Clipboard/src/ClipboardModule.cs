@@ -390,7 +390,7 @@ public sealed class ClipboardModule :
             Hint = _paused ? T["Clip_Paused"] : null,
             Placeholder = T["Clip_Search"],
             EmptyText = _store?.Entries.Count > 0 ? T["Clip_NoHit"] : T["Clip_Empty"],
-            Actions = Actions(),
+            Actions = Actions(HasContentActions),
             Placement = ChoicePlacement.Caret,
             OnAction = OnPopupActionAsync,
         };
@@ -403,7 +403,16 @@ public sealed class ClipboardModule :
         return choice;
     }
 
-    internal static IReadOnlyList<ChoiceAction> Actions() =>
+    /// <summary>P3-1: "Actions …" (Ctrl+K) – content actions of other plugins for the selected entry; only when there are any.</summary>
+    internal const string ContentActionsId = "actions";
+
+    internal bool HasContentActions => _context is IContentActions actions && actions.GetContentActions(ContentKinds.All).Count > 0;
+
+    internal static IReadOnlyList<ChoiceAction> Actions(bool contentActions = false) => contentActions
+        ? [.. BaseActions(), new(ContentActionsId, T["Clip_ActionActions"], "Ctrl+K") { Icon = "U+E8BD" }]
+        : BaseActions();
+
+    private static IReadOnlyList<ChoiceAction> BaseActions() =>
     [
         new("paste", T["Clip_ActionPaste"]) { Icon = "U+E77F" },
         new("plain", T["Clip_ActionPlain"], "Shift+Enter") { Icon = "U+E8E9" },
@@ -531,6 +540,22 @@ public sealed class ClipboardModule :
                     Notify(T["Clip_CopyFailed"], "", "Error");
                 }
 
+                break;
+            case ContentActionsId:
+                // The entry goes only to the action the user picks next (the list opens where the popup was).
+                var item = new ContentItem { Text = content.Text, ImagePng = content.ImagePng, Files = content.Files, SourceTitle = entry.AppName };
+                if (context is not IContentActions contentActions || item.IsEmpty)
+                {
+                    Notify(T["Clip_NoActions"], "", "U+E8BD");
+                    break;
+                }
+
+                await contentActions.ChooseContentActionAsync(item, new ContentActionStart
+                {
+                    Origin = ContentOrigin.Clipboard,
+                    PasteTarget = choice.Target,
+                    Placement = ChoicePlacement.Caret,
+                }, cancellationToken).ConfigureAwait(false);
                 break;
             case "pin":
                 if (!Pin(entry, content))

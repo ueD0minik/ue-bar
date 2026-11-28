@@ -32,6 +32,9 @@ text) and [Clipboard](plugins/Clipboard/README.md) (history with `Win + V`) come
 - **German and English**, switchable at runtime. Numbers and times follow your Windows region.
 - OLED protection (dimming, pixel shift), light on resources when collapsed.
 - **Hide from screen captures** for screen sharing and recordings (see below).
+- **Content actions**: plugins can offer things to do with a text, a screenshot or a clipboard entry
+  ("Summarize", "Ask …") – after a screenshot, with `Ctrl + K` in the `Win + V` history, in the menu of a pin and
+  for the marked text of any window (`Win + Alt + C`, see below).
 
 ## Hide from screen captures
 
@@ -41,7 +44,8 @@ choice, quick search, settings and welcome, own notifications and feedback, cont
 and popups – is missing from the capture; the others see what lies behind it. You keep seeing and
 using everything as usual.
 
-- **Off by default.** Switch it under **Settings → General → Privacy**, with one click in the **tray
+- **On by default** (since 1.7.0; an existing installation is switched on once by the update, after that your
+  choice counts). Switch it under **Settings → General → Privacy**, with one click in the **tray
   menu** (**Hide from screen captures**, with a check mark), with the quick command **`privat`**
   (`privat on` / `privat off`) – or from automations through the bus action
   `privacy.capture_hidden` (`{ "state": "on" | "off" | "toggle" }`, with a permission like every action;
@@ -52,11 +56,29 @@ using everything as usual.
   a program can still read what ue Bar shows. It only keeps the windows out of screen sharing and
   recordings.
 - **Side effects:** while it is on, you cannot take pictures of ue Bar yourself either – switch it off
-  for screenshots of the bar. Remote desktop and remote help do not see the bar either. Windows'
-  own dialogs (such as **Save as**) stay visible. The own screenshot (`Win + Alt + S`) keeps working –
+  for screenshots of the bar. Remote desktop and remote help do not see the bar either. Messages and
+  questions of ue Bar are its own windows and are hidden, too. What belongs to Windows stays visible: file dialogs
+  (**Save as**, **Open**), SmartScreen, the installer, and the rare messages before the settings are loaded (another
+  instance hangs, the start failed). The own screenshot (`Win + Alt + S`) keeps working –
   its picture simply does not contain ue Bar.
 - Needs Windows 10 version 2004 or newer; older versions only show the windows as a black area on
   captures (the settings say so).
+
+## Content actions and "Send marked text to …"
+
+Plugins can offer actions for content – for example the
+[Claude plugin](https://github.com/ueD0minik/ue-bar-plugins/tree/main/claude) ("Ask Claude …", "Summarize",
+"Translate", "Correct"). They appear
+
+- on the bar after a screenshot (**Actions …**, `Ctrl + K`),
+- in the `Win + V` history: select an entry, `Ctrl + K`,
+- in the menu of a pin (**Actions**),
+- for the **marked text of any window**: `Win + Alt + C` (Settings → General → Content actions) copies the marking,
+  gives the clipboard its old content back at once and shows the actions at the text cursor.
+
+The answer appears in a window of ue Bar: copy, pin, **paste** into the window the text came from (e.g. the corrected
+text straight back into Word), ask a follow-up. A plugin gets content only when you start one of its actions; the
+conversation is forgotten when you close the window.
 
 ## Pins
 
@@ -134,7 +156,9 @@ ue Bar is listed with the reason under **Settings → Plugins** – the app keep
 tiles show a placeholder. Plugins that come with ue Bar are checked against a checksum list
 written when ue Bar is built and load without asking. For every other plugin ue Bar asks once
 (name, author, version, source and a clear warning) and again whenever its files change. Add one
-as a ZIP with **Settings → Plugins → Add plugin …**.
+as a ZIP with **Settings → Plugins → Add plugin …**. The **portable** exe also takes plugins from a folder
+`plugins\` next to it – unzip a plugin ZIP there and start the exe: nothing is installed, no admin rights, a
+write-protected stick works (the plugin is still confirmed once per PC and user).
 
 | Plugin | What it does | Comes with ue Bar |
 |---|---|---|
@@ -146,6 +170,15 @@ as a ZIP with **Settings → Plugins → Add plugin …**.
 | [Clipboard](plugins/Clipboard/README.md) | Clipboard history with `Win + V`: text, images, files; search, paste into the previous window, keep, pin – encrypted on this PC only, password managers left out | yes |
 | [Test module](plugins/Dummy/README.md) | Simulated devices for developing and testing ue Bar | no – debug builds and a separate ZIP |
 | [Hello](samples/HelloPlugin) | Sample plugin: a counter tile, the starting point for your own | no – sample in the source |
+
+### More plugins
+
+Plugins that not everybody needs live in **[ue-bar-plugins](https://github.com/ueD0minik/ue-bar-plugins)** – each with
+its own version and a ZIP in the releases, not part of the installer:
+
+| Plugin | What it does |
+|---|---|
+| [Claude](https://github.com/ueD0minik/ue-bar-plugins/tree/main/claude) | Claude in the bar: chat, `c <question>`, content actions (ask about a screenshot, summarize, translate, correct) – with your Claude subscription through Claude Code, or an API key; nothing is stored |
 
 ### Plugins by others
 
@@ -161,6 +194,10 @@ dotnet build
 dotnet test
 dotnet run --project src/UeBar.App
 ```
+
+Tests with a short output (summary per project, only failed tests): `build/test.ps1` runs the fast ones (without the
+categories `Slow` and `Desktop`), `-Full` everything, `-Desktop` only the tests with real windows and the real clipboard
+(they show windows for a moment; test texts never reach the Windows clipboard history). The CI runs all of them.
 
 Installer, portable executable, SDK package and plugin ZIPs (needs
 [Inno Setup 6](https://jrsoftware.org/isinfo.php)):

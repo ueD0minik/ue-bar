@@ -60,6 +60,36 @@ internal sealed class ClipboardWatcher : IHostClipboardWatcher, IDisposable
         };
     }
 
+    /// <summary>
+    /// P3-1 ("Send marked text to …"): the copy of the marking and the restored old content are not news – while a
+    /// pause runs, and for every change up to its end, nothing is reported. Dispose the result to end the pause.
+    /// </summary>
+    public IDisposable PauseReporting()
+    {
+        _pauses++;
+        return new Pause(this);
+    }
+
+    private int _pauses;
+    private uint _ignoreThrough;
+
+    private sealed class Pause(ClipboardWatcher owner) : IDisposable
+    {
+        private bool _done;
+
+        public void Dispose()
+        {
+            if (_done)
+            {
+                return;
+            }
+
+            _done = true;
+            owner._ignoreThrough = ClipInterop.GetClipboardSequenceNumber();
+            owner._pauses--;
+        }
+    }
+
     /// <summary>For the diagnostics: changes seen, private ones skipped, watchers.</summary>
     public string Diagnostics => $"Clipboard: {_changes} changes, {_skippedPrivate} private skipped, {_watches.Count} watches, listening {_window is not null}";
 
@@ -163,6 +193,12 @@ internal sealed class ClipboardWatcher : IHostClipboardWatcher, IDisposable
         }
 
         _lastSequence = sequence;
+        if (_pauses > 0 || (_ignoreThrough != 0 && sequence <= _ignoreThrough && _ignoreThrough - sequence < 1000))
+        {
+            _log.Debug(null, "Clipboard: own copy of a marking – not reported");
+            return;
+        }
+
         _changes++;
         try
         {

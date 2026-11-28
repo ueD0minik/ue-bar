@@ -380,6 +380,59 @@ if (context is IHotkeyTakeoverService hotkeys)
 - **Tray entries** (`ITrayMenuProvider`): one or two entries in the tray menu, read when the menu opens, e.g.
   "Pause clipboard history" with a check mark.
 
+### Content actions and the answer window (1.8)
+
+A plugin can offer things to do with a **text, an image or a file list** – "Summarize", "Translate", "Ask …".
+ue Bar shows them where the user has such content: on the bar after a screenshot ("Actions …", `Ctrl + K`), in the
+`Win + V` history (`Ctrl + K` on an entry), in the menu of a pin ("Actions") and for the marked text of any window
+(hotkey **"Send marked text to …"**, default `Win + Alt + C`). The core draws the answer – your plugin needs no WPF:
+
+```csharp
+public sealed class MyModule : IModule, IContentActionProvider
+{
+    public IReadOnlyList<ContentActionInfo> ContentActions =>
+    [
+        new("sum", "Summarize", ContentKinds.Text) { Icon = "U+E8BD" },
+        new("ask", "Ask …", ContentKinds.Text | ContentKinds.Image) { AsksQuestion = true },
+        new("fix", "Correct", ContentKinds.Text) { ReplacesContent = true }, // "Paste" becomes the main button
+    ];
+
+    public async Task RunContentActionAsync(ContentActionRequest request, IContentResponse response, CancellationToken ct)
+    {
+        // request.Content (Text / ImagePng / Files), request.Question (own question or follow-up),
+        // request.History (earlier turns of this window), request.OptionId (see SetOptions), request.Origin
+        response.SetOptions([new("small", "Small"), new("big", "Big")], request.OptionId ?? "small"); // switcher
+        response.SetStatus("Thinking …");
+        await foreach (var piece in AskSomewhereAsync(request, ct))
+        {
+            response.Append(piece); // Markdown, shown at once (streaming)
+        }
+
+        response.SetResultText(corrected); // optional: what Copy/Paste/Pin use instead of the whole answer
+    }
+
+    public TimeSpan ConversationIdleTimeout => TimeSpan.FromMinutes(15); // the window forgets after this
+}
+```
+
+- **The answer window** (core): title, the content in short, the conversation with Markdown (headings, lists,
+  code, tables, links – selectable), the answer as it comes in, a switcher (`SetOptions`, e.g. the model – picking
+  another one asks the last question again), and a field for follow-ups (`Enter` sends, `Shift + Enter` is a new
+  line). Buttons: **Copy** (`Ctrl + Shift + C`), **Paste** into the window the content came from, **Pin**, **Stop**,
+  **New chat**. `Esc` stops a running answer, otherwise closes. Hidden from screen captures like every window of ue Bar.
+- **Temporary:** the conversation lives only in that window – closing, "New chat" and `ConversationIdleTimeout`
+  forget it. The core logs action, kind and size of the content, duration and errors – never content. Do the same.
+- **Errors:** throw – the message is shown in the window; your plugin does **not** go to "Error" because of it (a
+  limit or a missing network is not a broken plugin). The core allows a turn 5 minutes.
+- **Content only when the user starts it:** listing the actions (`ContentActions`) never hands out content; a
+  provider is called only when the user chose its action, asked a follow-up or picked another option.
+- **Starting yourself** (`IContentActions` on the context): list the actions of all plugins
+  (`GetContentActions(kinds)`), start one with content (`RunContentActionAsync(module, action, content, start)`), or
+  let the user choose (`ChooseContentActionAsync(content, start)`). `ContentActionStart` says where it came from
+  (`Origin`), where "Paste" goes (`PasteTarget`, e.g. `ChoicePopupResult.Target`), where the list appears and a first
+  question. Your **own** actions can also start without content – a chat or a quick command
+  (`Origin = ContentOrigin.Chat`, `Question = "…"`).
+
 ### Entries of a settings list as tiles (1.5)
 
 With `ISettingListTiles.CreateTileForListEntry(fieldKey, entry)` the settings page offers "Also add as
@@ -469,6 +522,12 @@ checks it (plugin.json, the DLL, the interface version), shows who made it with 
 and copies it to `%APPDATA%\ueBar\plugins\<id>\` after you allow it. It is loaded on the next
 start – the page offers "Restart now".
 
+**Portable, without installing (1.7.0):** the portable `ueBar-<version>-portable.exe` also loads plugins from a
+folder `plugins\` **next to the exe** – unzip the plugin ZIP there (`plugins\<id>\`), start the exe, done. Nothing is
+installed or copied, no admin rights; a write-protected stick or a school share works. The plugin is confirmed like any
+added one (the answer is stored per PC and user in `%APPDATA%\ueBar\plugin-trust.json`), and a plugin next to the exe
+never counts as bundled.
+
 While developing you can also copy the plugin folder to `%APPDATA%\ueBar\plugins\` yourself (use
 `UEBAR_DATA_DIR` to keep your real settings out of it). Every time the plugin's files change, ue
 Bar asks again before loading it.
@@ -491,7 +550,7 @@ checksum of the plugin's code files (`.dll`, `.exe`, `*.deps.json`, `plugin.json
 - The **major** version changes only for an unavoidable breaking change. Plugins for another major
   version are not loaded – Settings → Plugins says why.
 
-A plugin that needs `1.7` is not loaded by a ue Bar that offers `1.6` (it says "update ue Bar").
+A plugin that needs `1.8` is not loaded by a ue Bar that offers `1.7` (it says "update ue Bar").
 
 ## Rules
 

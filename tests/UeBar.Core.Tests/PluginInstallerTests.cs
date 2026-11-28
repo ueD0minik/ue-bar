@@ -11,6 +11,7 @@ using UeBar.Sdk;
 namespace UeBar.Core.Tests;
 
 /// <summary>P2-1: plugin.json, contract version, adding/removing plugins, the bundled list and the portable archive.</summary>
+[Trait("Category", "Slow")]
 public sealed class PluginInstallerTests
 {
     private const string Manifest = """

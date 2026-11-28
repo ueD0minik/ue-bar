@@ -81,6 +81,7 @@ internal static class SourceTree
 }
 
 /// <summary>R1: every text exists in German and English, the code uses only existing keys.</summary>
+[Trait("Category", "Slow")]
 public sealed class ResourceCompletenessTests
 {
     private static readonly Regex Placeholder = new(@"\{(\d+)(?::[^}]*)?\}", RegexOptions.Compiled);
@@ -186,6 +187,7 @@ public sealed class ResourceCompletenessTests
 /// R1: no UI texts hard-wired in the code. Looks for German letters/typical words in string
 /// literals of <c>.cs</c> files (comments are English anyway) and for literal texts in XAML.
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed class HardcodedTextTests
 {
     /// <summary>Allowed German literals: (file name, literal) – with the reason.</summary>

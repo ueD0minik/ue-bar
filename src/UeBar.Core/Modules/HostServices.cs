@@ -36,6 +36,9 @@ public sealed class HostServices
     /// <summary>Hotkeys taken over from Windows with a keyboard hook (P2-6).</summary>
     public IHostHotkeyTakeover? HotkeyTakeover { get; set; }
 
+    /// <summary>Content actions of all modules and the answer window (P3-1, contract 1.8).</summary>
+    public ContentActionService? ContentActions { get; set; }
+
     /// <summary>IDs the host uses itself (bus owner of the pins, of "hide from screen captures") – no module may take them.</summary>
     public static IReadOnlySet<string> ReservedIds { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {

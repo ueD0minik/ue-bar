@@ -48,6 +48,7 @@ public partial class App : Application
     private UeBar.App.ClipHistory.KeyboardHook? _keyboardHook;
     private UeBar.App.Pins.PinController? _pins;
     private CaptureProtection? _privacy;
+    private UeBar.App.ContentActions.ContentActionUi? _answers;
     private bool _exiting;
     private long? _exitStarted;
     private volatile string _exitStage = "not started";
@@ -192,8 +193,18 @@ public partial class App : Application
             _keyboardHook = new UeBar.App.ClipHistory.KeyboardHook(_log);
             _registry.Host.ClipboardWatcher = _clipboardWatcher;
             _registry.Host.ClipboardWriter = clipboard;
-            _registry.Host.Paste = new UeBar.App.ClipHistory.PasteService(Dispatcher, clipboard, _log);
-            _registry.Host.ChoicePopup = new UeBar.App.ClipHistory.ChoicePopupHost(Dispatcher, _log);
+            var paste = new UeBar.App.ClipHistory.PasteService(Dispatcher, clipboard, _log);
+            var choicePopup = new UeBar.App.ClipHistory.ChoicePopupHost(Dispatcher, _log);
+            _registry.Host.Paste = paste;
+            _registry.Host.ChoicePopup = choicePopup;
+
+            // P3-1: content actions of the plugins – the list of actions, the answer windows and "Send marked text to …".
+            var contentActions = new ContentActionService(_registry, _log) { UiLanguage = () => Loc.Culture.TwoLetterISOLanguageName };
+            _answers = new UeBar.App.ContentActions.ContentActionUi(Dispatcher, choicePopup, clipboard, paste, pinManager, _log);
+            contentActions.Ui = _answers;
+            _registry.Host.ContentActions = contentActions;
+            var selection = new UeBar.App.ContentActions.SelectionAction(Dispatcher, contentActions, _clipboardWatcher, _log);
+            selection.Bind(_hotkeys, general);
             _registry.Host.HotkeyTakeover = _keyboardHook;
 
             // Plugins (SPEC 4.4): find them, ask for every one that does not come with ue Bar (first time
@@ -257,6 +268,7 @@ public partial class App : Application
             privacy.Changed += (_, _) => viewModel.IsCaptureHidden = privacy.IsHidden;
             _pins = new UeBar.App.Pins.PinController(pinManager, settings, _hotkeys, clipboard, Dispatcher, _log);
             _pins.SaveDialog = saveDialog;
+            _pins.ContentActions = contentActions;
             _pins.Start();
             _pins.AttachPointer(_bar);
             viewModel.Pins = new PinsViewModel(_pins);
@@ -277,6 +289,9 @@ public partial class App : Application
                 Dispatcher);
             var extras = _extras;
             extras.FeedbackToast = new UeBar.App.Capture.ActionFeedbackToast(Dispatcher, () => picker.LastPick);
+            void Notice(string text) => Dispatcher.BeginInvoke(() => extras.FeedbackToast?.Show(text, null, TimeSpan.FromSeconds(2.5), [], _ => { }));
+            _answers.Notice = Notice;
+            selection.Notice = Notice;
             window.EscapePressed += (_, _) => extras.OnEscape();
             window.Panel.AssistInputRequested += (_, _) => extras.BeginInput();
             extras.QuickSearchOpened += (_, _) => window.Panel.FocusQuickSearch();
@@ -361,6 +376,7 @@ public partial class App : Application
                 Pins = _pins,
                 Hotkeys = _hotkeys,
                 PluginHotkeys = pluginHotkeys,
+                Selection = selection,
                 Restart = async () =>
                 {
                     if (layout.IsEditing)
@@ -459,7 +475,14 @@ public partial class App : Application
         catch (Exception ex)
         {
             _log.Error(null, "Start failed", ex);
-            MessageBox.Show(Loc.F("App_StartFailed", ex.Message, paths.Logs), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
+            try
+            {
+                UeBar.App.Infrastructure.UeDialog.Error(null, Loc.F("App_StartFailed", ex.Message, paths.Logs));
+            }
+            catch (Exception dialogError) when (dialogError is InvalidOperationException or System.Windows.Markup.XamlParseException or ResourceReferenceKeyNotFoundException)
+            {
+                UeBar.App.Infrastructure.EarlyMessage.Show(Loc.F("App_StartFailed", ex.Message, paths.Logs), error: true); // resources not there yet
+            }
             await ExitAsync("start failed");
         }
     }
@@ -606,12 +629,8 @@ public partial class App : Application
             : string.Join(", ", others.Select(p => $"PID {p.Id}, started {SafeStart(p)}"));
         log.Warn(null, $"ue Bar is already running but does not respond within {SingleInstance.HandshakeTimeout.TotalSeconds:0} s ({info}).");
 
-        var answer = MessageBox.Show(
-            Loc.Get("App_HangingQuestion"),
-            "ue Bar",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
-        if (answer != MessageBoxResult.Yes)
+        // Before the settings are loaded: the Windows message box (P3-1 exception).
+        if (!UeBar.App.Infrastructure.EarlyMessage.Show(Loc.Get("App_HangingQuestion"), question: true))
         {
             log.Info(null, "User declined ending the hanging instance.");
             return false;
@@ -636,7 +655,7 @@ public partial class App : Application
         if (_singleInstance is null)
         {
             log.Error(null, "Lock is still held after ending – start aborted.");
-            MessageBox.Show(Loc.Get("App_CannotEndOld"), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Error);
+            UeBar.App.Infrastructure.EarlyMessage.Show(Loc.Get("App_CannotEndOld"), error: true);
             return false;
         }
 
@@ -712,6 +731,7 @@ public partial class App : Application
             })
             .Add("bar", () =>
             {
+                _answers?.CloseAll(); // P3-1: answer windows forget their conversations
                 _pins?.Dispose();
                 _pins = null;
                 _hotkeys?.Dispose();

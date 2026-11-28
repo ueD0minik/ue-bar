@@ -260,6 +260,7 @@ public sealed class PickerTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Plugin_folder_loads_like_any_bundled_plugin()
     {
         var built = Path.GetDirectoryName(typeof(ClipboardModule).Assembly.Location)!;
@@ -299,7 +300,7 @@ public sealed class PickerTests
             Assert.True(plugin.State == PluginState.Loaded, $"{plugin.State}: {plugin.Problem}");
             Assert.Equal(ClipboardModule.ModuleId, plugin.Module!.Id);
             Assert.Equal("Zwischenablage", plugin.Manifest!.DisplayName(CultureInfo.GetCultureInfo("de-DE")));
-            Assert.Equal(new Version(1, 7), plugin.Manifest.SdkVersion);
+            Assert.Equal(new Version(1, 8), plugin.Manifest.SdkVersion);
             Assert.Contains("cb leeren", ((IQuickCommandProvider)plugin.Module).QuickCommands[0].Description, StringComparison.Ordinal); // own satellite assembly
             Assert.IsAssignableFrom<ITrayMenuProvider>(plugin.Module);
             Assert.IsAssignableFrom<IHotkeyHandler>(plugin.Module);

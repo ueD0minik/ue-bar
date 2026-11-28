@@ -110,6 +110,7 @@ public class LocalFileLayoutStoreTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task External_change_raises_changed_but_own_save_does_not()
     {
         using var dir = new TempDirectory();

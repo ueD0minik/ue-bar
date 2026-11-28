@@ -95,7 +95,7 @@ public sealed class PluginHostTests
         using var box = new PluginSandbox();
         box.Add(box.Bundled, "good", sdkVersion: "1.0");
 
-        var plugin = Assert.Single(box.Host(api: new Version(1, 7)).Discover());
+        var plugin = Assert.Single(box.Host(api: UeBar.Sdk.CoreApiVersion.Version).Discover()); // the fixture is built against the current SDK
 
         Assert.Equal(PluginState.Pending, plugin.State);
     }

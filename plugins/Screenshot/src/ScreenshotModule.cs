@@ -303,13 +303,24 @@ public sealed class ScreenshotModule :
         var chosen = action ?? options.After;
         var request = new ScreenAreaRequest(mode ?? options.Mode)
         {
-            Actions = chosen == ShotAction.Ask ? Actions() : [],
+            Actions = chosen == ShotAction.Ask ? Actions(HasContentActions) : [],
         };
         var result = await picker.PickScreenAreaAsync(request, cancellationToken).ConfigureAwait(false);
         if (result?.Image is not { Length: > 0 } png)
         {
             _context.Log.Info("Capture cancelled");
             return null;
+        }
+
+        if (result.ActionId == ContentActionsId && _context is IContentActions contentActions)
+        {
+            // P3-1: the actions of other plugins for the image (e.g. "Ask Claude") – the image goes only to the chosen one.
+            _context.Log.Info($"Captured {result.Bounds.Width}×{result.Bounds.Height} ({ShotOptions.Id(result.Mode)}) → actions");
+            var started = await contentActions.ChooseContentActionAsync(
+                new ContentItem { ImagePng = png, SourceTitle = result.WindowTitle },
+                new ContentActionStart { Origin = ContentOrigin.Screenshot, Placement = ChoicePlacement.Mouse },
+                cancellationToken).ConfigureAwait(false);
+            return started ? ShotAction.Ask : null;
         }
 
         var done = chosen == ShotAction.Ask ? ShotOptions.ParseAction(result.ActionId) ?? ShotAction.Pin : chosen;
@@ -328,7 +339,17 @@ public sealed class ScreenshotModule :
     }
 
     /// <summary>The buttons of the bar after picking.</summary>
-    internal static IReadOnlyList<ScreenAreaAction> Actions() =>
+    /// <summary>ID of the button "Actions …" (P3-1) – only there when another plugin offers actions for images.</summary>
+    internal const string ContentActionsId = "actions";
+
+    /// <summary>Does any running plugin offer content actions for images (contract 1.8)?</summary>
+    internal bool HasContentActions => _context is IContentActions actions && actions.GetContentActions(ContentKinds.Image).Count > 0;
+
+    internal static IReadOnlyList<ScreenAreaAction> Actions(bool contentActions = false) => contentActions
+        ? [.. BaseActions(), new(ContentActionsId, T["Shot_ActionActions"], "U+E8BD") { Shortcut = "Ctrl+K" }]
+        : BaseActions();
+
+    private static IReadOnlyList<ScreenAreaAction> BaseActions() =>
     [
         new("pin", T["Shot_ActionPin"], "U+E718"),
         new("copy", T["Shot_ActionCopy"], "U+E8C8") { Shortcut = "Ctrl+C" },

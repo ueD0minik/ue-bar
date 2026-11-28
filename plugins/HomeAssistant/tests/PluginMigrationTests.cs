@@ -17,6 +17,7 @@ namespace UeBar.Modules.HomeAssistant.Tests;
 /// built in) must work unchanged: plugin ID = former module ID, so settings, token, layout and the
 /// saved secrets are found again.
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed class PluginMigrationTests
 {
     /// <summary>Stands in for DPAPI.</summary>

@@ -47,6 +47,9 @@ internal sealed class PinController : IDisposable
     private PixelPoint _offset;
     private bool _disposed;
 
+    /// <summary>Content actions of the plugins for the pin menu (P3-1); null = no "Actions" entry.</summary>
+    public UeBar.Core.Modules.ContentActionService? ContentActions { get; set; }
+
     public PinController(PinManager pins, SettingsService settings, GlobalHotkeys hotkeys, ClipboardAccess clipboard, Dispatcher dispatcher, IUeLogger log)
     {
         _pins = pins;
@@ -631,6 +634,7 @@ internal sealed class PinController : IDisposable
         void Separator() => menu.Items.Add(new Separator { Style = (Style)Application.Current.FindResource("DarkMenuSeparator") });
 
         Item(Loc.Get("Pin_Copy"), "", () => _ = CopyAsync(window));
+        ActionsItem(menu, window);
         if (pin.Kind == PinKind.Image)
         {
             Item(Loc.Get("Pin_SaveAs"), "", () => SaveAs(window));
@@ -699,6 +703,46 @@ internal sealed class PinController : IDisposable
         };
     }
 
+    /// <summary>
+    /// P3-1: "Actions" – a submenu with the content actions of the plugins for this pin (text or image). Content goes to a
+    /// plugin only when the user clicks one of them.
+    /// </summary>
+    private void ActionsItem(ContextMenu menu, PinWindow window)
+    {
+        var pin = window.Pin;
+        var kind = pin.Kind == PinKind.Text ? ContentKinds.Text : ContentKinds.Image;
+        if (ContentActions is not { } service || service.GetActions(kind) is not { Count: > 0 } actions)
+        {
+            return;
+        }
+
+        var parent = new MenuItem { Header = Loc.Get("Pin_Actions"), Tag = "E8BD", Style = (Style)Application.Current.FindResource("DarkMenuItem") };
+        foreach (var action in actions)
+        {
+            var item = new MenuItem
+            {
+                Header = action.Action.Label,
+                Tag = action.Action.Icon is { Length: > 2 } icon && int.TryParse(icon[2..], System.Globalization.NumberStyles.HexNumber, null, out var code) ? char.ConvertFromUtf32(code) : "E8BD",
+                ToolTip = action.ModuleName,
+                Style = (Style)Application.Current.FindResource("DarkMenuItem"),
+            };
+            var chosen = action;
+            item.Click += (_, _) =>
+            {
+                var content = pin.Kind == PinKind.Text
+                    ? new ContentItem { Text = pin.Text, SourceTitle = pin.Title }
+                    : new ContentItem { ImagePng = PinWindow.Png(window.ImageSource), SourceTitle = pin.Title };
+                if (!service.Run(null, chosen.ModuleId, chosen.Action.Id, content, new ContentActionStart { Origin = ContentOrigin.Pin }))
+                {
+                    _log.Info(null, "Pin action could not start");
+                }
+            };
+            parent.Items.Add(item);
+        }
+
+        menu.Items.Add(parent);
+    }
+
     private async Task CopyAsync(PinWindow window)
     {
         var ok = window.Pin.Kind == PinKind.Text
@@ -736,7 +780,7 @@ internal sealed class PinController : IDisposable
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             _log.Warn(null, $"Pin image not saved: {ex.Message}");
-            MessageBox.Show(ex.Message, "ue Bar", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UeDialog.Warning(null, ex.Message);
         }
     }
 

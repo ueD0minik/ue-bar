@@ -33,6 +33,7 @@
     <Resource Include="Assets\ueBar-256.png" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="UeBar.App.Tests" />
     <ProjectReference Include="..\UeBar.Core\UeBar.Core.csproj" />
     <ProjectReference Include="..\UeBar.Bar\UeBar.Bar.csproj" />
   </ItemGroup>

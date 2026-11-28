@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using UeBar.App.Infrastructure;
 using UeBar.App.Bar;
 using UeBar.App.Bar.Converters;
 using UeBar.App.Bar.Edit;
@@ -65,6 +66,9 @@ internal sealed class SettingsHost
 
     /// <summary>Hotkeys of plugins (P2-5).</summary>
     public UeBar.App.Plugins.PluginHotkeys? PluginHotkeys { get; init; }
+
+    /// <summary>Hotkey "Send marked text to …" (P3-1).</summary>
+    public UeBar.App.ContentActions.SelectionAction? Selection { get; init; }
 
     /// <summary>Ends this process and starts ue Bar again (plugin changes need it).</summary>
     public required Func<Task> Restart { get; init; }
@@ -356,7 +360,7 @@ internal sealed partial class SettingsWindow : Window
             }
             else
             {
-                MessageBox.Show(this, Loc.F("General_NotAColor", text), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Information);
+                UeDialog.Info(this, Loc.F("General_NotAColor", text));
             }
         }, width: 140));
         hexRow.Children.Add(Hint(Loc.Get("General_OwnColor"), 0));
@@ -401,6 +405,16 @@ internal sealed partial class SettingsWindow : Window
         capture.IsEnabled = privacy.IsAvailable;
         _privacySwitch = capture as CheckBox;
         page.Children.Add(Card(capture, Hint(Loc.Get("Privacy_Switch_Limits"))));
+
+        // P3-1: content actions of the plugins for the marked text of any window.
+        if (_host.Selection is { } selection)
+        {
+            page.Children.Add(SubHeading(Loc.Get("Selection_Heading")));
+            var binding = new HotkeyBinding(() => selection.CurrentHotkey, () => selection.HotkeyStatus, selection.ChangeHotkey, GeneralSettings.DefaultSelectionHotkey) { AllowOff = true };
+            page.Children.Add(Card(
+                Row(Loc.Get("Selection_Hotkey"), Loc.F("Selection_Hotkey_Hint", Hotkey.TryParse(GeneralSettings.DefaultSelectionHotkey)?.DisplayText ?? GeneralSettings.DefaultSelectionHotkey),
+                    HotkeyRecorderUi.Create(this, binding, SuspendAllHotkeys, _host.Log), controlBelow: true)));
+        }
     }
 
     /// <summary>The switch on the General page – follows a switch from the tray, the quick command or the bus.</summary>
@@ -422,7 +436,7 @@ internal sealed partial class SettingsWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, Loc.F("General_AutostartFailed", ex.Message), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UeDialog.Warning(this, Loc.F("General_AutostartFailed", ex.Message));
         }
     }
 

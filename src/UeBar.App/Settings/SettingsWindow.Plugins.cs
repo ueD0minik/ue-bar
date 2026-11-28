@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using UeBar.App.Infrastructure;
 using UeBar.App.Localization;
 using UeBar.App.Plugins;
 using UeBar.Core.Logging;
@@ -46,7 +47,7 @@ internal sealed partial class SettingsWindow
             }
 
             body.Children.Add(Section(Loc.Get("Plugins_Installed")));
-            var installed = plugins.Plugins.Where(p => p.Origin == PluginOrigin.Installed).ToList();
+            var installed = plugins.Plugins.Where(p => p.Origin is PluginOrigin.Installed or PluginOrigin.Portable).ToList(); // P3-1: also those next to the portable exe
             foreach (var plugin in installed)
             {
                 body.Children.Add(PluginCard(plugin, Fill));
@@ -140,6 +141,11 @@ internal sealed partial class SettingsWindow
         }
 
         details.Children.Add(DetailLine(Loc.Get("Plugins_Detail_Folder"), plugin.Directory));
+        if (plugin.Origin == PluginOrigin.Portable)
+        {
+            details.Children.Add(DetailLine(Loc.Get("Plugins_Detail_Origin"), Loc.Get("Plugins_Detail_Portable")));
+        }
+
         if (plugin.Hash.Length > 0)
         {
             var checksum = plugin.Hash[..Math.Min(16, plugin.Hash.Length)] + "…";
@@ -302,7 +308,7 @@ internal sealed partial class SettingsWindow
             if (!PluginTrustDialog.Ask(this, PluginTrustRequest.From(package, source, host.IsChanged(package))))
             {
                 _host.Log.Info(null, $"Plugin '{package.Manifest.Id}' from {Path.GetFileName(source)}: not allowed by the user, not added");
-                MessageBox.Show(this, Loc.F("Plugins_NotAdded", name), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Information);
+                UeDialog.Info(this, Loc.F("Plugins_NotAdded", name));
                 return;
             }
 
@@ -314,7 +320,7 @@ internal sealed partial class SettingsWindow
         catch (PluginException ex)
         {
             _host.Log.Warn(null, $"Plugin from {Path.GetFileName(source)} not added: {ex.Message}");
-            MessageBox.Show(this, ex.Message, Loc.Get("Plugins_AddFailed"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            UeDialog.Warning(this, ex.Message, Loc.Get("Plugins_AddFailed"));
         }
     }
 
@@ -322,7 +328,7 @@ internal sealed partial class SettingsWindow
     {
         try
         {
-            if (MessageBox.Show(this, Loc.F("Plugins_Remove_Confirm", plugin.DisplayName), "ue Bar", MessageBoxButton.OKCancel, MessageBoxImage.Question) != MessageBoxResult.OK)
+            if (!UeDialog.Ask(this, Loc.F("Plugins_Remove_Confirm", plugin.DisplayName), safeDefault: true, buttons: UeBar.Bar.DialogButtons.OkCancel))
             {
                 return;
             }
@@ -338,7 +344,7 @@ internal sealed partial class SettingsWindow
         }
         catch (PluginException ex)
         {
-            MessageBox.Show(this, ex.Message, "ue Bar", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UeDialog.Warning(this, ex.Message);
         }
         catch (Exception ex)
         {

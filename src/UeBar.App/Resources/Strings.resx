@@ -1366,4 +1366,136 @@ Its tiles stay in the layout as placeholders, its settings are kept.</value>
   <data name="Privacy_StatusTip" xml:space="preserve">
     <value>Hidden from screen captures</value>
   </data>
+  <data name="Dialog_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Dialog_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Dialog_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Response_OptionTip" xml:space="preserve">
+    <value>Only for this question</value>
+  </data>
+  <data name="Response_NewChat" xml:space="preserve">
+    <value>New chat (forgets everything)</value>
+  </data>
+  <data name="Response_Close" xml:space="preserve">
+    <value>Close (forgets the conversation)</value>
+  </data>
+  <data name="Response_Paste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="Response_PasteTip" xml:space="preserve">
+    <value>Paste into the window it came from</value>
+  </data>
+  <data name="Response_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Response_CopyTip" xml:space="preserve">
+    <value>Copy the answer (Ctrl + Shift + C)</value>
+  </data>
+  <data name="Response_Pin" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="Response_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Response_AskPlaceholder" xml:space="preserve">
+    <value>Your question …</value>
+  </data>
+  <data name="Response_FollowUpPlaceholder" xml:space="preserve">
+    <value>Ask a follow-up … (Enter sends)</value>
+  </data>
+  <data name="Response_Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Response_Working" xml:space="preserve">
+    <value>Working …</value>
+  </data>
+  <data name="Response_Timeout" xml:space="preserve">
+    <value>No answer in time.</value>
+  </data>
+  <data name="Response_ModuleGone" xml:space="preserve">
+    <value>The plugin is no longer running.</value>
+  </data>
+  <data name="Response_Error" xml:space="preserve">
+    <value>Something went wrong.</value>
+  </data>
+  <data name="Response_Copied" xml:space="preserve">
+    <value>Answer copied</value>
+  </data>
+  <data name="Response_CopyFailed" xml:space="preserve">
+    <value>Could not copy</value>
+  </data>
+  <data name="Response_PasteFailed" xml:space="preserve">
+    <value>Could not paste – the answer is on the clipboard</value>
+  </data>
+  <data name="Response_Pinned" xml:space="preserve">
+    <value>Answer pinned</value>
+  </data>
+  <data name="Response_PinFailed" xml:space="preserve">
+    <value>Could not pin</value>
+  </data>
+  <data name="Response_Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="Actions_Title" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Actions_Search" xml:space="preserve">
+    <value>Search actions …</value>
+  </data>
+  <data name="Actions_None" xml:space="preserve">
+    <value>No actions</value>
+  </data>
+  <data name="Actions_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="Actions_Text" xml:space="preserve">
+    <value>Text · {0} characters</value>
+  </data>
+  <data name="Actions_Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="Actions_Files" xml:space="preserve">
+    <value>{0} files</value>
+  </data>
+  <data name="Selection_NoActions" xml:space="preserve">
+    <value>No plugin offers actions for text</value>
+  </data>
+  <data name="Selection_NoWindow" xml:space="preserve">
+    <value>No window in front</value>
+  </data>
+  <data name="Selection_Failed" xml:space="preserve">
+    <value>The marked text could not be copied</value>
+  </data>
+  <data name="Selection_Nothing" xml:space="preserve">
+    <value>Nothing marked</value>
+  </data>
+  <data name="Selection_Heading" xml:space="preserve">
+    <value>Content actions</value>
+  </data>
+  <data name="Selection_Hotkey" xml:space="preserve">
+    <value>Send marked text to …</value>
+  </data>
+  <data name="Selection_Hotkey_Hint" xml:space="preserve">
+    <value>Copies the marked text of the window in front (the clipboard is restored) and shows the actions of the plugins for it. Default {0}.</value>
+  </data>
+  <data name="Pin_Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Plugins_Detail_Origin" xml:space="preserve">
+    <value>Origin</value>
+  </data>
+  <data name="Plugins_Detail_Portable" xml:space="preserve">
+    <value>Next to the portable exe – used from there, not installed</value>
+  </data>
+  <data name="Response_Quote" xml:space="preserve">
+    <value>“{0}”</value>
+  </data>
 </root>

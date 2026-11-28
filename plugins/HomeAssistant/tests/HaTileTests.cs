@@ -549,6 +549,7 @@ public class HaTileTests
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task Media_player_without_any_answer_reverts_after_the_maximum_and_errors_revert_at_once()
     {
         await using var env = new TileEnv();

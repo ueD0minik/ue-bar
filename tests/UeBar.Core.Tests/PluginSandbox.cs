@@ -26,6 +26,7 @@ internal sealed class PluginSandbox : IDisposable
     {
         Bundled = Path.Combine(_temp.Path, "app", "plugins");
         User = Path.Combine(_temp.Path, "data", "plugins");
+        Portable = Path.Combine(_temp.Path, "stick", "plugins");
         TrustFile = Path.Combine(_temp.Path, "data", "plugin-trust.json");
         Directory.CreateDirectory(Bundled);
         Directory.CreateDirectory(User);
@@ -36,6 +37,9 @@ internal sealed class PluginSandbox : IDisposable
     public string Bundled { get; }
 
     public string User { get; }
+
+    /// <summary>P3-1: <c>plugins</c> next to a portable exe (created on first use).</summary>
+    public string Portable { get; }
 
     public string TrustFile { get; }
 
@@ -110,12 +114,13 @@ internal sealed class PluginSandbox : IDisposable
     }
 
     /// <summary>A host like the app creates it. <paramref name="list"/> null = the bundled folder as it is now counts as genuine.</summary>
-    public PluginHost Host(BundledPluginList? list = null, Version? api = null, TimeSpan? timeout = null) => new(
+    public PluginHost Host(BundledPluginList? list = null, Version? api = null, TimeSpan? timeout = null, bool portable = false) => new(
         new PluginHostOptions
         {
             BundledDirectory = Bundled,
             BundledList = list ?? BuildList(),
             UserDirectory = User,
+            PortableDirectory = portable ? Portable : null,
             ApiVersion = api ?? UeBar.Sdk.CoreApiVersion.Version,
             LoadTimeout = timeout ?? TimeSpan.FromSeconds(15),
         },

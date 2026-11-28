@@ -76,7 +76,7 @@ public interface IModule
 /// object – check with <c>as</c>: <see cref="IModuleSecrets"/>, <see cref="IHostInfo"/>, <see cref="IUiLanguageInfo"/>,
 /// <see cref="IDeviceBatteryCatalog"/>, <see cref="IPinService"/>, <see cref="IScreenAreaPicker"/>, <see cref="IClipboardAccess"/>,
 /// <see cref="IFileSaveDialog"/>, and since contract 1.7 <see cref="IClipboardWatcher"/>, <see cref="IClipboardWriter"/>,
-/// <see cref="IPasteService"/>, <see cref="IChoicePopup"/> and <see cref="IHotkeyTakeoverService"/>.
+/// <see cref="IPasteService"/>, <see cref="IChoicePopup"/> and <see cref="IHotkeyTakeoverService"/>, since 1.8 <see cref="IContentActions"/>.
 /// </summary>
 public interface IModuleContext
 {

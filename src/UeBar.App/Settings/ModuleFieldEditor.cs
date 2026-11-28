@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Dominik Poschinger
 
+using UeBar.App.Infrastructure;
 using UeBar.App.Localization;
 using System.Globalization;
 using System.Windows;
@@ -286,7 +287,7 @@ internal sealed class ModuleFieldEditor
                     {
                         if (!double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out var d))
                         {
-                            MessageBox.Show(_owner!, Loc.F("Fields_NotANumber", text), "ue Bar", MessageBoxButton.OK, MessageBoxImage.Information);
+                            UeDialog.Info(_owner, Loc.F("Fields_NotANumber", text));
                             return;
                         }
 

@@ -23,12 +23,15 @@ internal static class PluginStartup
 
     public static PluginHost CreateHost(AppPaths paths, SettingsService settings, IUeLogger log)
     {
-        var (directory, list) = LocateBundled(log);
+        var (directory, list) = LocateBundled(log, out var portable);
         var options = new PluginHostOptions
         {
             BundledDirectory = directory,
             BundledList = list,
             UserDirectory = paths.Plugins,
+
+            // P3-1: the portable exe also takes plugins from plugins\ next to it (unpacked ZIPs, e.g. on a stick).
+            PortableDirectory = portable,
 
             // P2-5-Fix 1: checksums of unchanged files (path, size, times) from the last start.
             HashCache = new PluginHashCache(Path.Combine(paths.Root, "plugin-hashes.json"), log),
@@ -36,11 +39,13 @@ internal static class PluginStartup
         return new PluginHost(options, settings, new PluginTrustStore(paths.PluginTrustFile, log), log);
     }
 
-    private static (string? Directory, BundledPluginList List) LocateBundled(IUeLogger log)
+    private static (string? Directory, BundledPluginList List) LocateBundled(IUeLogger log, out string? portable)
     {
+        portable = null;
         var assembly = typeof(PluginStartup).Assembly;
         if (assembly.GetManifestResourceInfo(EmbeddedPlugins) is not null)
         {
+            portable = PortablePluginFolder(Environment.ProcessPath);
             try
             {
                 var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ueBar", "builtin-plugins");
@@ -56,6 +61,21 @@ internal static class PluginStartup
 
         var directory = Path.Combine(AppContext.BaseDirectory, "plugins");
         return (directory, BundledPluginList.Load(Path.Combine(directory, BundledPluginList.FileName)));
+    }
+
+    /// <summary>
+    /// <c>plugins\</c> next to the portable exe (P3-1). Only read – a write-protected stick or a school share works. Null when
+    /// the folder is not there.
+    /// </summary>
+    internal static string? PortablePluginFolder(string? exePath)
+    {
+        if (Path.GetDirectoryName(exePath) is not { Length: > 0 } folder)
+        {
+            return null;
+        }
+
+        var plugins = Path.Combine(folder, "plugins");
+        return Directory.Exists(plugins) ? plugins : null;
     }
 }
 
